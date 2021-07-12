@@ -4,6 +4,7 @@ const path = require('path')
 const cookieParser = require('cookie-parser')
 const logger = require('morgan')
 
+const { port } = require('./config')
 const indexRouter = require('./routes/index')
 
 const server = express()
@@ -36,7 +37,6 @@ server.use((err, req, res, next) => {
   res.render('error')
 })
 
-const port = 3000
 server.listen(port, () => {
   console.log(`The LoreVault server is listening on port ${port}`)
 })
