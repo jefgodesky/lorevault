@@ -1,4 +1,14 @@
 {
   "port": 3000,
-  "db": "mongodb://127.0.0.1/lorevault"
+  "db": "mongodb://127.0.0.1/lorevault",
+  "google": {
+    "id": "GOOGLE_CLIENT_ID",
+    "secret": "GOOGLE_SECRET",
+    "callback": "http://localhost:8080/login/google/callback"
+  },
+  "discord": {
+    "id": "DISCORD_CLIENT_ID",
+    "secret": "DISCORD_SECRET",
+    "callback": "http://localhost:8080/login/discord/callback"
+  }
 }
