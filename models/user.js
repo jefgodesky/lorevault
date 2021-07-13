@@ -1,9 +1,7 @@
 const { Schema, model } = require('mongoose')
 
 const UserSchema = new Schema({
-  auth: {
-    google: String
-  }
+  googleID: String
 })
 
 module.exports = model('User', UserSchema)
