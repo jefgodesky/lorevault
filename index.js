@@ -3,8 +3,9 @@ const express = require('express')
 const path = require('path')
 const cookieParser = require('cookie-parser')
 const logger = require('morgan')
+const mongoose = require('mongoose')
 
-const { port } = require('./config')
+const { db, port } = require('./config')
 const indexRouter = require('./routes/index')
 
 const server = express()
@@ -18,6 +19,11 @@ server.use(express.json())
 server.use(express.urlencoded({ extended: false }))
 server.use(cookieParser())
 server.use(express.static(path.join(__dirname, 'public')))
+
+// Set up database
+mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
+const conn = mongoose.connection
+conn.on('error', console.error.bind(console, 'MongoDB connection error:'))
 
 server.use('/', indexRouter)
 
