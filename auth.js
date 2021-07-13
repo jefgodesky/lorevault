@@ -6,15 +6,21 @@ const initPassport = passport => {
   passport.use(new GoogleStrategy({
     clientID: google.id,
     clientSecret: google.secret,
-    callbackURL: google.callback
-  }, async (accessToken, refreshToken, profile, done) => {
+    callbackURL: google.callback,
+    passReqToCallback: true
+  }, async (req, token, refresh, profile, done) => {
     try {
-      let user = await User.findOne({ googleID: profile.id  })
+      if (req.user) {
+        req.user.googleID = profile.id
+        await req.user.save()
+        return done(null, req.user)
+      }
+      let user = await User.findOne({googleID: profile.id})
       if (user) return done(null, user)
       user = await User.create({
         googleID: profile.id
       })
-      done(null, user)
+      return done(null, user)
     } catch (err) {
       console.error(err)
     }
