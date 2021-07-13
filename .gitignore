@@ -1,5 +1,7 @@
 node_modules
 node_modules/*
+config/*.json
+!config/example.json
 
 # IDE configurations and local settings
 .idea
