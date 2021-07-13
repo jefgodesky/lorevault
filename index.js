@@ -4,11 +4,19 @@ const path = require('path')
 const cookieParser = require('cookie-parser')
 const logger = require('morgan')
 const mongoose = require('mongoose')
+const passport = require('passport')
+const session = require('express-session')
+const MongoStore = require('connect-mongo')
+require('./auth')(passport)
 
-const { db, port } = require('./config')
+const { db, port, secret } = require('./config')
 const indexRouter = require('./routes/index')
+const authRouter = require('./routes/auth')
 
 const server = express()
+
+// Set up database
+mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
 
 // View engine setup
 server.set('views', path.join(__dirname, 'views'))
@@ -16,16 +24,20 @@ server.set('view engine', 'ejs')
 
 server.use(logger('dev'))
 server.use(express.json())
-server.use(express.urlencoded({ extended: false }))
+server.use(express.urlencoded({ extended: true }))
 server.use(cookieParser())
 server.use(express.static(path.join(__dirname, 'public')))
-
-// Set up database
-mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
-const conn = mongoose.connection
-conn.on('error', console.error.bind(console, 'MongoDB connection error:'))
+server.use(session({
+  secret,
+  resave: false,
+  saveUninitialized: false,
+  store: new MongoStore({ mongoUrl: db })
+}))
+server.use(passport.initialize())
+server.use(passport.session())
 
 server.use('/', indexRouter)
+server.use('/', authRouter)
 
 // Catch 404 and forward to error handler
 server.use((req, res, next) => {
