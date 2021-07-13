@@ -16,8 +16,7 @@ const authRouter = require('./routes/auth')
 const server = express()
 
 // Set up database
-const conn = mongoose.createConnection(db, { useNewUrlParser: true, useUnifiedTopology: true })
-conn.on('error', console.error.bind(console, 'MongoDB connection error:'))
+mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
 
 // View engine setup
 server.set('views', path.join(__dirname, 'views'))
