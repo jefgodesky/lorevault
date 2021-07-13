@@ -6,7 +6,7 @@ const logger = require('morgan')
 const mongoose = require('mongoose')
 const passport = require('passport')
 const session = require('express-session')
-const MongoStore = require('connect-mongo')(session)
+const MongoStore = require('connect-mongo')
 require('./auth')(passport)
 
 const { db, port, secret } = require('./config')
@@ -16,8 +16,7 @@ const authRouter = require('./routes/auth')
 const server = express()
 
 // Set up database
-mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
-const conn = mongoose.connection
+const conn = mongoose.createConnection(db, { useNewUrlParser: true, useUnifiedTopology: true })
 conn.on('error', console.error.bind(console, 'MongoDB connection error:'))
 
 // View engine setup
@@ -33,7 +32,7 @@ server.use(session({
   secret,
   resave: false,
   saveUninitialized: false,
-  store: new MongoStore({ mongooseConnection: mongoose.connection })
+  store: new MongoStore({ mongoUrl: db })
 }))
 server.use(passport.initialize())
 server.use(passport.session())
