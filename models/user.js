@@ -1,8 +1,16 @@
 const { Schema, model } = require('mongoose')
+const { rules } = require('../config')
 
-const CharacterSchema = new Schema({
-  name: String
-})
+const CharacterSchemaDefinition = {
+  name: String,
+  avatar: String
+}
+
+for (const system of rules) {
+  CharacterSchemaDefinition[system] = require(`../rules/${system}/sheet`)
+}
+
+const CharacterSchema = new Schema(CharacterSchemaDefinition)
 
 const UserSchema = new Schema({
   googleID: String,
