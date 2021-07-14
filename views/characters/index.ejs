@@ -16,10 +16,14 @@
         <li><a href="/login/discord">Log in with Discord</a></li>
       </ul>
     <% } %>
+    <% if (isLoggedIn) { %>
     <form action="/characters" method="POST">
       <label for="new-char-name">Character name</label>
       <input type="text" id="new-char-name" name="new-char-name" placeholder="Enter your character’s name here." />
       <button>Add Character</button>
     </form>
+    <% } else { %>
+    <p>You&rsquo;ll need to log before you can add a character.</p>
+    <% } %>
   </body>
 </html>
