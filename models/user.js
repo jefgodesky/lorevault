@@ -2,8 +2,7 @@ const { Schema, model } = require('mongoose')
 const { rules } = require('../config')
 
 const CharacterSchemaDefinition = {
-  name: String,
-  avatar: String
+  name: String
 }
 
 for (const system of rules) {
