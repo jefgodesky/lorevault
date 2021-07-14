@@ -3,6 +3,7 @@ const router = Router()
 
 // GET /
 router.get('/', (req, res, next) => {
+  req.viewOpts.chars = req.user.characters
   res.render('characters/index', req.viewOpts)
 })
 
