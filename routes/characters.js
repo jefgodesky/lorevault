@@ -21,7 +21,15 @@ router.get('/', (req, res, next) => {
 
 // POST /
 router.post('/', async (req, res, next) => {
-  req.user.characters.push({ name: req.body['new-char-name'] })
+  const char = { name: req.body['new-char-name'] }
+  for (const system of rules) {
+    const sheet = require(`../rules/${system}/sheet`)
+    char[system] = {}
+    for (const field of Object.keys(sheet)) {
+      char[system][field] = parseInt(req.body[`${system}-${field}`])
+    }
+  }
+  req.user.characters.push(char)
   await req.user.save()
   res.redirect('/characters')
 })
