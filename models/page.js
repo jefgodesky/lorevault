@@ -1,5 +1,4 @@
 const { Schema, model } = require('mongoose')
-const slugify = require('slugify')
 
 const CorePageSchemaDefinition = {
   title: String,
@@ -18,7 +17,7 @@ const VersionSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
 const PageSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
   path: {
     type: String,
-    default: () => slugify(this.title)
+    slug: "title"
   },
   created: {
     type: Date,
