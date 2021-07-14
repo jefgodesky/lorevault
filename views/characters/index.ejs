@@ -46,6 +46,10 @@
     <form action="/characters" method="POST">
       <label for="new-char-name">Character name</label>
       <input type="text" id="new-char-name" name="new-char-name" placeholder="Enter your character’s name here." />
+      <% for (const field of charSheet) { %>
+      <label for="<%= field.id %>"><%= field.label %></label>
+      <input type="<%= field.type %>" id="<%= field.id %>" name="<%= field.id %>" value="0" />
+      <% } %>
       <button>Add Character</button>
     </form>
     <% } else { %>
