@@ -14,4 +14,11 @@ router.post('/', async (req, res, next) => {
   res.redirect('/characters')
 })
 
+// GET /delete/:id
+router.get('/delete/:id', async (req, res, next) => {
+  req.user.characters = req.user.characters.filter(char => char._id.toString() !== req.params.id)
+  await req.user.save()
+  res.redirect('/characters')
+})
+
 module.exports = router

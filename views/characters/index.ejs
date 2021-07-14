@@ -24,6 +24,7 @@
           <th />
           <th>Character</th>
           <th>Party</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -32,6 +33,7 @@
           <td></td>
           <td><%= char.name %></td>
           <td></td>
+          <td><a href="/characters/delete/<%= char._id %>">Delete</a></td>
         </tr>
         <% } %>
       </tbody>
