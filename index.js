@@ -9,6 +9,8 @@ const session = require('express-session')
 const MongoStore = require('connect-mongo')
 require('./auth')(passport)
 
+const initViewOpts = require('./middleware/initViewOpts')
+
 const { db, port, secret } = require('./config')
 const indexRouter = require('./routes/index')
 const authRouter = require('./routes/auth')
@@ -36,6 +38,10 @@ server.use(session({
 server.use(passport.initialize())
 server.use(passport.session())
 
+// Set up middleware
+server.use(initViewOpts)
+
+// Set up routers
 server.use('/', indexRouter)
 server.use('/', authRouter)
 
