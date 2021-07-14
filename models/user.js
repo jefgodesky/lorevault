@@ -6,7 +6,11 @@ const CharacterSchemaDefinition = {
 }
 
 for (const system of rules) {
-  CharacterSchemaDefinition[system] = require(`../rules/${system}/sheet`)
+  const orig = require(`../rules/${system}/sheet`)
+  CharacterSchemaDefinition[system] = {}
+  for (const stat of Object.keys(orig)) {
+    CharacterSchemaDefinition[system][stat] = orig[stat].type
+  }
 }
 
 const CharacterSchema = new Schema(CharacterSchemaDefinition)
