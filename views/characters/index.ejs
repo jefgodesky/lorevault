@@ -17,6 +17,30 @@
       </ul>
     <% } %>
     <% if (isLoggedIn) { %>
+    <% if (chars.length > 0) { %>
+    <table>
+      <thead>
+        <tr>
+          <th />
+          <th>Character</th>
+          <th>Party</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (const char of chars) { %>
+        <tr>
+          <td></td>
+          <td><%= char.name %></td>
+          <td></td>
+        </tr>
+        <% } %>
+      </tbody>
+    </table>
+    <% } else { %>
+    <div class="null">
+      <p>You don&rsquo;t have any characters yet.</p>
+    </div>
+    <% } %>
     <form action="/characters" method="POST">
       <label for="new-char-name">Character name</label>
       <input type="text" id="new-char-name" name="new-char-name" placeholder="Enter your character’s name here." />
