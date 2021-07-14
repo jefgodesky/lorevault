@@ -1,9 +1,17 @@
 const { Router } = require('express')
+const { rules } = require('../config')
 const router = Router()
 
 // GET /
 router.get('/', (req, res, next) => {
   req.viewOpts.chars = req.user.characters
+  req.viewOpts.charSheet = []
+  for (const system of rules) {
+    const sheet = require(`../rules/${system}/sheet`)
+    for (const field of Object.keys(sheet)) {
+      req.viewOpts.charSheet.push({ field, label: sheet[field].label })
+    }
+  }
   res.render('characters/index', req.viewOpts)
 })
 
