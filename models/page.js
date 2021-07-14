@@ -8,7 +8,10 @@ const CorePageSchemaDefinition = {
 
 const VersionSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
   msg: String,
-  timestamp: Date,
+  timestamp: {
+    type: Date,
+    default: Date.now
+  },
   editor: Schema.Types.ObjectId
 }))
 
@@ -17,8 +20,14 @@ const PageSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
     type: String,
     default: () => slugify(this.title)
   },
-  created: Date,
-  modified: Date,
+  created: {
+    type: Date,
+    default: Date.now
+  },
+  modified: {
+    type: Date,
+    default: Date.now
+  },
   versions: [VersionSchema]
 }))
 
