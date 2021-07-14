@@ -9,7 +9,7 @@ router.get('/', (req, res, next) => {
   for (const system of rules) {
     const sheet = require(`../rules/${system}/sheet`)
     for (const field of Object.keys(sheet)) {
-      req.viewOpts.charSheet.push({ field, label: sheet[field].label })
+      req.viewOpts.charSheet.push({ system, field, label: sheet[field].label })
     }
   }
   res.render('characters/index', req.viewOpts)
