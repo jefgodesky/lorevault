@@ -18,7 +18,14 @@ const CharacterSchema = new Schema(CharacterSchemaDefinition)
 const UserSchema = new Schema({
   googleID: String,
   discordID: String,
-  characters: [CharacterSchema]
+  characters: [CharacterSchema],
+  active: CharacterSchema
 })
+
+UserSchema.methods.addCharacter = async function (char) {
+  if (this.characters.length === 0) this.active = char
+  this.characters.push(char)
+  await this.save()
+}
 
 module.exports = model('User', UserSchema)
