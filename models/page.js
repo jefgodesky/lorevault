@@ -1,4 +1,6 @@
 const { Schema, model } = require('mongoose')
+const slugger = require('mongoose-slug-generator')
+const uniqueValidation = require('mongoose-unique-validator')
 
 const CorePageSchemaDefinition = {
   title: String,
@@ -30,5 +32,8 @@ const PageSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
   },
   versions: [VersionSchema]
 }))
+
+PageSchema.plugin(slugger)
+PageSchema.plugin(uniqueValidation)
 
 module.exports = model('Page', PageSchema)

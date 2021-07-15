@@ -4,8 +4,6 @@ const path = require('path')
 const cookieParser = require('cookie-parser')
 const logger = require('morgan')
 const mongoose = require('mongoose')
-const slugger = require('mongoose-slug-generator')
-const uniqueValidation = require('mongoose-unique-validator')
 const passport = require('passport')
 const session = require('express-session')
 const MongoStore = require('connect-mongo')
@@ -23,8 +21,6 @@ const server = express()
 
 // Set up database
 mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
-mongoose.plugin(slugger)
-mongoose.plugin(uniqueValidation)
 
 // View engine setup
 server.set('views', path.join(__dirname, 'views'))
