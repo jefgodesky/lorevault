@@ -22,6 +22,15 @@ const UserSchema = new Schema({
   active: CharacterSchema
 })
 
+/**
+ * Add a character to a user document.
+ * @param {CharacterSchemaDefinition} char - The character object to add to the
+ *   user document. This object should conform to CharacterSchema.
+ * @returns {Promise<void>} - A Promise that resolves when the character has
+ *   been added to the user's array, and the user's document has been saved to
+ *   the database.
+ */
+
 UserSchema.methods.addCharacter = async function (char) {
   if (this.characters.length === 0) this.active = char
   this.characters.push(char)
@@ -29,7 +38,7 @@ UserSchema.methods.addCharacter = async function (char) {
 }
 
 /**
- * Delete a character.
+ * Delete a character from a user document.
  * @param {{ _id: ObjectId|string}|string} char - Either an object which has an
  *   `_id` property that can be cast into a string, or a string itself. This is
  *   used to identify the character to delete by ID.
