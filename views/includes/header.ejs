@@ -1,0 +1,15 @@
+<header>
+      <nav>
+      <% if (isLoggedIn) { %>
+        <ul>
+          <li><a href="/characters">Characters</a></li>
+        </ul>
+      <% } else { %>
+        <ul>
+          <li><a href="/login/google">Log in with Google</a></li>
+          <li><a href="/login/discord">Log in with Discord</a></li>
+        </ul>
+      <% } %>
+      </nav>
+      <h1><%= title %></h1>
+    </header>
