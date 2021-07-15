@@ -15,6 +15,7 @@ const { db, port, secret } = require('./config')
 const indexRouter = require('./routes/index')
 const authRouter = require('./routes/auth')
 const charRouter = require('./routes/characters')
+const pageRouter = require('./routes/pages')
 
 const server = express()
 
@@ -46,6 +47,7 @@ server.use(initViewOpts)
 server.use('/', indexRouter)
 server.use('/', authRouter)
 server.use('/characters', charRouter)
+server.use('/', pageRouter)
 
 // Catch 404 and forward to error handler
 server.use((req, res, next) => {
