@@ -1,21 +1,8 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/css/style.css' />
-  </head>
+  <%- include('includes/head', { title }) %>
   <body>
-    <h1>Create a New Page</h1>
-    <% if (isLoggedIn) { %>
-      <ul>
-        <li><a href="/characters">Characters</a></li>
-      </ul>
-    <% } else { %>
-      <ul>
-        <li><a href="/login/google">Log in with Google</a></li>
-        <li><a href="/login/discord">Log in with Discord</a></li>
-      </ul>
-    <% } %>
+    <%- include('includes/header', { isLoggedIn, title }) %>
     <form action="/create" method="POST">
       <label for="title">Title</label>
       <input type="text" id="title" name="title" placeholder="Enter the title for this page here" />
