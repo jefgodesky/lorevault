@@ -1,21 +1,8 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/css/style.css' />
-  </head>
+  <%- include('../includes/head', { title }) %>
   <body>
-    <h1><%= title %></h1>
-    <% if (isLoggedIn) { %>
-      <ul>
-        <li><a href="/characters">Characters</a></li>
-      </ul>
-    <% } else { %>
-      <ul>
-        <li><a href="/login/google">Log in with Google</a></li>
-        <li><a href="/login/discord">Log in with Discord</a></li>
-      </ul>
-    <% } %>
+    <%- include('../includes/header', { isLoggedIn, title }) %>
     <% if (isLoggedIn) { %>
     <% if (chars.length > 0) { %>
     <table>
@@ -55,5 +42,6 @@
     <% } else { %>
     <p>You&rsquo;ll need to log before you can add a character.</p>
     <% } %>
+    <%- include('../includes/footer') %>
   </body>
 </html>
