@@ -28,4 +28,20 @@ UserSchema.methods.addCharacter = async function (char) {
   await this.save()
 }
 
+/**
+ * Delete a character.
+ * @param {{ _id: ObjectId|string}|string} char - Either an object which has an
+ *   `_id` property that can be cast into a string, or a string itself. This is
+ *   used to identify the character to delete by ID.
+ * @returns {Promise<void>} - A Promise that resolves when the character has
+ *   been removed from the user document, and the user document has been saved
+ *   to the database.
+ */
+
+UserSchema.methods.deleteCharacter = async function (char) {
+  const id = char._id?.toString() || char.toString()
+  this.characters = this.characters.filter(c => c._id.toString() !== id)
+  await this.save()
+}
+
 module.exports = model('User', UserSchema)
