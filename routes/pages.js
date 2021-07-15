@@ -24,4 +24,10 @@ router.post('/create', async (req, res, next) => {
   res.redirect(`/${page.path}`)
 })
 
+// GET *
+router.get('*', async (req, res, next) => {
+  req.viewOpts.page = await Page.findOne({ path: req.originalUrl.substr(1) })
+  res.render('page', req.viewOpts)
+})
+
 module.exports = router
