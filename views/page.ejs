@@ -3,6 +3,9 @@
   <%- include('includes/head', { title }) %>
   <body>
     <%- include('includes/header', { isLoggedIn, title: page.title }) %>
-    <%= page.body %>
+    <main>
+      <%= page.body %>
+    </main>
+    <%- include('includes/footer') %>
   </body>
 </html>
