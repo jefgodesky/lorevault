@@ -21,6 +21,8 @@
       <input type="text" id="title" name="title" placeholder="Enter the title for this page here" />
       <label for="body">Body</label>
       <textarea id="body" name="body"></textarea>
+      <label for="msg">Message</label>
+      <input type="text" id="msg" name="msg" placeholder="A short description of the change that you’re making" value="<%= locals.msg ? msg : null %>" />
       <button>Create Page</button>
     </form>
   </body>
