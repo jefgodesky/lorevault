@@ -3,46 +3,48 @@
 <%- include('./includes/head', { title }) %>
   <body>
     <%- include('./includes/header', { isLoggedIn, char, title }) %>
-    <% if (isLoggedIn) { %>
-      <% if (chars.length > 0) { %>
-        <table>
-          <thead>
-          <tr>
-            <th>Character</th>
-            <th>Party</th>
-            <th></th>
-          </tr>
-          </thead>
-          <tbody>
-          <% for (const char of chars) { %>
+    <main>
+      <% if (isLoggedIn) { %>
+        <% if (chars.length > 0) { %>
+          <table>
+            <thead>
             <tr>
-              <td><%= char.name %></td>
-              <td></td>
-              <td>
-                <a href="/characters/select/<%= char._id %>">Select</a>
-                <a href="/characters/delete/<%= char._id %>">Delete</a>
-              </td>
+              <th>Character</th>
+              <th>Party</th>
+              <th></th>
             </tr>
-          <% } %>
-          </tbody>
-        </table>
-      <% } else { %>
-        <div class="null">
-          <p>You don&rsquo;t have any characters yet.</p>
-        </div>
-      <% } %>
-      <form action="/characters" method="POST">
-        <label for="new-char-name">Character name</label>
-        <input type="text" id="new-char-name" name="new-char-name" placeholder="Enter your character’s name here." />
-        <% for (const field of charSheet) { %>
-          <label for="<%= field.id %>"><%= field.label %></label>
-          <input type="<%= field.type %>" id="<%= field.id %>" name="<%= field.id %>" value="0" />
+            </thead>
+            <tbody>
+            <% for (const char of chars) { %>
+              <tr>
+                <td><%= char.name %></td>
+                <td></td>
+                <td>
+                  <a href="/characters/select/<%= char._id %>">Select</a>
+                  <a href="/characters/delete/<%= char._id %>">Delete</a>
+                </td>
+              </tr>
+            <% } %>
+            </tbody>
+          </table>
+        <% } else { %>
+          <div class="null">
+            <p>You don&rsquo;t have any characters yet.</p>
+          </div>
         <% } %>
-        <button>Add Character</button>
-      </form>
-    <% } else { %>
-      <p>You&rsquo;ll need to log before you can add a character.</p>
-    <% } %>
+        <form action="/characters" method="POST">
+          <label for="new-char-name">Character name</label>
+          <input type="text" id="new-char-name" name="new-char-name" placeholder="Enter your character’s name here." />
+          <% for (const field of charSheet) { %>
+            <label for="<%= field.id %>"><%= field.label %></label>
+            <input type="<%= field.type %>" id="<%= field.id %>" name="<%= field.id %>" value="0" />
+          <% } %>
+          <button>Add Character</button>
+        </form>
+      <% } else { %>
+        <p>You&rsquo;ll need to log before you can see or edit your profile.</p>
+      <% } %>
+    </main>
     <%- include('./includes/footer') %>
   </body>
 </html>
