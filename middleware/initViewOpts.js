@@ -9,6 +9,7 @@
 const initViewOpts = (req, res, next) => {
   req.viewOpts = {
     title: 'LoreVault',
+    char: req.user.active,
     isLoggedIn: Boolean(req.user)
   }
   next()

@@ -2,7 +2,7 @@
 <html>
   <%- include('includes/head', { title }) %>
   <body>
-    <%- include('includes/header', { isLoggedIn, title: page.title }) %>
+    <%- include('includes/header', { isLoggedIn, char, title: page.title }) %>
     <main>
       <%= page.body %>
     </main>

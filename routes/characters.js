@@ -29,15 +29,19 @@ router.post('/', async (req, res, next) => {
       char[system][field] = parseInt(req.body[`${system}-${field}`])
     }
   }
-  req.user.characters.push(char)
-  await req.user.save()
+  await req.user.addCharacter(char)
+  res.redirect('/characters')
+})
+
+// GET /select/:id
+router.get('/select/:id', async (req, res, next) => {
+  await req.user.selectCharacter(req.params.id)
   res.redirect('/characters')
 })
 
 // GET /delete/:id
 router.get('/delete/:id', async (req, res, next) => {
-  req.user.characters = req.user.characters.filter(char => char._id.toString() !== req.params.id)
-  await req.user.save()
+  await req.user.deleteCharacter(req.params.id)
   res.redirect('/characters')
 })
 
