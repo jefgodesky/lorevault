@@ -39,7 +39,7 @@ const serviceKeys = {
 UserSchema.methods.isLastConnection = function (service) {
   const cpy = JSON.parse(JSON.stringify(this))
   delete cpy[serviceKeys[service]]
-  const all = Object.values(keys).map(key => Boolean(cpy[key]))
+  const all = Object.values(serviceKeys).map(key => Boolean(cpy[key]))
   return !all.reduce((acc, curr) => acc || curr, false)
 }
 
@@ -55,10 +55,6 @@ UserSchema.methods.isLastConnection = function (service) {
 
 UserSchema.methods.disconnect = async function (service) {
   if (this.isLastConnection(service)) return false
-  const keys = {
-    google: 'googleID',
-    discord: 'discordID'
-  }
   delete this[serviceKeys[service]]
   await this.save()
   return true
