@@ -19,6 +19,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "jest",
+    "dev": "npm-run-all -p dev:serve dev:css",
     "dev:serve": "nodemon index.js",
     "dev:css": "npm-run-all -p css:build css:watch css:sync",
     "css:build": "npm-run-all css:compile css:postcss",
