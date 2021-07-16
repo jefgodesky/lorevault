@@ -2,7 +2,7 @@ node_modules
 node_modules/*
 config/*.json
 !config/example.json
-css/*
+public/css/*
 
 # IDE configurations and local settings
 .idea

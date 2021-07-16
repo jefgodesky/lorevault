@@ -31,6 +31,6 @@ const compile = (file, output, outputStyle) => {
 const files = fs.readdirSync('./scss')
 for (const file of files.filter(f => f.endsWith('.scss'))) {
   const input = `./scss/${file}`
-  const output = `./css/${file.substr(0, file.length - 5)}.css`
+  const output = `./public/css/${file.substr(0, file.length - 5)}.css`
   compile(input, output, style)
 }
