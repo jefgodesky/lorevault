@@ -24,6 +24,7 @@
     "css:postcss": "postcss css/*.css --use autoprefixer --dir css"
   },
   "dependencies": {
+    "chokidar-cli": "^2.1.0",
     "connect-mongo": "^4.4.1",
     "cookie-parser": "^1.4.5",
     "debug": "^2.6.9",
