@@ -33,6 +33,12 @@ router.post('/', async (req, res, next) => {
   res.redirect('/characters')
 })
 
+// GET /select/:id
+router.get('/select/:id', async (req, res, next) => {
+  await req.user.selectCharacter(req.params.id)
+  res.redirect('/characters')
+})
+
 // GET /delete/:id
 router.get('/delete/:id', async (req, res, next) => {
   await req.user.deleteCharacter(req.params.id)
