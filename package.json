@@ -26,7 +26,7 @@
     "css:compile": "node sass.js",
     "css:postcss": "postcss public/css/*.css --use autoprefixer --dir css",
     "css:watch": "chokidar './scss/*.scss' './scss/**/*.scss' --command 'npm run css:compile'",
-    "css:sync": "browser-sync start --port 8080 --files 'public/css/*.css'"
+    "css:sync": "browser-sync start --proxy localhost:8080 --files 'public/css/*.css' --no-ui --no-inject-changes"
   },
   "dependencies": {
     "chokidar-cli": "^2.1.0",
