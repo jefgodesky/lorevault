@@ -1,0 +1,49 @@
+// Normalize CSS
+@import 'node_modules/normalize-scss/sass/normalize';
+
+:root,
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: url(https://lorevault.s3.us-east-2.wasabisys.com/styles/base/bg.jpg) no-repeat center;
+  background-size: cover;
+  font-family: Georgia, serif;
+  min-height: 100vh;
+}
+
+header nav,
+main,
+footer {
+  background: rgba(245, 225, 166, 0.5);
+  box-shadow: 0 0 1em rgba(0, 0, 0, 0.5);
+  margin: 2em;
+  padding: 2em;
+
+  @media (min-width: 44em) {
+    margin: 2em auto;
+    max-width: 40em;
+  }
+}
+
+header nav {
+  margin-top: 0;
+}
+
+header h1 {
+  font-size: 2em;
+  margin: 2em 2em 1em 2em;
+  padding: 0 1em;
+
+  @media (min-width: 44em) {
+    margin: 2em auto 1em auto;
+    max-width: 20em;
+  }
+}
