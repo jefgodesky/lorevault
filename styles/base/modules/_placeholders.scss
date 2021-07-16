@@ -1,0 +1,18 @@
+%unformatted-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+%layout-block {
+  background: rgba(245, 225, 166, 0.5);
+  box-shadow: 0 0 1em rgba(0, 0, 0, 0.5);
+  margin: 2em;
+  padding: 2em;
+  width: 100%;
+
+  @media (min-width: 44em) {
+    margin: 2em auto;
+    max-width: 40em;
+  }
+}

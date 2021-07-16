@@ -6,44 +6,13 @@
   box-sizing: border-box;
 }
 
-html,
-body {
-  margin: 0;
-  padding: 0;
-}
+// MODULES
+// Modules are full of things that don't show up in the CSS we produce, but
+// are used by the things that get us there, like variables and mixins.
 
-body {
-  background: url(https://lorevault.s3.us-east-2.wasabisys.com/styles/base/bg.jpg) no-repeat center;
-  background-size: cover;
-  font-family: Georgia, serif;
-  min-height: 100vh;
-}
+@import 'modules/placeholders';
 
-header nav,
-main,
-footer {
-  background: rgba(245, 225, 166, 0.5);
-  box-shadow: 0 0 1em rgba(0, 0, 0, 0.5);
-  margin: 2em;
-  padding: 2em;
+// PARTIALS
+// Partials are the various pieces that actually render to CSS.
 
-  @media (min-width: 44em) {
-    margin: 2em auto;
-    max-width: 40em;
-  }
-}
-
-header nav {
-  margin-top: 0;
-}
-
-header h1 {
-  font-size: 2em;
-  margin: 2em 2em 1em 2em;
-  padding: 0 1em;
-
-  @media (min-width: 44em) {
-    margin: 2em auto 1em auto;
-    max-width: 20em;
-  }
-}
+@import 'partials/layout';
