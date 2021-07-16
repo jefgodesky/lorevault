@@ -38,6 +38,7 @@
     "passport-google-oauth20": "^2.0.0"
   },
   "devDependencies": {
+    "commander": "^8.0.0",
     "jest": "^27.0.6",
     "nodemon": "^2.0.12",
     "sass": "^1.35.2"
