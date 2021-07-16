@@ -20,11 +20,12 @@
     "start": "node index.js",
     "test": "jest",
     "dev:serve": "nodemon index.js",
+    "dev:css": "npm-run-all -p css:build css:watch css:sync",
     "css:build": "npm-run-all css:compile css:postcss",
     "css:compile": "node sass.js",
     "css:postcss": "postcss css/*.css --use autoprefixer --dir css",
     "css:watch": "chokidar './scss/*.scss' './scss/**/*.scss' --command 'npm run css:compile'",
-    "css:sync": "browser-sync start --server --files 'css/*.css'"
+    "css:sync": "browser-sync start --port 8080 --files 'css/*.css'"
   },
   "dependencies": {
     "chokidar-cli": "^2.1.0",
