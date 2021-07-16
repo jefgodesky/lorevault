@@ -19,6 +19,12 @@ router.get('/login/discord/callback', passport.authenticate('discord', { failure
   res.redirect('/')
 })
 
+// GET /disconnect/:service
+router.get('/disconnect/:service', async (req, res, next) => {
+  await req.user.disconnect(req.params.service)
+  res.redirect('/profile')
+})
+
 // GET /profile
 router.get('/profile', async (req, res, next) => {
   req.viewOpts.connectedGoogle = Boolean(req.user.googleID)
