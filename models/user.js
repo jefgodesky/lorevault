@@ -23,6 +23,26 @@ const UserSchema = new Schema({
 })
 
 /**
+ * Checks if removing the given service would leave the user without any OAuth
+ * services with which to log in.
+ * @param {string} service - The service to consider.
+ * @returns {boolean} - `true` if removing the given service would leave the
+ *   user without any OAuth services with which to log in, or `false` if hen
+ *   will still be able to log in after removing it.
+ */
+
+UserSchema.methods.isLastConnection = function (service) {
+  const keys = {
+    google: 'googleID',
+    discord: 'discordID'
+  }
+  const cpy = JSON.parse(JSON.stringify(this))
+  delete cpy[keys[service]]
+  const all = Object.values(keys).map(key => Boolean(cpy[key]))
+  return !all.reduce((acc, curr) => acc || curr, false)
+}
+
+/**
  * Add a character to a user document.
  * @param {CharacterSchemaDefinition} char - The character object to add to the
  *   user document. This object should conform to CharacterSchema.
