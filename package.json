@@ -20,7 +20,8 @@
     "start": "node index.js",
     "test": "jest",
     "dev": "nodemon index.js",
-    "css:compile": "node sass.js"
+    "css:compile": "node sass.js",
+    "css:postcss": "postcss css/*.css --use autoprefixer --dir css"
   },
   "dependencies": {
     "connect-mongo": "^4.4.1",
