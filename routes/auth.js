@@ -27,6 +27,8 @@ router.get('/disconnect/:service', async (req, res, next) => {
 
 // GET /profile
 router.get('/profile', async (req, res, next) => {
+  req.viewOpts.title = 'Your Profile'
+
   req.viewOpts.connectedGoogle = Boolean(req.user.googleID)
   req.viewOpts.connectedDiscord = Boolean(req.user.discordID)
 
