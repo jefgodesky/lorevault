@@ -19,7 +19,8 @@
   "scripts": {
     "start": "node index.js",
     "test": "jest",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "css:compile": "node sass.js"
   },
   "dependencies": {
     "connect-mongo": "^4.4.1",
