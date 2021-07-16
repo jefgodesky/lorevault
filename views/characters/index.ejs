@@ -2,7 +2,7 @@
 <html>
   <%- include('../includes/head', { title }) %>
   <body>
-    <%- include('../includes/header', { isLoggedIn, title }) %>
+    <%- include('../includes/header', { isLoggedIn, char, title }) %>
     <% if (isLoggedIn) { %>
     <% if (chars.length > 0) { %>
     <table>
