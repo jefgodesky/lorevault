@@ -5,18 +5,51 @@
     <%- include('./includes/header', { isLoggedIn, char, title }) %>
     <main>
       <% if (isLoggedIn) { %>
+        <h2>Logins</h2>
+        <p>You&rsquo;ll need to leave at least one of these services connected in order to log into your account in the future. Connecting an account simply lets you use it to log in.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th>Status</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Google</td>
+              <% if (connectedGoogle) { %>
+              <td>Connected</td>
+              <td><a href="/disconnect/google">Disconnect Google</a></td>
+              <% } else { %>
+              <td>Not connected</td>
+              <td><a href="/login/google">Connect Google</a></td>
+              <% } %>
+            </tr>
+            <tr>
+              <td>Discord</td>
+              <% if (connectedDiscord) { %>
+              <td>Connected</td>
+              <td><a href="/disconnect/discord">Disconnect Discord</a></td>
+              <% } else { %>
+              <td>Not connected</td>
+              <td><a href="/login/discord">Connect Discord</a></td>
+              <% } %>
+            </tr>
+          </tbody>
+        </table>
         <% if (chars.length > 0) { %>
           <h2>Characters</h2>
           <table>
             <thead>
-            <tr>
-              <th>Character</th>
-              <th>Party</th>
-              <th></th>
-            </tr>
+              <tr>
+                <th>Character</th>
+                <th>Party</th>
+                <th></th>
+              </tr>
             </thead>
             <tbody>
-            <% for (const char of chars) { %>
+              <% for (const char of chars) { %>
               <tr>
                 <td><%= char.name %></td>
                 <td></td>
@@ -25,7 +58,7 @@
                   <a href="/characters/delete/<%= char._id %>">Delete</a>
                 </td>
               </tr>
-            <% } %>
+              <% } %>
             </tbody>
           </table>
         <% } else { %>

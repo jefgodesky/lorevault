@@ -21,6 +21,9 @@ router.get('/login/discord/callback', passport.authenticate('discord', { failure
 
 // GET /profile
 router.get('/profile', async (req, res, next) => {
+  req.viewOpts.connectedGoogle = Boolean(req.user.googleID)
+  req.viewOpts.connectedDiscord = Boolean(req.user.discordID)
+
   req.viewOpts.chars = req.user.characters
   req.viewOpts.charSheet = []
   for (const system of rules) {
@@ -33,6 +36,7 @@ router.get('/profile', async (req, res, next) => {
       })
     }
   }
+
   res.render('profile', req.viewOpts)
 })
 
