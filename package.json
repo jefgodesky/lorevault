@@ -19,7 +19,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "jest",
-    "dev": "nodemon index.js",
+    "dev:serve": "nodemon index.js",
     "css:compile": "node sass.js",
     "css:postcss": "postcss css/*.css --use autoprefixer --dir css",
     "css:watch": "chokidar './scss/*.scss' './scss/**/*.scss' --command 'npm run css:compile'",
