@@ -1,4 +1,6 @@
- %aside {
+@forward '../modules/placeholders';
+
+%aside {
    @extend %box;
    width: calc(100% + 4em);
  }
