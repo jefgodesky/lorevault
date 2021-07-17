@@ -26,7 +26,7 @@ router.post('/create', async (req, res, next) => {
 
 // GET *
 router.get('*', async (req, res, next) => {
-  req.viewOpts.page = await Page.findOne({ path: req.originalUrl.substr(1) })
+  req.viewOpts.page = await Page.findByPath(req.originalUrl)
   res.render('page', req.viewOpts)
 })
 

@@ -36,4 +36,16 @@ const PageSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
 PageSchema.plugin(slugger)
 PageSchema.plugin(uniqueValidation)
 
+/**
+ * Return a Page document that has a given path.
+ * @param {string} url - The requesting URL.
+ * @returns {*} - A Promise that returns with the result of the query.
+ */
+
+PageSchema.statics.findByPath = function (url) {
+  const parts = url.split('/')
+  const path = parts[0] === '' ? parts[1] : parts[0]
+  return this.findOne({ path })
+}
+
 module.exports = model('Page', PageSchema)
