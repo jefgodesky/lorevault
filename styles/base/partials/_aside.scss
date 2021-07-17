@@ -1,0 +1,8 @@
+ %aside {
+   @extend %box;
+   width: calc(100% + 4em);
+ }
+
+ aside {
+   @extend %aside;
+ }
