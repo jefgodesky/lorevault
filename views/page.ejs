@@ -3,6 +3,12 @@
   <%- include('includes/head', { title }) %>
   <body>
     <%- include('includes/header', { isLoggedIn, char, title: page.title }) %>
+    <nav class="page">
+      <li class="active">Read</li>
+      <% if (isLoggedIn) { %>
+      <li><a href="/<%= page.path %>/edit">Edit</a></li>
+      <% } %>
+    </nav>
     <main>
       <%= page.body %>
     </main>
