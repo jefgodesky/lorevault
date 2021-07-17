@@ -38,6 +38,12 @@ router.post('*/edit', async (req, res, next) => {
   res.redirect(`/${page.path}`)
 })
 
+// GET */history
+router.get('*/history', async (req, res, next) => {
+  req.viewOpts.page = await Page.findByPath(req.originalUrl)
+  res.render('history', req.viewOpts)
+})
+
 // GET *
 router.get('*', async (req, res, next) => {
   req.viewOpts.page = await Page.findByPath(req.originalUrl)

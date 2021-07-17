@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <%- include('includes/head', { title }) %>
+  <body>
+  <%- include('includes/header', { isLoggedIn, char, title: `${page.title} — Revision History` }) %>
+  <nav class="page">
+    <li><a href="/<%= page.path %>">Read</a></li>
+    <% if (isLoggedIn) { %>
+    <li><a href="/<%= page.path %>/edit">Edit</a></li>
+    <% } %>
+    <li class="active">History</li>
+  </nav>
+  <main>
+  </main>
+  <%- include('includes/footer') %>
+  </body>
+</html>
