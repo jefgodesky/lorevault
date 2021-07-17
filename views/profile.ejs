@@ -11,7 +11,7 @@
           <thead>
             <tr>
               <th>Service</th>
-              <th>Status</th>
+              <th class="short">Status</th>
               <th />
             </tr>
           </thead>
@@ -19,21 +19,21 @@
             <tr>
               <td>Google</td>
               <% if (connectedGoogle) { %>
-              <td>Connected</td>
-              <td><a href="/disconnect/google" class="button">Disconnect Google</a></td>
+              <td class="short">Connected</td>
+              <td class="actions"><a href="/disconnect/google" class="button">Disconnect Google</a></td>
               <% } else { %>
-              <td>Not connected</td>
-              <td><a href="/login/google" class="button">Connect Google</a></td>
+              <td class="short">Not connected</td>
+              <td class="actions"><a href="/login/google" class="button">Connect Google</a></td>
               <% } %>
             </tr>
             <tr>
               <td>Discord</td>
               <% if (connectedDiscord) { %>
-              <td>Connected</td>
-              <td><a href="/disconnect/discord" class="button">Disconnect Discord</a></td>
+              <td class="short">Connected</td>
+              <td class="actions"><a href="/disconnect/discord" class="button">Disconnect Discord</a></td>
               <% } else { %>
-              <td>Not connected</td>
-              <td><a href="/login/discord" class="button">Connect Discord</a></td>
+              <td class="short">Not connected</td>
+              <td class="actions"><a href="/login/discord" class="button">Connect Discord</a></td>
               <% } %>
             </tr>
           </tbody>
@@ -53,7 +53,7 @@
               <tr>
                 <td><%= char.name %></td>
                 <td></td>
-                <td>
+                <td class="actions">
                   <a href="/characters/select/<%= char._id %>" class="button">Select</a>
                   <a href="/characters/delete/<%= char._id %>" class="button">Delete</a>
                 </td>
