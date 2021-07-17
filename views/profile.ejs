@@ -73,7 +73,9 @@
             <label for="<%= field.id %>"><%= field.label %></label>
             <input type="<%= field.type %>" id="<%= field.id %>" name="<%= field.id %>" value="0" />
           <% } %>
-          <button>Add Character</button>
+          <p class="actions">
+            <button>Add Character</button>
+          </p>
         </form>
       <% } else { %>
         <p>You&rsquo;ll need to log before you can see or edit your profile.</p>

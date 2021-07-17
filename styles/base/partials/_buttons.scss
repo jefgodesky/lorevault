@@ -27,3 +27,7 @@ button,
 a.button {
   @extend %button;
 }
+
+.actions {
+  text-align: right;
+}
