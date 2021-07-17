@@ -10,6 +10,7 @@ const MongoStore = require('connect-mongo')
 require('./auth')(passport)
 
 const initViewOpts = require('./middleware/initViewOpts')
+const ejsHelpers = require('./views/helpers')
 
 const { db, port, secret } = require('./config')
 const indexRouter = require('./routes/index')
@@ -25,6 +26,9 @@ mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
 // View engine setup
 server.set('views', path.join(__dirname, 'views'))
 server.set('view engine', 'ejs')
+Object.keys(ejsHelpers).forEach(key => {
+  server.locals[key] = ejsHelpers[key]
+})
 
 server.use(logger('dev'))
 server.use(express.json())
