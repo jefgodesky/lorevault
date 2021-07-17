@@ -7,7 +7,6 @@
 %blocklike {
   background: rgba(245, 225, 166, 0.5);
   box-shadow: 0 0 1em rgba(0, 0, 0, 0.5);
-  padding: 2em;
 }
 
 %layout-size {
@@ -23,10 +22,38 @@
 %layout-block {
   @extend %layout-size;
   @extend %blocklike;
+  padding: 2em;
 }
 
 %box {
   background: #f6e1a6;
   margin: 2em -2em;
   padding: 2em;
+}
+
+%tabs {
+  @extend %layout-size;
+  margin-bottom: 0;
+  text-align: right;
+
+  ul {
+    @extend %unformatted-list;
+  }
+
+  li {
+    @extend %blocklike;
+    display: inline-block;
+  }
+
+  a {
+    color: black;
+    display: block;
+    padding: 1em 2em;
+    text-decoration: none;
+  }
+
+  li.active {
+    font-weight: bold;
+    padding: 1em 2em;
+  }
 }
