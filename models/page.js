@@ -64,4 +64,20 @@ PageSchema.statics.findByPath = function (url) {
   return this.findOne({ path })
 }
 
+/**
+ * A static method which combines looking up the page by the URL provided and
+ * then applying the update to the page if it was found.
+ * @param {string} url - The requesting URL.
+ * @param {object} update - The update to make. This object should conform to
+ *   the `VersionSchema` outline.
+ * @returns {Promise<PageSchema|Boolean>} - A Promise that resolves with the
+ *   new document after it has been updated or saved, or `false` if it could
+ *   not be found.
+ */
+
+PageSchema.statics.makeUpdate = async function (url, update) {
+  const doc = await this.findByPath(url)
+  return doc && doc.makeUpdate ? doc.makeUpdate(update) : false
+}
+
 module.exports = model('Page', PageSchema)
