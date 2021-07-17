@@ -3,7 +3,7 @@
 <%- include('./includes/head', { title }) %>
   <body>
     <%- include('./includes/header', { isLoggedIn, char, title }) %>
-    <main>
+    <main class="profile">
       <% if (isLoggedIn) { %>
         <h2>Logins</h2>
         <p>You&rsquo;ll need to leave at least one of these services connected in order to log into your account in the future. Connecting an account simply lets you use it to log in.</p>

@@ -2,6 +2,7 @@ const fs = require('fs')
 const { renderSync } = require('sass')
 const program = require('commander')
 const pkg = require('./package.json')
+const { rules } = require('./config')
 
 program.version(pkg.version)
 program.option('-s, --style <outputStyle>', 'Output style (`expanded` or `compressed`)')
@@ -32,6 +33,13 @@ const styles = fs.readdirSync('./styles')
 for (const dir of styles) {
   const input = `./styles/${dir}/index.scss`
   if (fs.existsSync(input)) {
+    const files = []
+    for (const system of rules) {
+      const path = `./rules/${system}/_${system}.scss`
+      if (fs.existsSync(path)) files.push(path)
+    }
+    const lines = files.map(file => `@use '../.${file}';`)
+    fs.writeFileSync(`./styles/${dir}/rules.scss`, lines.join('\n'))
     const output = `./public/css/${dir}.css`
     compile(input, output, style)
   }
