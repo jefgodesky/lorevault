@@ -37,6 +37,22 @@ PageSchema.plugin(slugger)
 PageSchema.plugin(uniqueValidation)
 
 /**
+ * Makes an update to a Page document.
+ * @param {object} update - The update to make. This object should conform to
+ *   the `VersionSchema` outline.
+ * @returns {Promise<PageSchema>} - A Promise that resolves with the new
+ *   document once it has been updated and saved.
+ */
+
+PageSchema.methods.makeUpdate = async function (update) {
+  if (update.title) this.title = update.title
+  if (update.body) this.body = update.body
+  this.versions.push(update)
+  await this.save()
+  return this
+}
+
+/**
  * Return a Page document that has a given path.
  * @param {string} url - The requesting URL.
  * @returns {*} - A Promise that returns with the result of the query.
