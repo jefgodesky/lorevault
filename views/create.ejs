@@ -4,17 +4,7 @@
   <body>
     <%- include('includes/header', { isLoggedIn, char, title }) %>
     <main>
-      <form action="/create" method="POST">
-        <label for="title">Title</label>
-        <input type="text" id="title" name="title" placeholder="Enter the title for this page here" />
-        <label for="body">Body</label>
-        <textarea id="body" name="body" class="body"></textarea>
-        <label for="msg">Message</label>
-        <input type="text" id="msg" name="msg" placeholder="A short description of the change that you’re making" value="<%= locals.msg ? msg : null %>" />
-        <p class="actions">
-          <button>Create Page</button>
-        </p>
-      </form>
+      <%- include('includes/page-form', { msg }) %>
     </main>
     <%- include('includes/footer') %>
   </body>
