@@ -41,6 +41,7 @@ router.post('*/edit', async (req, res, next) => {
 // GET */history
 router.get('*/history', async (req, res, next) => {
   req.viewOpts.page = await Page.findByPath(req.originalUrl)
+  req.viewOpts.versions = JSON.parse(JSON.stringify(req.viewOpts.page.versions)).reverse()
   res.render('history', req.viewOpts)
 })
 

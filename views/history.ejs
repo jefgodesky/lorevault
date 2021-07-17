@@ -11,6 +11,22 @@
     <li class="active">History</li>
   </nav>
   <main>
+    <form action="/<%= page.path %>/compare" method="POST">
+      <table>
+        <tbody>
+          <% for (const version of versions) { %>
+          <tr>
+            <td><input type="radio" name="a" /></td>
+            <td><input type="radio" name="b" /></td>
+            <td>
+              <%= version.msg %><br />
+              <small><%= version.timestamp %></small>
+            </td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </form>
   </main>
   <%- include('includes/footer') %>
   </body>
