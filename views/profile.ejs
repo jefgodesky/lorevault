@@ -71,9 +71,14 @@
           <form action="/characters" method="POST">
             <label for="new-char-name">Character name</label>
             <input type="text" id="new-char-name" name="new-char-name" placeholder="Enter your character’s name here." />
-            <% for (const field of charSheet) { %>
-              <label for="<%= field.id %>"><%= field.label %></label>
-              <input type="<%= field.type %>" id="<%= field.id %>" name="<%= field.id %>" value="0" />
+            <% for (const system of systems) { %>
+              <div class="<%= system.id %>">
+                <h4><em><%= system.name %></em><% if (system.edition) { %> (<%= system.edition %>)<% } %></h4>
+                <% for (const stat of system.stats) { %>
+                  <label for="<%= stat.id %>"><%= stat.label %></label>
+                  <input type="<%= stat.type %>" id="<%= stat.id %>" name="<%= stat.id %>" value="0" />
+                <% } %>
+              </div>
             <% } %>
             <p class="actions">
               <button>Add Character</button>
