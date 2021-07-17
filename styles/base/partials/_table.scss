@@ -11,6 +11,15 @@ th {
 th,
 td {
   padding: 0.5em 1em;
+
+  &.short {
+    text-align: center;
+  }
+
+  &.num,
+  &.actions {
+    text-align: right;
+  }
 }
 
 tr:nth-child(odd) {
