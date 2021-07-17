@@ -4,7 +4,7 @@ const router = Router()
 
 // GET /create
 router.get('/create', async (req, res, next) => {
-  req.viewOpts.msg = 'Initial text'
+  req.viewOpts.title = 'Create a New Page'
   res.render('create', req.viewOpts)
 })
 
@@ -24,9 +24,23 @@ router.post('/create', async (req, res, next) => {
   res.redirect(`/${page.path}`)
 })
 
+// GET */edit
+router.get('*/edit', async (req, res, next) => {
+  req.viewOpts.page = await Page.findByPath(req.originalUrl)
+  req.viewOpts.title = `Editing ${req.viewOpts.page.title}`
+  res.render('edit', req.viewOpts)
+})
+
+// POST */edit
+router.post('*/edit', async (req, res, next) => {
+  const update = Object.assign({}, req.body, { editor: req.user?._id })
+  const page = await Page.makeUpdate(req.originalUrl, update)
+  res.redirect(`/${page.path}`)
+})
+
 // GET *
 router.get('*', async (req, res, next) => {
-  req.viewOpts.page = await Page.findOne({ path: req.originalUrl.substr(1) })
+  req.viewOpts.page = await Page.findByPath(req.originalUrl)
   res.render('page', req.viewOpts)
 })
 
