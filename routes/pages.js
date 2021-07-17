@@ -24,6 +24,13 @@ router.post('/create', async (req, res, next) => {
   res.redirect(`/${page.path}`)
 })
 
+// GET */edit
+router.get('*/edit', async (req, res, next) => {
+  req.viewOpts.page = await Page.findByPath(req.originalUrl)
+  req.viewOpts.title = `Editing ${req.viewOpts.page.title}`
+  res.render('edit', req.viewOpts)
+})
+
 // GET *
 router.get('*', async (req, res, next) => {
   req.viewOpts.page = await Page.findByPath(req.originalUrl)
