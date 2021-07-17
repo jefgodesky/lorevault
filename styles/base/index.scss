@@ -1,18 +1,10 @@
 // Normalize CSS
-@import 'node_modules/normalize-scss/sass/normalize';
+@use 'node_modules/normalize-scss/sass/normalize';
 
-:root,
-* {
-  box-sizing: border-box;
-}
+@use 'partials/layout';
+@use 'partials/buttons';
+@use 'partials/form';
+@use 'partials/table';
+@use 'partials/aside';
 
-// MODULES
-// Modules are full of things that don't show up in the CSS we produce, but
-// are used by the things that get us there, like variables and mixins.
-
-@import 'modules/placeholders';
-
-// PARTIALS
-// Partials are the various pieces that actually render to CSS.
-
-@import 'partials/layout';
+@use 'rules';

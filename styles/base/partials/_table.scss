@@ -1,0 +1,29 @@
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th {
+  border-bottom: 1px solid black;
+  text-align: left;
+}
+
+th,
+td {
+  padding: 0.5em 1em;
+
+  &.short {
+    text-align: center;
+  }
+
+  &.num,
+  &.actions {
+    text-align: right;
+  }
+}
+
+tr:nth-child(odd) {
+  td {
+    background: rgba(0, 0, 0, 0.05);
+  }
+}

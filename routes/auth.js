@@ -19,20 +19,32 @@ router.get('/login/discord/callback', passport.authenticate('discord', { failure
   res.redirect('/')
 })
 
+// GET /disconnect/:service
+router.get('/disconnect/:service', async (req, res, next) => {
+  await req.user.disconnect(req.params.service)
+  res.redirect('/profile')
+})
+
 // GET /profile
 router.get('/profile', async (req, res, next) => {
+  req.viewOpts.title = 'Your Profile'
+
+  req.viewOpts.connectedGoogle = Boolean(req.user.googleID)
+  req.viewOpts.connectedDiscord = Boolean(req.user.discordID)
+
   req.viewOpts.chars = req.user.characters
-  req.viewOpts.charSheet = []
+  req.viewOpts.systems = []
   for (const system of rules) {
+    const meta = require(`../rules/${system}/meta.json`)
     const sheet = require(`../rules/${system}/sheet`)
-    for (const field of Object.keys(sheet)) {
-      req.viewOpts.charSheet.push({
-        id: `${system}-${field}`,
-        label: sheet[field].label,
-        type: sheet[field].type === Number ? 'number' : 'text'
-      })
-    }
+    const stats = Object.keys(sheet).map(key => ({
+      id: `${system}-${key}`,
+      label: sheet[key].label,
+      type: sheet[key].type === Number ? 'number' : 'text'
+    }))
+    req.viewOpts.systems.push(Object.assign({}, meta, { stats }))
   }
+
   res.render('profile', req.viewOpts)
 })
 
