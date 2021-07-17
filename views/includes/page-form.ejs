@@ -6,6 +6,6 @@
         <label for="msg">Message</label>
         <input type="text" id="msg" name="msg" placeholder="A short description of the change that you’re making" value="<%= locals.page ? null : 'Initial text' %>" />
         <p class="actions">
-          <button>Create Page</button>
+          <button><% if (locals.page) { %>Save Changes<% } else { %>Create Page<% } %></button>
         </p>
       </form>
