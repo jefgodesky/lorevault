@@ -31,6 +31,13 @@ router.get('*/edit', async (req, res, next) => {
   res.render('edit', req.viewOpts)
 })
 
+// POST */edit
+router.post('*/edit', async (req, res, next) => {
+  const update = Object.assign({}, req.body, { editor: req.user?._id })
+  const page = await Page.makeUpdate(req.originalUrl, update)
+  res.redirect(`/${page.path}`)
+})
+
 // GET *
 router.get('*', async (req, res, next) => {
   req.viewOpts.page = await Page.findByPath(req.originalUrl)
