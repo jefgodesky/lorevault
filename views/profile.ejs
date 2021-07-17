@@ -75,8 +75,10 @@
               <div class="<%= system.id %>">
                 <h4><em><%= system.name %></em><% if (system.edition) { %> (<%= system.edition %>)<% } %></h4>
                 <% for (const stat of system.stats) { %>
-                  <label for="<%= stat.id %>"><%= stat.label %></label>
-                  <input type="<%= stat.type %>" id="<%= stat.id %>" name="<%= stat.id %>" value="0" />
+                  <div class="<%= system.id %>-stat <%= stat.id %>">
+                    <label for="<%= stat.id %>"><%= stat.label %></label>
+                    <input type="<%= stat.type %>" id="<%= stat.id %>" name="<%= stat.id %>" value="<%= stat.type === 'number' ? 0 : '' %>" />
+                  </div>
                 <% } %>
               </div>
             <% } %>
