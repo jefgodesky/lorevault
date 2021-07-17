@@ -4,7 +4,7 @@
         <label for="body">Body</label>
         <textarea id="body" name="body" class="body"></textarea>
         <label for="msg">Message</label>
-        <input type="text" id="msg" name="msg" placeholder="A short description of the change that you’re making" value="<%= locals.msg ? msg : null %>" />
+        <input type="text" id="msg" name="msg" placeholder="A short description of the change that you’re making" value="<%= locals.page ? null : 'Initial text' %>" />
         <p class="actions">
           <button>Create Page</button>
         </p>
