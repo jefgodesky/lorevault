@@ -14,7 +14,7 @@ const formatDate = date => {
   const ampm = hour === 0 ? 'PM' : hour > 12 ? 'PM' : 'AM'
   const h = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
   const minute = date.getMinutes()
-  const m = minute.padStart(2, '0')
+  const m = minute.toString().padStart(2, '0')
   const time = `${h}:${m} ${ampm}`
 
   return `${day} ${time}`
