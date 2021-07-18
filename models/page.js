@@ -1,6 +1,7 @@
 const { Schema, model } = require('mongoose')
 const slugger = require('mongoose-slug-generator')
 const uniqueValidation = require('mongoose-unique-validator')
+const { formatDate } = require('../views/helpers')
 
 const CorePageSchemaDefinition = {
   title: String,
@@ -80,6 +81,29 @@ PageSchema.methods.orderVersions = function (ids) {
     if (ids.includes(v._id.toString())) ordered.push(v)
   }
   return ordered
+}
+
+/**
+ * Roll the Page document back to a previous version.
+ * @param {string} id - The ID of the Page document's version that you want to
+ *   roll back to.
+ * @param {Schema.Types.ObjectId} editor - The ID of the user rolling back
+ *   the Page.
+ * @returns {Promise<Schema.methods>|null} - `null` if the Page document does
+ *   not have a version with the specified ID, or, if it does, a Promise that
+ *   resolves once the Page document has been rolled back to the specified
+ *   version and saved to the database.
+ */
+
+PageSchema.methods.rollback = function (id, editor) {
+  const version = this.findVersion(id)
+  if (!version) return null
+  return this.makeUpdate({
+    title: version.title,
+    body: version.body,
+    msg: `Rolling back to the version created at ${formatDate(version.timestamp)}`,
+    editor
+  })
 }
 
 /**
