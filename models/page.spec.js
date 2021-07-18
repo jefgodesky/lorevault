@@ -135,4 +135,23 @@ describe('Page', () => {
       expect(page._id).toEqual(actual._id)
     })
   })
+
+  describe('PageSchema.statics.makeUpdate', () => {
+    it('returns false if it couldn\'t find any such Page document', async () => {
+      expect.assertions(1)
+      const update = JSON.parse(JSON.stringify(testPageData))
+      update.body = 'This is an update.'
+      const actual = await Page.makeUpdate('/nope', update)
+      expect(actual).toEqual(false)
+    })
+
+    it('looks up the page and then makes the update', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      const update = JSON.parse(JSON.stringify(testPageData))
+      update.body = 'This is an update.'
+      const actual = await Page.makeUpdate(page.path, update)
+      expect(actual.versions).toHaveLength(2)
+    })
+  })
 })
