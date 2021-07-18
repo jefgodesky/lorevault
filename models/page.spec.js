@@ -67,7 +67,7 @@ describe('Page', () => {
       expect.assertions(1)
       const page = await Page.create(testPageData)
       const version = page.findVersion('nope')
-      expect(version).toEqual(undefined)
+      expect(version).not.toBeDefined()
     })
 
     it('returns the version if it exists', async () => {
