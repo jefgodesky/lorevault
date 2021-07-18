@@ -40,4 +40,31 @@ describe('User', () => {
       expect(user.discordID).toEqual('discord')
     })
   })
+
+  describe('UserSchema.methods.addCharacter', () => {
+    it('adds a character', async () => {
+      expect.assertions(1)
+      const name = 'Tester'
+      const user = await User.create({ googleID: 'google' })
+      await user.addCharacter({ name })
+      expect(user.characters[0].name).toEqual(name)
+    })
+
+    it('makes this your active character if this is your first character', async () => {
+      expect.assertions(1)
+      const name = 'Tester'
+      const user = await User.create({ googleID: 'google' })
+      await user.addCharacter({ name })
+      expect(user.active.name).toEqual(name)
+    })
+
+    it('doesn\'t makes this your active character if this isn\'t your first character', async () => {
+      expect.assertions(2)
+      const user = await User.create({ googleID: 'google' })
+      await user.addCharacter({ name: 'Tester 1' })
+      await user.addCharacter({ name: 'Tester 2' })
+      expect(user.characters).toHaveLength(2)
+      expect(user.active.name).toEqual('Tester 1')
+    })
+  })
 })
