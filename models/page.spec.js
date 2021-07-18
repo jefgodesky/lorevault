@@ -93,4 +93,37 @@ describe('Page', () => {
       expect(versions[1]._id.toString()).toEqual(ids[0])
     })
   })
+
+  describe('rollback', () => {
+    it('makes a new version', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      const update = JSON.parse(JSON.stringify(testPageData))
+      update.body = 'This is an update.'
+      await page.makeUpdate(update)
+      await page.rollback(page.versions[0]._id.toString())
+      expect(page.versions).toHaveLength(3)
+    })
+
+    it('announces the new version as a rollback', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      const update = JSON.parse(JSON.stringify(testPageData))
+      update.body = 'This is an update.'
+      await page.makeUpdate(update)
+      await page.rollback(page.versions[0]._id.toString())
+      expect(page.versions[2].msg).toMatch(/^Rolling back to the version created at/)
+    })
+
+    it('resets values to those from the previous version', async () => {
+      expect.assertions(2)
+      const page = await Page.create(testPageData)
+      const update = JSON.parse(JSON.stringify(testPageData))
+      update.body = 'This is an update.'
+      await page.makeUpdate(update)
+      await page.rollback(page.versions[0]._id.toString())
+      expect(page.versions[2].title).toEqual(page.versions[0].title)
+      expect(page.versions[2].body).toEqual(page.versions[0].body)
+    })
+  })
 })
