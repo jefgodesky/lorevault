@@ -45,6 +45,17 @@ router.get('/*/history', async (req, res, next) => {
   res.render('history', req.viewOpts)
 })
 
+// POST /*/compare
+router.post('/*/compare', async (req, res, next) => {
+  req.viewOpts.page = await Page.findByPath(req.originalUrl)
+  if (req.body.a === req.body.b) {
+    res.redirect(`/${req.viewOpts.page.path}/history`)
+  } else {
+    req.viewOpts.versions = req.viewOpts.page.orderVersions([req.body.a, req.body.b])
+    res.render('compare', req.viewOpts)
+  }
+})
+
 // GET /*/*
 router.get('/*/*', async (req, res, next) => {
   const parts = req.originalUrl.split('/')
