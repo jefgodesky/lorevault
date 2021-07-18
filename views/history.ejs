@@ -16,8 +16,8 @@
         <tbody>
           <% for (const version of versions) { %>
           <tr>
-            <td><input type="radio" name="a" /></td>
-            <td><input type="radio" name="b" /></td>
+            <td><input type="radio" name="a" value="<%= version._id %>" /></td>
+            <td><input type="radio" name="b" value="<%= version._id %>" /></td>
             <td>
               <%= version.msg %><br />
               <small><a href="/<%= page.path %>/<%= version._id %>"><%= formatDate(version.timestamp) %></a></small>
