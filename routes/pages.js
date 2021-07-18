@@ -1,4 +1,5 @@
 const { Router } = require('express')
+const diff = require('diff')
 const Page = require('../models/page')
 const router = Router()
 
@@ -52,6 +53,8 @@ router.post('/*/compare', async (req, res, next) => {
     res.redirect(`/${req.viewOpts.page.path}/history`)
   } else {
     req.viewOpts.versions = req.viewOpts.page.orderVersions([req.body.a, req.body.b])
+    const d = diff.diffWords(req.viewOpts.versions[0].body, req.viewOpts.versions[1].body)
+    req.viewOpts.diff = d.map(part => part.added ? `<ins>${part.value}</ins>` : part.removed ? `<del>${part.value}</del>` : part.value).join('')
     res.render('compare', req.viewOpts)
   }
 })
