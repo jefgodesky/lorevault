@@ -20,7 +20,7 @@
             <td><input type="radio" name="b" /></td>
             <td>
               <%= version.msg %><br />
-              <small><%= formatDate(version.timestamp) %></small>
+              <small><a href="/<%= page.path %>/<%= version._id %>"><%= formatDate(version.timestamp) %></a></small>
             </td>
           </tr>
           <% } %>
