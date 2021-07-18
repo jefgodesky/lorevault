@@ -24,21 +24,21 @@ router.post('/create', async (req, res, next) => {
   res.redirect(`/${page.path}`)
 })
 
-// GET */edit
+// GET /*/edit
 router.get('/*/edit', async (req, res, next) => {
   req.viewOpts.page = await Page.findByPath(req.originalUrl)
   req.viewOpts.title = `Editing ${req.viewOpts.page.title}`
   res.render('edit', req.viewOpts)
 })
 
-// POST */edit
+// POST /*/edit
 router.post('/*/edit', async (req, res, next) => {
   const update = Object.assign({}, req.body, { editor: req.user?._id })
   const page = await Page.makeUpdate(req.originalUrl, update)
   res.redirect(`/${page.path}`)
 })
 
-// GET */history
+// GET /*/history
 router.get('/*/history', async (req, res, next) => {
   req.viewOpts.page = await Page.findByPath(req.originalUrl)
   req.viewOpts.versions = [...req.viewOpts.page.versions].reverse()
