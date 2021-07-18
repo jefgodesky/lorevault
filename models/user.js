@@ -90,7 +90,6 @@ UserSchema.methods.addCharacter = async function (char) {
 UserSchema.methods.selectCharacter = async function (char) {
   const id = char._id?.toString() || char.toString()
   const filtered = this.characters.filter(c => c._id.toString() === id)
-  console.log(filtered)
   if (filtered.length > 0) {
     this.active = filtered[0]
     await this.save()
