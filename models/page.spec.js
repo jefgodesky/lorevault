@@ -126,4 +126,13 @@ describe('Page', () => {
       expect(page.versions[2].body).toEqual(page.versions[0].body)
     })
   })
+
+  describe('PageSchema.statics.findByPath', () => {
+    it('queries a Page by its path', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      const actual = await Page.findByPath(page.path)
+      expect(page._id).toEqual(actual._id)
+    })
+  })
 })
