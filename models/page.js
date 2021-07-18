@@ -41,8 +41,8 @@ PageSchema.plugin(uniqueValidation)
  * Makes an update to a Page document.
  * @param {object} update - The update to make. This object should conform to
  *   the `VersionSchema` outline.
- * @returns {Promise<PageSchema>} - A Promise that resolves with the new
- *   document once it has been updated and saved.
+ * @returns {Promise<Page>} - A Promise that resolves with the new document
+ *   once it has been updated and saved.
  */
 
 PageSchema.methods.makeUpdate = async function (update) {
@@ -89,10 +89,10 @@ PageSchema.methods.orderVersions = function (ids) {
  *   roll back to.
  * @param {Schema.Types.ObjectId} editor - The ID of the user rolling back
  *   the Page.
- * @returns {Promise<Schema.methods>|null} - `null` if the Page document does
- *   not have a version with the specified ID, or, if it does, a Promise that
- *   resolves once the Page document has been rolled back to the specified
- *   version and saved to the database.
+ * @returns {Promise<Page>|null} - `null` if the Page document does not have a
+ *   version with the specified ID, or, if it does, a Promise that resolves
+ *   once the Page document has been rolled back to the specified version and
+ *   saved to the database.
  */
 
 PageSchema.methods.rollback = function (id, editor) {
@@ -124,8 +124,8 @@ PageSchema.statics.findByPath = function (url) {
  * @param {string} url - The requesting URL.
  * @param {object} update - The update to make. This object should conform to
  *   the `VersionSchema` outline.
- * @returns {Promise<PageSchema|Boolean>} - A Promise that resolves with the
- *   new document after it has been updated or saved, or `false` if it could
+ * @returns {Promise<Page|Boolean>} - A Promise that resolves with the new
+ *   document after it has been updated or saved, or `false` if it could
  *   not be found.
  */
 
