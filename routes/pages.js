@@ -45,8 +45,20 @@ router.get('*/history', async (req, res, next) => {
   res.render('history', req.viewOpts)
 })
 
-// GET *
-router.get('*', async (req, res, next) => {
+// GET /*/*
+router.get('/*/*', async (req, res, next) => {
+  const parts = req.originalUrl.split('/')
+  req.viewOpts.page = await Page.findByPath(req.originalUrl)
+  if (parts.length <= 2) {
+    res.redirect(`/${req.viewOpts.page.path}`)
+  } else {
+    req.viewOpts.version = req.viewOpts.page.findVersion(parts[2])
+    res.render('version', req.viewOpts)
+  }
+})
+
+// GET /*
+router.get('/*', async (req, res, next) => {
   req.viewOpts.page = await Page.findByPath(req.originalUrl)
   res.render('page', req.viewOpts)
 })
