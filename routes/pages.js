@@ -71,12 +71,10 @@ router.post('/*/*/rollback', async (req, res, next) => {
 router.get('/*/*', async (req, res, next) => {
   const parts = req.originalUrl.split('/')
   req.viewOpts.page = await Page.findByPath(req.originalUrl)
-  if (parts.length <= 2) {
-    res.redirect(`/${req.viewOpts.page.path}`)
-  } else {
-    req.viewOpts.version = req.viewOpts.page.findVersion(parts[2])
-    res.render('version', req.viewOpts)
-  }
+  if (!req.viewOpts.page) return res.redirect('/')
+  if (parts.length <= 2) return res.redirect(`/${req.viewOpts.page.path}`)
+  req.viewOpts.version = req.viewOpts.page.findVersion(parts[2])
+  res.render('version', req.viewOpts)
 })
 
 // GET /*
