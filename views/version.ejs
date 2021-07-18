@@ -6,6 +6,7 @@
     <div class="version-notice">
       <p>Version created on <%= formatDate(version.timestamp) %></p>
       <p><em><%= version.msg %></em></p>
+      <p><a href="/<%= page.path %>/<%= version._id %>/rollback" class="button">Rollback to this version</a></p>
     </div>
     <nav class="page">
       <li><a href="/<%= version.path %>">Read</a></li>
