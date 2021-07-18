@@ -100,7 +100,7 @@ PageSchema.methods.rollback = function (id, editor) {
   return this.makeUpdate({
     title: version.title,
     body: version.body,
-    msg: `Rolling back to the version created at ${formatDate(version.timestamp)}`
+    msg: `Rolling back to the version created at ${formatDate(version.timestamp)}`,
     editor
   })
 }
