@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <%- include('includes/head', { title }) %>
+  <body>
+    <%- include('includes/header', { isLoggedIn, char, title: page.title }) %>
+    <nav class="page">
+      <li><a href="<%= page.path %>">Read</a></li>
+      <% if (isLoggedIn) { %>
+        <li><a href="/<%= page.path %>/edit">Edit</a></li>
+      <% } %>
+      <li><a href="/<%= page.path %>/history">History</a></li>
+    </nav>
+    <main class="compare">
+      <header>
+        <p>Comparing the version created at
+          <a href="/<%= page.path %>/<%= versions[0]._id %>"><%= formatDate(versions[0].timestamp) %></a>
+          (<em><%= versions[0].msg %></em>) to the version created at
+          <a href="/<%= page.path %>/<%= versions[1]._id %>"><%= formatDate(versions[1].timestamp) %></a>
+          (<em><%= versions[1].msg %></em>).
+        </p>
+        <p><ins>This style indicates parts that were added</ins> by the latter.</p>
+        <p><del>This style indicates part that were removed</del> from the former.</p>
+      </header>
+      <%- diff %>
+    </main>
+    <%- include('includes/footer') %>
+  </body>
+</html>

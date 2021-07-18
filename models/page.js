@@ -66,6 +66,23 @@ PageSchema.methods.findVersion = function (id) {
 }
 
 /**
+ * Given an array of strings representing version IDs, this method returns an
+ * array of versions of the Page document that have matching IDs, sorted into
+ * chronological order.
+ * @param {[string]} ids - An array of string representing version IDs.
+ * @returns {[Version]} - An array of versions of the Page document that have
+ *   matching IDs, sorted into chronological order.
+ */
+
+PageSchema.methods.orderVersions = function (ids) {
+  const ordered = []
+  for (const v of this.versions) {
+    if (ids.includes(v._id.toString())) ordered.push(v)
+  }
+  return ordered
+}
+
+/**
  * Return a Page document that has a given path.
  * @param {string} url - The requesting URL.
  * @returns {*} - A Promise that returns with the result of the query.
