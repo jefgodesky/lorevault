@@ -108,8 +108,8 @@ UserSchema.methods.selectCharacter = async function (char) {
 
 UserSchema.methods.deleteCharacter = async function (char) {
   const id = char._id?.toString() || char.toString()
-  const filtered = this.characters.filter(c => c._id.toString() !== id)
-  if (filtered.length > 0) this.characters = filtered
+  this.characters = this.characters.filter(c => c._id.toString() !== id)
+  if (this.active?._id?.toString() === id) this.active = undefined
   await this.save()
 }
 

@@ -98,12 +98,13 @@ describe('User', () => {
       expect(user.characters).toHaveLength(1)
     })
 
-    it('won\'t delete your last character', async () => {
+    it('deletes your active status if you delete your active character', async () => {
       expect.assertions(1)
       const user = await User.create({})
       await user.addCharacter({ name: 'Tester 1' })
-      await user.deleteCharacter(user.characters[0]._id.toString())
-      expect(user.characters).toHaveLength(1)
+      await user.addCharacter({ name: 'Tester 2' })
+      await user.deleteCharacter(user.active._id.toString())
+      expect(user.active).not.toBeDefined()
     })
   })
 })
