@@ -60,10 +60,30 @@ describe('User', () => {
 
     it('doesn\'t makes this your active character if this isn\'t your first character', async () => {
       expect.assertions(2)
-      const user = await User.create({ googleID: 'google' })
+      const user = await User.create({})
       await user.addCharacter({ name: 'Tester 1' })
       await user.addCharacter({ name: 'Tester 2' })
       expect(user.characters).toHaveLength(2)
+      expect(user.active.name).toEqual('Tester 1')
+    })
+  })
+
+  describe('UserSchema.methods.selectCharacter', () => {
+    it('selects a character as your new active character', async () => {
+      expect.assertions(1)
+      const user = await User.create({})
+      await user.addCharacter({ name: 'Tester 1' })
+      await user.addCharacter({ name: 'Tester 2' })
+      await user.selectCharacter(user.characters[1]._id.toString())
+      expect(user.active.name).toEqual('Tester 2')
+    })
+
+    it('does nothing if not given a valid ID for one of your characters', async () => {
+      expect.assertions(1)
+      const user = await User.create({})
+      await user.addCharacter({ name: 'Tester 1' })
+      await user.addCharacter({ name: 'Tester 2' })
+      await user.selectCharacter('nope')
       expect(user.active.name).toEqual('Tester 1')
     })
   })
