@@ -61,4 +61,22 @@ describe('Page', () => {
       expect(actual.versions[1].body).toEqual(update.body)
     })
   })
+
+  describe('findVersion', () => {
+    it('returns undefined if the version doesn\'t exist', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      const version = page.findVersion('nope')
+      expect(version).toEqual(undefined)
+    })
+
+    it('returns the version if it exists', async () => {
+      expect.assertions(3)
+      const page = await Page.create(testPageData)
+      const version = page.findVersion(page.versions[0]._id.toString())
+      expect(version.title).toEqual(testPageData.versions[0].title)
+      expect(version.body).toEqual(testPageData.versions[0].body)
+      expect(version.msg).toEqual(testPageData.versions[0].msg)
+    })
+  })
 })
