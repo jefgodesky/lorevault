@@ -79,4 +79,18 @@ describe('Page', () => {
       expect(version.msg).toEqual(testPageData.versions[0].msg)
     })
   })
+
+  describe('orderVersions', () => {
+    it('returns an array of versions with matching ID\'s in chronological order', async () => {
+      expect.assertions(2)
+      const page = await Page.create(testPageData)
+      const update = JSON.parse(JSON.stringify(testPageData))
+      update.body = 'This is an update.'
+      await page.makeUpdate(update)
+      const ids = [page.versions[1]._id.toString(), page.versions[0]._id.toString()]
+      const versions = page.orderVersions(ids)
+      expect(versions[0]._id.toString()).toEqual(ids[1])
+      expect(versions[1]._id.toString()).toEqual(ids[0])
+    })
+  })
 })
