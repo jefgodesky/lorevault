@@ -87,7 +87,8 @@ PageSchema.methods.orderVersions = function (ids) {
  * Roll the Page document back to a previous version.
  * @param {string} id - The ID of the Page document's version that you want to
  *   roll back to.
- * @param {string} editor - The ID of the user rolling back the Page.
+ * @param {Schema.Types.ObjectId} editor - The ID of the user rolling back
+ *   the Page.
  * @returns {Promise<Schema.methods>|null} - `null` if the Page document does
  *   not have a version with the specified ID, or, if it does, a Promise that
  *   resolves once the Page document has been rolled back to the specified
