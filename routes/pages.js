@@ -59,6 +59,14 @@ router.post('/*/compare', async (req, res, next) => {
   }
 })
 
+// POST /*/*/rollback
+router.post('/*/*/rollback', async (req, res, next) => {
+  const parts = req.originalUrl.split('/')
+  const page = await Page.findByPath(req.originalUrl)
+  if (parts.length >= 2) await page.rollback(parts[2], req.user._id)
+  res.redirect(`/${page.path}`)
+})
+
 // GET /*/*
 router.get('/*/*', async (req, res, next) => {
   const parts = req.originalUrl.split('/')
