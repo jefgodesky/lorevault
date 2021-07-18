@@ -20,7 +20,7 @@ const testPageData = {
 }
 
 describe('Page', () => {
-  describe('makeUpdate', () => {
+  describe('PageSchema.methods.makeUpdate', () => {
     it('updates the body', async () => {
       expect.assertions(1)
       const page = await Page.create(testPageData)
@@ -62,7 +62,7 @@ describe('Page', () => {
     })
   })
 
-  describe('findVersion', () => {
+  describe('PageSchema.methods.findVersion', () => {
     it('returns undefined if the version doesn\'t exist', async () => {
       expect.assertions(1)
       const page = await Page.create(testPageData)
@@ -80,7 +80,7 @@ describe('Page', () => {
     })
   })
 
-  describe('orderVersions', () => {
+  describe('PageSchema.methods.orderVersions', () => {
     it('returns an array of versions with matching ID\'s in chronological order', async () => {
       expect.assertions(2)
       const page = await Page.create(testPageData)
@@ -94,7 +94,7 @@ describe('Page', () => {
     })
   })
 
-  describe('rollback', () => {
+  describe('PageSchema.methods.rollback', () => {
     it('makes a new version', async () => {
       expect.assertions(1)
       const page = await Page.create(testPageData)
