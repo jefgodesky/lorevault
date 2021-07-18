@@ -87,4 +87,23 @@ describe('User', () => {
       expect(user.active.name).toEqual('Tester 1')
     })
   })
+
+  describe('UserSchema.methods.deleteCharacter', () => {
+    it('deletes a character', async () => {
+      expect.assertions(1)
+      const user = await User.create({})
+      await user.addCharacter({ name: 'Tester 1' })
+      await user.addCharacter({ name: 'Tester 2' })
+      await user.deleteCharacter(user.characters[1]._id.toString())
+      expect(user.characters).toHaveLength(1)
+    })
+
+    it('won\'t delete your last character', async () => {
+      expect.assertions(1)
+      const user = await User.create({})
+      await user.addCharacter({ name: 'Tester 1' })
+      await user.deleteCharacter(user.characters[0]._id.toString())
+      expect(user.characters).toHaveLength(1)
+    })
+  })
 })
