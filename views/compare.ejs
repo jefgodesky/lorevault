@@ -13,9 +13,9 @@
     <main>
       <header class="compare">
         <p>Comparing the version created at
-          <a href="/<%= page.path %>/<%= versions[0]._id %>"><%= versions[0].timestamp %></a>
+          <a href="/<%= page.path %>/<%= versions[0]._id %>"><%= formatDate(versions[0].timestamp) %></a>
           (<em><%= versions[0].msg %></em>) to the version created at
-          <a href="/<%= page.path %>/<%= versions[1]._id %>"><%= versions[1].timestamp %></a>
+          <a href="/<%= page.path %>/<%= versions[1]._id %>"><%= formatDate(versions[1].timestamp) %></a>
           (<em><%= versions[1].msg %></em>).
         </p>
       </header>
