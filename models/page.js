@@ -53,6 +53,19 @@ PageSchema.methods.makeUpdate = async function (update) {
 }
 
 /**
+ * Return a particular version of the Page document, identified by its ID.
+ * @param {string} id - The ID of the version to return.
+ * @returns {Version|undefined} - The Version that matches the ID provided, or
+ *   `undefined` if no such version could be found.
+ */
+
+PageSchema.methods.findVersion = function (id) {
+  const versions = this.versions.filter(v => v._id.toString() === id)
+  if (versions.length <= 0) return undefined
+  return versions[0]
+}
+
+/**
  * Return a Page document that has a given path.
  * @param {string} url - The requesting URL.
  * @returns {*} - A Promise that returns with the result of the query.
