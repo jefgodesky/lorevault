@@ -145,6 +145,13 @@ describe('Page', () => {
       const actual = await Page.findByTitle(testPageData.title)
       expect(actual).toHaveLength(2)
     })
+
+    it('is case insensitive', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      const actual = await Page.findByTitle(page.title.toLowerCase())
+      expect(actual._id).toEqual(page._id)
+    })
   })
 
   describe('PageSchema.statics.makeUpdate', () => {

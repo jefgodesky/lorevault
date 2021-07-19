@@ -129,7 +129,7 @@ PageSchema.statics.findByPath = function (url) {
  */
 
 PageSchema.statics.findByTitle = async function (title) {
-  const docs = await this.find({ title })
+  const docs = await this.find({ title: { $regex: new RegExp(`^${title}$`, 'i') } })
   return docs?.length === 1 ? docs[0] : docs
 }
 
