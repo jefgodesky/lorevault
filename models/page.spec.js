@@ -1,4 +1,4 @@
-const { TestDB } = require('../test-utils')
+const { TestDB, testPageData } = require('../test-utils')
 const Page = require('./page')
 
 const db = new TestDB()
@@ -6,18 +6,6 @@ const db = new TestDB()
 beforeAll(async () => await db.connect())
 afterEach(async () => await db.clear())
 afterAll(async () => await db.close())
-
-const testPageData = {
-  title: 'Test',
-  body: 'This is a test.',
-  versions: [
-    {
-      title: 'Test',
-      body: 'This is a test.',
-      msg: 'Initial text'
-    }
-  ]
-}
 
 describe('Page', () => {
   describe('PageSchema.methods.makeUpdate', () => {
@@ -139,7 +127,7 @@ describe('Page', () => {
   describe('PageSchema.statics.findByTitle', () => {
     it('returns an empty array if no Pages have that title', async () => {
       expect.assertions(1)
-      const actual = await Page.findByTitle('Nope')
+      const actual = await Page.findByTitle('Other Page')
       expect(actual).toEqual([])
     })
 
