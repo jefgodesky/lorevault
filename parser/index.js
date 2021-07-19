@@ -36,7 +36,7 @@ const parseLinks = async str => {
     const others = parts.length > 1 ? parts.slice(1) : parts
     const text = others.join('|').trim()
     if (page) {
-      str = str.replace(match, `<a href="/${page.path}">${text}</a>`)
+      str = str.replace(match, `<a href="/${page.path}" title="${page.title}">${text}</a>`)
     } else {
       str = str.replace(match, `<a href="/${slugify(parts[0]).toLowerCase()}" class="new">${text}</a>`)
     }

@@ -24,21 +24,21 @@ describe('parse', () => {
       expect.assertions(1)
       await Page.create(testPageData)
       const actual = await parse('This text links to [[Test]].')
-      expect(actual).toEqual('<p>This text links to <a href="/test">Test</a>.</p>\n')
+      expect(actual).toEqual('<p>This text links to <a href="/test" title="Test">Test</a>.</p>\n')
     })
 
     it('respects aliases', async () => {
       expect.assertions(1)
       await Page.create(testPageData)
       const actual = await parse('This text links to the [[Test | Test Page]].')
-      expect(actual).toEqual('<p>This text links to the <a href="/test">Test Page</a>.</p>\n')
+      expect(actual).toEqual('<p>This text links to the <a href="/test" title="Test">Test Page</a>.</p>\n')
     })
 
     it('wraps stems', async () => {
       expect.assertions(1)
       await Page.create(testPageData)
       const actual = await parse('This text links to [[test]]s.')
-      expect(actual).toEqual('<p>This text links to <a href="/test">tests</a>.</p>\n')
+      expect(actual).toEqual('<p>This text links to <a href="/test" title="Test">tests</a>.</p>\n')
     })
 
     it('parses links to pages that don\'t exist yet', async () => {
