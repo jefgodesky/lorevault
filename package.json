@@ -18,18 +18,46 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js"
+    "test": "jest",
+    "dev": "npm-run-all -p dev:serve dev:css",
+    "dev:serve": "nodemon index.js",
+    "dev:css": "npm-run-all -p css:build css:watch css:sync",
+    "css:build": "npm-run-all css:compile css:postcss",
+    "css:compile": "node sass.js",
+    "css:postcss": "postcss public/css/*.css --use autoprefixer --dir public/css",
+    "css:watch": "chokidar './styles/**/*.scss' './rules/**/*.scss' -i './styles/**/rules.scss' --command 'npm run css:compile'",
+    "css:sync": "browser-sync start --proxy localhost:8080 --files 'public/css/*.css' --no-ui --no-inject-changes"
   },
   "dependencies": {
+    "chokidar-cli": "^2.1.0",
+    "connect-mongo": "^4.4.1",
     "cookie-parser": "^1.4.5",
     "debug": "^2.6.9",
+    "diff": "^5.0.0",
     "ejs": "^3.1.6",
     "express": "^4.17.1",
-    "http-errors": "^1.7.2",
-    "morgan": "^1.10.0"
+    "express-session": "^1.17.2",
+    "http-errors": "^1.8.0",
+    "mongoose": "^5.13.3",
+    "mongoose-slug-generator": "^1.0.4",
+    "mongoose-unique-validator": "^2.0.3",
+    "morgan": "^1.10.0",
+    "passport": "^0.4.1",
+    "passport-discord": "^0.1.4",
+    "passport-google-oauth20": "^2.0.0",
+    "remarkable": "^2.0.1",
+    "slugify": "^1.6.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.12"
+    "autoprefixer": "^10.3.1",
+    "browser-sync": "^2.27.4",
+    "commander": "^8.0.0",
+    "jest": "^27.0.6",
+    "mongodb-memory-server": "^7.2.1",
+    "nodemon": "^2.0.12",
+    "normalize-scss": "^7.0.1",
+    "npm-run-all": "^4.1.5",
+    "postcss-cli": "^8.3.1",
+    "sass": "^1.35.2"
   }
 }

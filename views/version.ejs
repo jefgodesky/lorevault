@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <%- include('includes/head', { title }) %>
+  <body>
+    <%- include('includes/header', { isLoggedIn, char, title: version.title }) %>
+    <div class="version-notice">
+      <p>Version created on <%= formatDate(version.timestamp) %></p>
+      <p><em><%= version.msg %></em></p>
+      <p>
+        <form action="/<%= page.path %>/<%= version._id %>/rollback" method="POST">
+          <button>Rollback to this version</button>
+        </form>
+      </p>
+    </div>
+    <nav class="page">
+      <li><a href="/<%= version.path %>">Read</a></li>
+      <% if (isLoggedIn) { %>
+        <li><a href="/<%= page.path %>/edit">Edit</a></li>
+      <% } %>
+      <li><a href="/<%= page.path %>/history">History</a></li>
+    </nav>
+    <main>
+      <%- markup %>
+    </main>
+    <%- include('includes/footer') %>
+  </body>
+</html>

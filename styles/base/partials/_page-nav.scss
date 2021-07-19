@@ -1,0 +1,9 @@
+@forward '../modules/placeholders';
+
+nav.page {
+  @extend %tabs;
+}
+
+nav.page + main {
+  margin-top: 0;
+}

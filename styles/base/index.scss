@@ -1,0 +1,12 @@
+// Normalize CSS
+@use 'node_modules/normalize-scss/sass/normalize';
+
+@use 'partials/layout';
+@use 'partials/buttons';
+@use 'partials/form';
+@use 'partials/table';
+@use 'partials/aside';
+@use 'partials/page-nav';
+@use 'partials/history';
+
+@use 'rules';

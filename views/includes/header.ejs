@@ -1,0 +1,18 @@
+<header>
+      <nav>
+      <% if (isLoggedIn) { %>
+        <ul>
+          <li class="status"><em>Active character:</em> <%= char.name %></li>
+          <li><a href="/profile">Your Profile</a></li>
+          <li><a href="/logout">Logout</a></li>
+        </ul>
+      <% } else { %>
+        <ul>
+          <li class="status"><em>Log in with:</em></li>
+          <li><a href="/login/google">Google</a></li>
+          <li><a href="/login/discord">Discord</a></li>
+        </ul>
+      <% } %>
+      </nav>
+      <h1><%= title %></h1>
+    </header>

@@ -1,0 +1,83 @@
+@forward '../modules/placeholders';
+
+:root,
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: url(https://lorevault.s3.us-east-2.wasabisys.com/styles/base/bg.jpg) no-repeat center;
+  background-size: cover;
+  display: flex;
+  flex-direction: column;
+  font-family: Georgia, serif;
+  min-height: 100vh;
+}
+
+header nav,
+main,
+footer {
+  @extend %layout-block;
+}
+
+main {
+  flex-grow: 1;
+}
+
+header nav {
+  margin-top: 0;
+  padding: 0;
+  text-align: right;
+
+  ul {
+    @extend %unformatted-list;
+  }
+
+  li {
+    display: inline-block;
+    margin: 0;
+    vertical-align: middle;
+  }
+
+  a,
+  .status {
+    padding: 1em;
+  }
+
+  a {
+    background: rgba(245, 225, 166, 0.5);
+    color: black;
+    display: block;
+    font-weight: bold;
+    text-decoration: none;
+
+    &:hover {
+      background: rgba(245, 225, 166, 1);
+    }
+
+    &:active {
+      background: rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+header h1 {
+  font-size: 2em;
+  margin: 2em 2em 0 2em;
+  padding: 0 1em;
+
+  @media (min-width: 44em) {
+    margin: 2em auto 0 auto;
+    max-width: 20em;
+  }
+}
+
+footer {
+  margin-bottom: 0;
+}

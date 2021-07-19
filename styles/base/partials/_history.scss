@@ -1,0 +1,33 @@
+@forward '../modules/placeholders';
+
+.version-notice {
+  @extend %layout-size;
+  margin-top: 0;
+  margin-bottom: 0;
+
+  p {
+    margin: 1em 2em;
+  }
+}
+
+.compare {
+  header {
+    border-bottom: 1px solid black;
+    margin-bottom: 2em;
+    padding-bottom: 1em;
+  }
+
+  ins,
+  del {
+    color: white;
+    text-decoration: none;
+  }
+
+  ins {
+    background: #00A550;
+  }
+
+  del {
+    background: #e23d28;
+  }
+}

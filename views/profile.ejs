@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<%- include('./includes/head', { title }) %>
+  <body>
+    <%- include('./includes/header', { isLoggedIn, char, title }) %>
+    <main class="profile">
+      <% if (isLoggedIn) { %>
+        <h2>Logins</h2>
+        <p>You&rsquo;ll need to leave at least one of these services connected in order to log into your account in the future. Connecting an account simply lets you use it to log in.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th class="short">Status</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Google</td>
+              <% if (connectedGoogle) { %>
+              <td class="short">Connected</td>
+              <td class="actions"><a href="/disconnect/google" class="button">Disconnect Google</a></td>
+              <% } else { %>
+              <td class="short">Not connected</td>
+              <td class="actions"><a href="/login/google" class="button">Connect Google</a></td>
+              <% } %>
+            </tr>
+            <tr>
+              <td>Discord</td>
+              <% if (connectedDiscord) { %>
+              <td class="short">Connected</td>
+              <td class="actions"><a href="/disconnect/discord" class="button">Disconnect Discord</a></td>
+              <% } else { %>
+              <td class="short">Not connected</td>
+              <td class="actions"><a href="/login/discord" class="button">Connect Discord</a></td>
+              <% } %>
+            </tr>
+          </tbody>
+        </table>
+        <% if (chars.length > 0) { %>
+          <h2>Characters</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Character</th>
+                <th>Party</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% for (const char of chars) { %>
+              <tr>
+                <td><%= char.name %></td>
+                <td></td>
+                <td class="actions">
+                  <a href="/characters/select/<%= char._id %>" class="button">Select</a>
+                  <a href="/characters/delete/<%= char._id %>" class="button">Delete</a>
+                </td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        <% } else { %>
+          <div class="null">
+            <p>You don&rsquo;t have any characters yet.</p>
+          </div>
+        <% } %>
+        <aside>
+        <h3>Add a New Character</h3>
+          <form action="/characters" method="POST">
+            <label for="new-char-name">Character name</label>
+            <input type="text" id="new-char-name" name="new-char-name" placeholder="Enter your character’s name here." />
+            <% for (const system of systems) { %>
+              <div class="<%= system.id %>">
+                <h4><em><%= system.name %></em><% if (system.edition) { %> (<%= system.edition %>)<% } %></h4>
+                <% for (const stat of system.stats) { %>
+                  <div class="<%= system.id %>-stat <%= stat.id %>">
+                    <label for="<%= stat.id %>"><%= stat.label %></label>
+                    <input type="<%= stat.type %>" id="<%= stat.id %>" name="<%= stat.id %>" value="<%= stat.type === 'number' ? 0 : '' %>" />
+                  </div>
+                <% } %>
+              </div>
+            <% } %>
+            <p class="actions">
+              <button>Add Character</button>
+            </p>
+          </form>
+        </aside>
+      <% } else { %>
+        <p>You&rsquo;ll need to log before you can see or edit your profile.</p>
+      <% } %>
+    </main>
+    <%- include('./includes/footer') %>
+  </body>
+</html>

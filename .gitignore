@@ -1,6 +1,13 @@
 node_modules
 node_modules/*
+config/*.json
+!config/example.json
+public/css/*
 
 # IDE configurations and local settings
 .idea
 .idea/*
+
+# .DS_Store, wherever it may appear
+.DS_Store
+*/.DS_Store
