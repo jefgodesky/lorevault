@@ -1,4 +1,4 @@
-const { TestDB } = require('../test-utils')
+const { TestDB, testPageData } = require('../test-utils')
 const Page = require('./page')
 
 const db = new TestDB()
@@ -6,18 +6,6 @@ const db = new TestDB()
 beforeAll(async () => await db.connect())
 afterEach(async () => await db.clear())
 afterAll(async () => await db.close())
-
-const testPageData = {
-  title: 'Test',
-  body: 'This is a test.',
-  versions: [
-    {
-      title: 'Test',
-      body: 'This is a test.',
-      msg: 'Initial text'
-    }
-  ]
-}
 
 describe('Page', () => {
   describe('PageSchema.methods.makeUpdate', () => {
@@ -133,6 +121,36 @@ describe('Page', () => {
       const page = await Page.create(testPageData)
       const actual = await Page.findByPath(page.path)
       expect(page._id).toEqual(actual._id)
+    })
+  })
+
+  describe('PageSchema.statics.findByTitle', () => {
+    it('returns an empty array if no Pages have that title', async () => {
+      expect.assertions(1)
+      const actual = await Page.findByTitle('Other Page')
+      expect(actual).toEqual([])
+    })
+
+    it('returns a single Page if it\'s the only one with that title', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      const actual = await Page.findByTitle(page.title)
+      expect(actual._id).toEqual(page._id)
+    })
+
+    it('returns an array of Pages that match the title if more than one does', async () => {
+      expect.assertions(1)
+      await Page.create(testPageData)
+      await Page.create(testPageData)
+      const actual = await Page.findByTitle(testPageData.title)
+      expect(actual).toHaveLength(2)
+    })
+
+    it('is case insensitive', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      const actual = await Page.findByTitle(page.title.toLowerCase())
+      expect(actual._id).toEqual(page._id)
     })
   })
 

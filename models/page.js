@@ -119,6 +119,21 @@ PageSchema.statics.findByPath = function (url) {
 }
 
 /**
+ * Return a Page document or an array of Page documents that have a
+ * given title.
+ * @param {string} title - The title to search for.
+ * @returns {Page|[Page]} - The lone Page document with the title provided if
+ *   only one match was found, or an array of Page documents with the given
+ *   title if more than one was found, or an empty array if no matching Page
+ *   documents could be found.
+ */
+
+PageSchema.statics.findByTitle = async function (title) {
+  const docs = await this.find({ title: { $regex: new RegExp(`^${title}$`, 'i') } })
+  return docs?.length === 1 ? docs[0] : docs
+}
+
+/**
  * A static method which combines looking up the page by the URL provided and
  * then applying the update to the page if it was found.
  * @param {string} url - The requesting URL.
