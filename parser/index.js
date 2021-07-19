@@ -1,6 +1,6 @@
 const { Remarkable } = require('remarkable')
 
-const parse = markdown => {
+const parse = async markdown => {
   const md = new Remarkable()
   return md.render(markdown)
 }

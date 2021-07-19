@@ -3,8 +3,9 @@
 const parse = require('./index')
 
 describe('parse', () => {
-  it('renders Markdown to HTML', () => {
-    const actual = parse('## Title\n\n_Hello, world!_')
+  it('renders Markdown to HTML', async () => {
+    expect.assertions(1)
+    const actual = await parse('## Title\n\n_Hello, world!_')
     expect(actual).toEqual('<h2>Title</h2>\n<p><em>Hello, world!</em></p>\n')
   })
 })
