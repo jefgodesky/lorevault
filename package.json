@@ -46,6 +46,7 @@
     "passport-discord": "^0.1.4",
     "passport-google-oauth20": "^2.0.0",
     "remarkable": "^2.0.1",
+    "remarkable-header-ids": "^0.2.0",
     "slugify": "^1.6.0"
   },
   "devDependencies": {
