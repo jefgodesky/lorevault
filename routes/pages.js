@@ -1,6 +1,7 @@
 const { Router } = require('express')
 const diff = require('diff')
 const Page = require('../models/page')
+const parse = require('../parser')
 const router = Router()
 
 // GET /create
@@ -74,12 +75,14 @@ router.get('/*/*', async (req, res, next) => {
   if (!req.viewOpts.page) return res.redirect('/')
   if (parts.length <= 2) return res.redirect(`/${req.viewOpts.page.path}`)
   req.viewOpts.version = req.viewOpts.page.findVersion(parts[2])
+  req.viewOpts.markup = parse(req.viewOpts.version.body)
   res.render('version', req.viewOpts)
 })
 
 // GET /*
 router.get('/*', async (req, res, next) => {
   req.viewOpts.page = await Page.findByPath(req.originalUrl)
+  req.viewOpts.markup = parse(req.viewOpts.page.body)
   res.render('page', req.viewOpts)
 })
 
