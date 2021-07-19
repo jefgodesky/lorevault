@@ -15,7 +15,13 @@ describe('parse', () => {
     it('renders Markdown to HTML', async () => {
       expect.assertions(1)
       const actual = await parse('## Title\n\n_Hello, world!_')
-      expect(actual).toEqual('<h2>Title</h2>\n<p><em>Hello, world!</em></p>\n')
+      expect(actual).toEqual('<h2 id="heading-title"><a class="header-anchor" id="title" href="#title">#</a>Title</h2>\n<p><em>Hello, world!</em></p>\n')
+    })
+
+    it('provides IDs for headers', async () => {
+      expect.assertions(1)
+      const actual = await parse('## Section 1\n\n## Section 2')
+      expect(actual).toEqual('<h2 id="heading-section-1"><a class="header-anchor" id="section-1" href="#section-1">#</a>Section 1</h2>\n<h2 id="heading-section-2"><a class="header-anchor" id="section-2" href="#section-2">#</a>Section 2</h2>\n')
     })
   })
 
