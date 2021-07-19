@@ -136,6 +136,29 @@ describe('Page', () => {
     })
   })
 
+  describe('PageSchema.statics.findByTitle', () => {
+    it('returns an empty array if no Pages have that title', async () => {
+      expect.assertions(1)
+      const actual = await Page.findByTitle('Nope')
+      expect(actual).toEqual([])
+    })
+
+    it('returns a single Page if it\'s the only one with that title', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      const actual = await Page.findByTitle(page.title)
+      expect(actual._id).toEqual(page._id)
+    })
+
+    it('returns an array of Pages that match the title if more than one does', async () => {
+      expect.assertions(1)
+      await Page.create(testPageData)
+      await Page.create(testPageData)
+      const actual = await Page.findByTitle(testPageData.title)
+      expect(actual).toHaveLength(2)
+    })
+  })
+
   describe('PageSchema.statics.makeUpdate', () => {
     it('returns false if it couldn\'t find any such Page document', async () => {
       expect.assertions(1)
