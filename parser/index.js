@@ -1,4 +1,5 @@
 const { Remarkable } = require('remarkable')
+const HeaderIdsPlugin = require('remarkable-header-ids')
 const slugify = require('slugify')
 const Page = require('../models/page')
 
@@ -14,6 +15,7 @@ const markdown = str => {
     xhtmlOut: true,
     typographer: true
   })
+  md.use(HeaderIdsPlugin({ headerId: slug => `heading-${slug}` }))
   return md.render(str)
 }
 
@@ -26,6 +28,7 @@ const markdown = str => {
 
 const parseLinks = async str => {
   const matches = str.match(/\[\[(.*?)\]\]/gm)
+  if (!matches) return str
   for (const match of matches) {
     const inside = match.substr(2, match.length - 4)
     const parts = inside.split('|')
@@ -56,6 +59,7 @@ const parseLinks = async str => {
 
 const wrapLinks = str => {
   const matches = str.match(/<a (.*?)>(.*?)<\/a>([a-zA-Z]+)?/gm)
+  if (!matches) return str
   for (const match of matches) {
     str = str.replace(match, `${match.replace('</a>', '')}</a>`)
   }
