@@ -20,6 +20,21 @@ const markdown = str => {
 }
 
 /**
+ * Remove tags from the string to be parsed. They're just for internal use, not
+ * for final rendering.
+ * @param {string} str - The string from which tags are to be removed.
+ * @returns {string} - The original string, but with all tags removed.
+ */
+
+const detag = str => {
+  const tags = [
+    /\[\[Type:(.*?)\]\](\r|\n)*/gm
+  ]
+  for (const tag of tags) str = str.replace(tag, '')
+  return str
+}
+
+/**
  * Parses wiki links into HTML links going to the appropriate URLs.
  * @param {string} str - The string to be parsed.
  * @returns {Promise<string>} - A Promise that resolves once all of the links
@@ -113,7 +128,8 @@ const restoreBlocks = (str, blocks) => {
 
 const parse = async str => {
   let { blockedStr, blocks } = removeBlocks(str)
-  const linkedStr = await parseLinks(blockedStr)
+  const detaggedStr = detag(blockedStr)
+  const linkedStr = await parseLinks(detaggedStr)
   const wrappedStr = wrapLinks(linkedStr)
   const markedStr = markdown(wrappedStr)
   return restoreBlocks(markedStr, blocks)
