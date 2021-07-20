@@ -19,6 +19,7 @@ const VersionSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
 
 const PageSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
   types: [{ type: String }],
+  categories: [{ type: Schema.Types.ObjectId }],
   path: {
     type: String,
     slug: 'title',
