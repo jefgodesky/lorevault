@@ -15,6 +15,29 @@ describe('Page', () => {
       const page = await Page.create(cpy)
       expect(Array.from(page.types)).toEqual(['Category'])
     })
+
+    it('saves types specified in the body', async () => {
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.body = '[[Type:Test]]'
+      const page = await Page.create(cpy)
+      expect(Array.from(page.types)).toEqual(['Test'])
+    })
+
+    it('combines types taken from the title and from the body', async () => {
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.title = 'Category:Test'
+      cpy.body = '[[Type:Test]]'
+      const page = await Page.create(cpy)
+      expect(Array.from(page.types)).toEqual(['Category', 'Test'])
+    })
+
+    it('does not include duplicates', async () => {
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.title = 'Test:Hello World!'
+      cpy.body = '[[Type:Test]]'
+      const page = await Page.create(cpy)
+      expect(Array.from(page.types)).toEqual(['Test'])
+    })
   })
 
   describe('PageSchema.methods.makeUpdate', () => {
