@@ -184,6 +184,16 @@ describe('Page', () => {
       const actual = await Page.findByTitle(page.title.toLowerCase())
       expect(actual._id).toEqual(page._id)
     })
+
+    it('can be limited by type', async () => {
+      expect.assertions(1)
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.body = '[[Type:Test Page]]'
+      await Page.create(testPageData)
+      const p2 = await Page.create(cpy)
+      const actual = await Page.findByTitle(testPageData.title.toLowerCase(), 'Test Page')
+      expect(actual._id).toEqual(p2._id)
+    })
   })
 
   describe('PageSchema.statics.makeUpdate', () => {

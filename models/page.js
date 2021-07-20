@@ -145,14 +145,18 @@ PageSchema.statics.findByPath = function (url) {
  * Return a Page document or an array of Page documents that have a
  * given title.
  * @param {string} title - The title to search for.
+ * @param {string} type - (Optional.) If provided, the query will only return
+ *   Pages that have the specified type.
  * @returns {Page|[Page]} - The lone Page document with the title provided if
  *   only one match was found, or an array of Page documents with the given
  *   title if more than one was found, or an empty array if no matching Page
  *   documents could be found.
  */
 
-PageSchema.statics.findByTitle = async function (title) {
-  const docs = await this.find({ title: { $regex: new RegExp(`^${title}$`, 'i') } })
+PageSchema.statics.findByTitle = async function (title, type) {
+  const query = { title: { $regex: new RegExp(`^${title}$`, 'i') } }
+  if (type && typeof type === 'string' && type.length > 0) query.types = type
+  const docs = await this.find(query)
   return docs?.length === 1 ? docs[0] : docs
 }
 
