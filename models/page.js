@@ -18,6 +18,7 @@ const VersionSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
 }))
 
 const PageSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
+  types: [{ type: String }],
   path: {
     type: String,
     slug: 'title',
@@ -36,6 +37,27 @@ const PageSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
 
 PageSchema.plugin(slugger)
 PageSchema.plugin(uniqueValidation)
+
+/**
+ * Before saving the page, figure out its types, based on its title and body.
+ */
+
+PageSchema.pre('save', function (next) {
+  // If title is of form `X:Y`, save `X` as a type.
+  const index = this.title.indexOf(':')
+  const titleType = index > -1
+    ? this.title.substr(0, index).trim()
+    : null
+
+  // Fetch any other types specified in the body.
+  const matches = this.body.match(/\[\[Type:(.*?)\]\]/gm)
+  const bodyTypes = matches
+    ? matches.map(m => m.substr(7, m.length - 9).trim())
+    : []
+
+  this.types = titleType && !bodyTypes.includes(titleType) ? [ titleType, ...bodyTypes ] : bodyTypes
+  return next()
+})
 
 /**
  * Makes an update to a Page document.
