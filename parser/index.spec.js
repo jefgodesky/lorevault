@@ -25,6 +25,14 @@ describe('parse', () => {
     })
   })
 
+  describe('Code Blocks', () => {
+    it('skips code blocks', async () => {
+      expect.assertions(1)
+      const actual = await parse('A _paragraph_ **before**.\n\n```\n[[Link]]\nA _paragraph_ **within**.\n```\n\nA _paragraph_ **between**.\n\nThis is another paragraph.\n\n```\n\nThis is a second block.\n\n```\n\nA _paragraph_ **after**.')
+      expect(actual).toEqual('<p>A <em>paragraph</em> <strong>before</strong>.</p>\n<pre><code>\n[[Link]]\nA _paragraph_ **within**.\n</code></pre>\n<p>A <em>paragraph</em> <strong>between</strong>.</p>\n<p>This is another paragraph.</p>\n<pre><code>\n\nThis is a second block.\n\n</code></pre>\n<p>A <em>paragraph</em> <strong>after</strong>.</p>\n')
+    })
+  })
+
   describe('Parsing links', () => {
     it('parses links', async () => {
       expect.assertions(1)

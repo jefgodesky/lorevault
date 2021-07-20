@@ -67,15 +67,56 @@ const wrapLinks = str => {
 }
 
 /**
+ * Remove code blocks from the string, so that we don't parse links or
+ * templates contained within them.
+ * @param {string} str - The string to parse.
+ * @returns {{blockedStr: string, blocks: string[]}} - An object with two
+ *   properties: `blockedStr`, containing the `str` with all code blocks
+ *   removed, and `blocks`, an array of strings of the blocks removed.
+ */
+
+const removeBlocks = str => {
+  let blockedStr = str
+  const b = str.match(/```(\r|\n|.)*?```/gm)
+  const blocks = b ? b.map(b => b.substr(3, b.length - 6)) : []
+  blocks.forEach((block, index) => {
+    const placeholder = `<!-- BLOCK${index} -->`
+    blockedStr = blockedStr.replace(`\`\`\`${block}\`\`\``, placeholder)
+  })
+  return { blockedStr, blocks }
+}
+
+/**
+ * Restores blocks removed by `removeBlocks` to the string.
+ * @param str {!string} - The string being parsed. This should have been
+ *   taken from the `blocked` string returned by `saveBlocks`, perhaps after
+ *   further parsing.
+ * @param blocks {!string[]} - An array of blocks to restore. This should come
+ *   from the `blocks` array returned by `saveBlocks`.
+ * @returns {string} - The string with the blocks saved by `saveBlocks`
+ *   restored.
+ */
+
+const restoreBlocks = (str, blocks) => {
+  blocks.forEach((block, index) => {
+    const placeholder = `<!-- BLOCK${index} -->`
+    str = str.replace(placeholder, `<pre><code>${block}</code></pre>`)
+  })
+  return str
+}
+
+/**
  * Parse a string to HTML.
  * @param {string} str - The string to parse.
  * @returns {Promise<string>} - A Promise that resolves with the parsed HTML.
  */
 
 const parse = async str => {
-  str = await parseLinks(str)
-  str = wrapLinks(str)
-  return markdown(str)
+  let { blockedStr, blocks } = removeBlocks(str)
+  const linkedStr = await parseLinks(blockedStr)
+  const wrappedStr = wrapLinks(linkedStr)
+  const markedStr = markdown(wrappedStr)
+  return restoreBlocks(markedStr, blocks)
 }
 
 module.exports = parse
