@@ -8,6 +8,15 @@ afterEach(async () => await db.clear())
 afterAll(async () => await db.close())
 
 describe('Page', () => {
+  describe('PageSchema.pre(save)', () => {
+    it('saves the type, given a title formatted as `X:Y`', async () => {
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.title = 'Category:Test'
+      const page = await Page.create(cpy)
+      expect(Array.from(page.types)).toEqual(['Category'])
+    })
+  })
+
   describe('PageSchema.methods.makeUpdate', () => {
     it('updates the body', async () => {
       expect.assertions(1)

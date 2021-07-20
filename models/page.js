@@ -39,6 +39,17 @@ PageSchema.plugin(slugger)
 PageSchema.plugin(uniqueValidation)
 
 /**
+ * Pre-save middleware.
+ */
+
+PageSchema.pre('save', function (next) {
+  const index = this.title.indexOf(':')
+  if (index < 0) return next()
+  this.types.push(this.title.substr(0, index).trim())
+  return next()
+})
+
+/**
  * Makes an update to a Page document.
  * @param {object} update - The update to make. This object should conform to
  *   the `VersionSchema` outline.
