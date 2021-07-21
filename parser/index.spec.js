@@ -65,7 +65,7 @@ describe('parse', () => {
   describe('Tags', () => {
     it('removes tags from parsed output', async () => {
       expect.assertions(1)
-      const actual = await parse('This text has a [[Link]].\n\n[[Type:Test]]\n[[Type:Unit Test]]\n\nHere\'s a paragraph _after_ the tags. Ah-ha!')
+      const actual = await parse('This text has a [[Link]].\n\n[[Type:Test]]\n[[Type:Unit Test]]\n[[Category:Test Category]]\n\nHere\'s a paragraph _after_ the tags. Ah-ha!')
       expect(actual).toEqual('<p>This text has a <a href="/link" class="new">Link</a>.</p>\n<p>Here’s a paragraph <em>after</em> the tags. Ah-ha!</p>\n')
     })
   })

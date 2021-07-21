@@ -28,7 +28,8 @@ const markdown = str => {
 
 const detag = str => {
   const tags = [
-    /\[\[Type:(.*?)\]\](\r|\n)*/gm
+    /\[\[Type:(.*?)\]\](\r|\n)*/gm,
+    /\[\[Category:(.*?)\]\](\r|\n)*/gm
   ]
   for (const tag of tags) str = str.replace(tag, '')
   return str
