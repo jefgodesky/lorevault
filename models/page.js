@@ -61,6 +61,37 @@ PageSchema.pre('save', function (next) {
 })
 
 /**
+ * Create the array of categories that the Page belongs to. These can include
+ * both categories that already exist that the page refers to, or new
+ * categories that are created now because a page is being saved with them.
+ */
+
+PageSchema.pre('save', async function (next) {
+  const Page = this.model('Page')
+  this.categories = []
+  const matches = this.body.match(/\[\[Category:(.*?)\]\]/gm)
+  const categoryNames = matches
+    ? matches.map(m => m.substr(11, m.length - 13).trim())
+    : []
+  for (const name of categoryNames) {
+    const existing = await Page.findByTitle(name, 'Category')
+    if (existing && existing._id) { this.categories.push(existing._id); continue }
+    const category = await Page.create({
+      title: name,
+      body: '[[Type:Category]]',
+      versions: [{
+        title: name,
+        body: '[[Type:Category]]',
+        msg: `Created along with ${this.title}`,
+        editor: this.versions[this.versions.length - 1]._id
+      }]
+    })
+    this.categories.push(category._id)
+  }
+  next()
+})
+
+/**
  * Makes an update to a Page document.
  * @param {object} update - The update to make. This object should conform to
  *   the `VersionSchema` outline.

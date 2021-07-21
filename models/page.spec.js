@@ -38,6 +38,30 @@ describe('Page', () => {
       const page = await Page.create(cpy)
       expect(Array.from(page.types)).toEqual(['Test'])
     })
+
+    it('refers to existing categories', async () => {
+      expect.assertions(1)
+      const categoryData = JSON.parse(JSON.stringify(testPageData))
+      categoryData.body = '[[Type:Category]]'
+      const category = await Page.create(categoryData)
+
+      const pageData = JSON.parse(JSON.stringify(testPageData))
+      pageData.body = '[[Category:Test]]'
+      const page = await Page.create(pageData)
+
+      expect(page.categories[0].toString()).toEqual(category._id.toString())
+    })
+
+    it('creates new categories', async () => {
+      expect.assertions(3)
+      const pageData = JSON.parse(JSON.stringify(testPageData))
+      pageData.body = '[[Category:Test Category]]'
+      const page = await Page.create(pageData)
+      const check = await Page.findByTitle('Test Category', 'Category')
+      expect(page.categories).toHaveLength(1)
+      expect(page.categories[0].toString()).toEqual(check._id.toString())
+      expect(page._id.toString()).not.toEqual(check._id.toString())
+    })
   })
 
   describe('PageSchema.methods.makeUpdate', () => {
