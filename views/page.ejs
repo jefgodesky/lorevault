@@ -32,6 +32,15 @@
         </ul>
       </section>
       <% } %>
+      <% if (locals.categories && categories.length > 0) { %>
+      <ul class="categories">
+        <% for (const category of categories) { %>
+        <li>
+          <a href="/<%= category.path %>"><%= category.title %></a>
+        </li>
+        <% } %>
+      </ul>
+      <% } %>
     </main>
     <%- include('includes/footer') %>
   </body>
