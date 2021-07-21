@@ -192,6 +192,34 @@ PageSchema.statics.findByTitle = async function (title, type) {
 }
 
 /**
+ * Find all of the Page documents in a category.
+ * @param {string} category - The name of the category that you want to find
+ *   all fo the Page documents witihn.
+ * @returns {Promise<{pages: Page[], subcategories: Page[]}|null>} - A Promise
+ *   that resolves with an object with two properties. `subcategories` is an array
+ *   of all of the Page documents that are in the category, which are
+ *   themselves categories, while `pages` is an array of all of te other Page
+ *   documents in the category, or `null` if no such category could be found.
+ */
+
+PageSchema.statics.findCategoryMembers = async function (category) {
+  const c = await this.findByTitle(category, 'Category')
+  const cat = c && c._id ? c : Array.isArray(c) && c.length > 0 ? c[0] : null
+  if (!cat) return null
+  const all = await this.find({ categories: cat._id })
+  const subcategories = []
+  const pages = []
+  for (const page of all) {
+    if (page.types.includes('Category')) {
+      subcategories.push(page)
+    } else {
+      pages.push(page)
+    }
+  }
+  return { subcategories, pages }
+}
+
+/**
  * A static method which combines looking up the page by the URL provided and
  * then applying the update to the page if it was found.
  * @param {string} url - The requesting URL.

@@ -220,6 +220,28 @@ describe('Page', () => {
     })
   })
 
+  describe('PageSchema.statics.findCategoryMembers', () => {
+    it('returns all of the pages in a category', async () => {
+      expect.assertions(2)
+
+      const d1 = JSON.parse(JSON.stringify(testPageData))
+      d1.body = '[[Category:Test Category]]'
+      const p1 = await Page.create(d1)
+
+      const d2 = JSON.parse(JSON.stringify(testPageData))
+      d2.body = '[[Category:Test Category]]'
+      const p2 = await Page.create(d2)
+
+      const d3 = JSON.parse(JSON.stringify(testPageData))
+      d3.body = '[[Category:Test Category]]\n[[Type:Category]]'
+      const p3 = await Page.create(d3)
+
+      const actual = await Page.findCategoryMembers('Test Category')
+      expect(actual.pages.map(p => p._id)).toEqual([ p1._id, p2._id ])
+      expect(actual.subcategories.map(p => p._id)).toEqual([ p3._id ])
+    })
+  })
+
   describe('PageSchema.statics.makeUpdate', () => {
     it('returns false if it couldn\'t find any such Page document', async () => {
       expect.assertions(1)
