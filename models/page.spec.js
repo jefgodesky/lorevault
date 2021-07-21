@@ -38,6 +38,30 @@ describe('Page', () => {
       const page = await Page.create(cpy)
       expect(Array.from(page.types)).toEqual(['Test'])
     })
+
+    it('refers to existing categories', async () => {
+      expect.assertions(1)
+      const categoryData = JSON.parse(JSON.stringify(testPageData))
+      categoryData.body = '[[Type:Category]]'
+      const category = await Page.create(categoryData)
+
+      const pageData = JSON.parse(JSON.stringify(testPageData))
+      pageData.body = '[[Category:Test]]'
+      const page = await Page.create(pageData)
+
+      expect(page.categories[0].toString()).toEqual(category._id.toString())
+    })
+
+    it('creates new categories', async () => {
+      expect.assertions(3)
+      const pageData = JSON.parse(JSON.stringify(testPageData))
+      pageData.body = '[[Category:Test Category]]'
+      const page = await Page.create(pageData)
+      const check = await Page.findByTitle('Test Category', 'Category')
+      expect(page.categories).toHaveLength(1)
+      expect(page.categories[0].toString()).toEqual(check._id.toString())
+      expect(page._id.toString()).not.toEqual(check._id.toString())
+    })
   })
 
   describe('PageSchema.methods.makeUpdate', () => {
@@ -183,6 +207,38 @@ describe('Page', () => {
       const page = await Page.create(testPageData)
       const actual = await Page.findByTitle(page.title.toLowerCase())
       expect(actual._id).toEqual(page._id)
+    })
+
+    it('can be limited by type', async () => {
+      expect.assertions(1)
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.body = '[[Type:Test Page]]'
+      await Page.create(testPageData)
+      const p2 = await Page.create(cpy)
+      const actual = await Page.findByTitle(testPageData.title.toLowerCase(), 'Test Page')
+      expect(actual._id).toEqual(p2._id)
+    })
+  })
+
+  describe('PageSchema.statics.findCategoryMembers', () => {
+    it('returns all of the pages in a category', async () => {
+      expect.assertions(2)
+
+      const d1 = JSON.parse(JSON.stringify(testPageData))
+      d1.body = '[[Category:Test Category]]'
+      const p1 = await Page.create(d1)
+
+      const d2 = JSON.parse(JSON.stringify(testPageData))
+      d2.body = '[[Category:Test Category]]'
+      const p2 = await Page.create(d2)
+
+      const d3 = JSON.parse(JSON.stringify(testPageData))
+      d3.body = '[[Category:Test Category]]\n[[Type:Category]]'
+      const p3 = await Page.create(d3)
+
+      const actual = await Page.findCategoryMembers('Test Category')
+      expect(actual.pages.map(p => p._id)).toEqual([ p1._id, p2._id ])
+      expect(actual.subcategories.map(p => p._id)).toEqual([ p3._id ])
     })
   })
 

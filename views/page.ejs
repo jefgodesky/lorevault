@@ -12,6 +12,35 @@
     </nav>
     <main>
       <%- markup %>
+      <% if (locals.subcategories && subcategories.length > 0) { %>
+      <section class="subcategories">
+        <h2>Subcategories</h2>
+        <ul class="category-listing">
+          <% for (const subcat of subcategories) { %>
+          <li><a href="/<%= subcat.path %>"><%= subcat.title %></a></li>
+          <% } %>
+        </ul>
+      </section>
+      <% } %>
+      <% if (locals.pages && pages.length > 0) { %>
+      <section class="category-pages">
+        <h2>Pages in category &ldquo;<%= page.title %>&rdquo;</h2>
+        <ul class="category-listing">
+          <% for (const p of pages) { %>
+          <li><a href="/<%= p.path %>"><%= p.title %></a></li>
+          <% } %>
+        </ul>
+      </section>
+      <% } %>
+      <% if (locals.categories && categories.length > 0) { %>
+      <ul class="categories">
+        <% for (const category of categories) { %>
+        <li>
+          <a href="/<%= category.path %>"><%= category.title %></a>
+        </li>
+        <% } %>
+      </ul>
+      <% } %>
     </main>
     <%- include('includes/footer') %>
   </body>

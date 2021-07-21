@@ -14,11 +14,18 @@ const VersionSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
     type: Date,
     default: Date.now
   },
-  editor: Schema.Types.ObjectId
+  editor: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }
 }))
 
 const PageSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
-  types: [{ type: String }],
+  types: [String],
+  categories: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Page'
+  }],
   path: {
     type: String,
     slug: 'title',
@@ -57,6 +64,37 @@ PageSchema.pre('save', function (next) {
 
   this.types = titleType && !bodyTypes.includes(titleType) ? [ titleType, ...bodyTypes ] : bodyTypes
   return next()
+})
+
+/**
+ * Create the array of categories that the Page belongs to. These can include
+ * both categories that already exist that the page refers to, or new
+ * categories that are created now because a page is being saved with them.
+ */
+
+PageSchema.pre('save', async function (next) {
+  const Page = this.model('Page')
+  this.categories = []
+  const matches = this.body.match(/\[\[Category:(.*?)\]\]/gm)
+  const categoryNames = matches
+    ? matches.map(m => m.substr(11, m.length - 13).trim())
+    : []
+  for (const name of categoryNames) {
+    const existing = await Page.findByTitle(name, 'Category')
+    if (existing && existing._id) { this.categories.push(existing._id); continue }
+    const category = await Page.create({
+      title: name,
+      body: '[[Type:Category]]',
+      versions: [{
+        title: name,
+        body: '[[Type:Category]]',
+        msg: `Created along with ${this.title}`,
+        editor: this.versions[this.versions.length - 1]._id
+      }]
+    })
+    this.categories.push(category._id)
+  }
+  next()
 })
 
 /**
@@ -144,15 +182,47 @@ PageSchema.statics.findByPath = function (url) {
  * Return a Page document or an array of Page documents that have a
  * given title.
  * @param {string} title - The title to search for.
+ * @param {string} type - (Optional.) If provided, the query will only return
+ *   Pages that have the specified type.
  * @returns {Page|[Page]} - The lone Page document with the title provided if
  *   only one match was found, or an array of Page documents with the given
  *   title if more than one was found, or an empty array if no matching Page
  *   documents could be found.
  */
 
-PageSchema.statics.findByTitle = async function (title) {
-  const docs = await this.find({ title: { $regex: new RegExp(`^${title}$`, 'i') } })
+PageSchema.statics.findByTitle = async function (title, type) {
+  const query = { title: { $regex: new RegExp(`^${title}$`, 'i') } }
+  if (type && typeof type === 'string' && type.length > 0) query.types = type
+  const docs = await this.find(query)
   return docs?.length === 1 ? docs[0] : docs
+}
+
+/**
+ * Find all of the Page documents in a category.
+ * @param {string} category - The name of the category that you want to find
+ *   all fo the Page documents witihn.
+ * @returns {Promise<{pages: Page[], subcategories: Page[]}|null>} - A Promise
+ *   that resolves with an object with two properties. `subcategories` is an array
+ *   of all of the Page documents that are in the category, which are
+ *   themselves categories, while `pages` is an array of all of te other Page
+ *   documents in the category, or `null` if no such category could be found.
+ */
+
+PageSchema.statics.findCategoryMembers = async function (category) {
+  const c = await this.findByTitle(category, 'Category')
+  const cat = c && c._id ? c : Array.isArray(c) && c.length > 0 ? c[0] : null
+  if (!cat) return null
+  const all = await this.find({ categories: cat._id })
+  const subcategories = []
+  const pages = []
+  for (const page of all) {
+    if (page.types.includes('Category')) {
+      subcategories.push(page)
+    } else {
+      pages.push(page)
+    }
+  }
+  return { subcategories, pages }
 }
 
 /**
