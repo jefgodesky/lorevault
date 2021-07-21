@@ -14,12 +14,18 @@ const VersionSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
     type: Date,
     default: Date.now
   },
-  editor: Schema.Types.ObjectId
+  editor: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }
 }))
 
 const PageSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
   types: [String],
-  categories: [Schema.Types.ObjectId],
+  categories: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Page'
+  }],
   path: {
     type: String,
     slug: 'title',
