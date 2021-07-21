@@ -83,6 +83,11 @@ router.get('/*/*', async (req, res, next) => {
 router.get('/*', async (req, res, next) => {
   req.viewOpts.page = await Page.findByPath(req.originalUrl)
   req.viewOpts.markup = await parse(req.viewOpts.page.body)
+  if (req.viewOpts.page.types.includes('Category')) {
+    const { subcategories, pages } = req.viewOpts.page.findCategoryMembers(req.viewOpts.page.title)
+    req.viewOpts.subcategories = subcategories
+    req.viewOpts.pages = pages
+  }
   res.render('page', req.viewOpts)
 })
 
