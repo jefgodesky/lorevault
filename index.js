@@ -1,6 +1,7 @@
 const createError = require('http-errors')
 const express = require('express')
 const path = require('path')
+const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const logger = require('morgan')
 const mongoose = require('mongoose')
@@ -33,6 +34,7 @@ Object.keys(ejsHelpers).forEach(key => {
 server.use(logger('dev'))
 server.use(express.json())
 server.use(express.urlencoded({ extended: true }))
+server.use(bodyParser.json())
 server.use(cookieParser())
 server.use(express.static(path.join(__dirname, 'public')))
 server.use(session({
