@@ -73,6 +73,20 @@ describe('parse', () => {
       expect(actual).toEqual('<p>Hello, world!</p>\n<p>This is a test.</p>\n')
     })
 
+    it('parses nested templates', async () => {
+      expect.assertions(1)
+      const innerData = JSON.parse(JSON.stringify(testPageData))
+      innerData.title = 'Template:HelloWorld'
+      innerData.body = 'Hello, world!\n\n<noinclude>\n  This should not be included.\n</noinclude>'
+      await Page.create(innerData)
+      const outerData = JSON.parse(JSON.stringify(testPageData))
+      outerData.title = 'Template:Wrapper'
+      outerData.body = '{{Template:HelloWorld}}'
+      await Page.create(outerData)
+      const actual = await parse('{{Template:Wrapper}}\n\nThis is a test.')
+      expect(actual).toEqual('<p>Hello, world!</p>\n<p>This is a test.</p>\n')
+    })
+
     it('parses multiple templates', async () => {
       expect.assertions(1)
       const tplData = JSON.parse(JSON.stringify(testPageData))

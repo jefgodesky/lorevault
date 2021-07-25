@@ -98,7 +98,7 @@ const parseTemplates = async str => {
     if (!tpl) continue
     str = str.replace(match, tpl.parseTemplate(params))
   }
-  return str
+  return parseTemplates(str)
 }
 
 /**
