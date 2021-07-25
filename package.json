@@ -29,6 +29,7 @@
     "css:sync": "browser-sync start --proxy localhost:8080 --files 'public/css/*.css' --no-ui --no-inject-changes"
   },
   "dependencies": {
+    "aws-sdk": "^2.953.0",
     "chokidar-cli": "^2.1.0",
     "connect-mongo": "^4.4.1",
     "cookie-parser": "^1.4.5",
