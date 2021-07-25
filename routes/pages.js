@@ -26,6 +26,13 @@ router.post('/create', async (req, res, next) => {
   res.redirect(`/${page.path}`)
 })
 
+// GET /upload
+router.get('/upload', async (req, res, next) => {
+  req.viewOpts.title = 'Upload a File'
+  req.viewOpts.upload = true
+  res.render('create', req.viewOpts)
+})
+
 // GET /*/edit
 router.get('/*/edit', async (req, res, next) => {
   req.viewOpts.page = await Page.findByPath(req.originalUrl)

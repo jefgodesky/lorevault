@@ -4,7 +4,7 @@
   <body>
     <%- include('includes/header', { isLoggedIn, char, title }) %>
     <main>
-      <%- include('includes/page-form') %>
+      <%- include('includes/page-form', { upload: locals.upload }) %>
     </main>
     <%- include('includes/footer') %>
   </body>
