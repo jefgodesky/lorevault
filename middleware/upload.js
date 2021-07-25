@@ -4,7 +4,7 @@ const multerS3 = require('multer-s3')
 const config = require('../config')
 
 aws.config.update({
-  endpoint: `https://s3.${config.aws.region}.stackpathstorage.com`,
+  endpoint: config.aws.endpoint,
   accessKeyId: config.aws.key,
   secretAccessKey: config.aws.secret
 })
