@@ -26,6 +26,11 @@ const PageSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
     type: Schema.Types.ObjectId,
     ref: 'Page'
   }],
+  file: {
+    path: String,
+    mimetype: String,
+    size: Number
+  },
   path: {
     type: String,
     slug: 'title',
