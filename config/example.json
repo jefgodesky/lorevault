@@ -7,7 +7,7 @@
     "key": "S3_ACCESS_KEY",
     "secret": "S3_SECRET_KEY",
     "bucket": "BUCKET_NAME",
-    "region": "REGION_NAME"
+    "endpoint": "S3_API_ENDPOINT"
   },
   "google": {
     "id": "GOOGLE_CLIENT_ID",
