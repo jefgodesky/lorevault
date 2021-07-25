@@ -1,6 +1,7 @@
 const { Router } = require('express')
 const diff = require('diff')
 const Page = require('../models/page')
+const upload = require('../middleware/upload')
 const parse = require('../parser')
 const router = Router()
 
@@ -11,11 +12,21 @@ router.get('/create', async (req, res, next) => {
 })
 
 // POST /create
-router.post('/create', async (req, res, next) => {
+router.post('/create', upload.single('file'), async (req, res, next) => {
   const data = {
     title: req.body.title,
     body: req.body.body
   }
+
+  // Handle file uploads
+  if (req.file) {
+    data.file = {}
+    if (req.file.key) data.file.path = req.file.key
+    if (req.file.contentType) data.file.mimetype = req.file.contentType
+    if (req.file.size) data.file.size = req.file.size
+  }
+
+  // Create initial version
   data.versions = [
     Object.assign({}, data, {
       msg: req.body.msg,
