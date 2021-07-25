@@ -1,0 +1,24 @@
+@forward '../modules/placeholders';
+
+ul.categories {
+  @extend %unformatted-list;
+  @extend %box;
+
+  &:before {
+    content: 'Categories: ';
+    display: inline;
+    font-style: italic;
+  }
+
+  li {
+    display: inline;
+
+    &:before {
+      content: '|';
+    }
+
+    &:first-child:before {
+      content: none;
+    }
+  }
+}

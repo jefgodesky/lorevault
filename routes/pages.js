@@ -83,6 +83,25 @@ router.get('/*/*', async (req, res, next) => {
 router.get('/*', async (req, res, next) => {
   req.viewOpts.page = await Page.findByPath(req.originalUrl)
   req.viewOpts.markup = await parse(req.viewOpts.page.body)
+
+  // Populate categories
+  req.viewOpts.categories = []
+  for (const id of req.viewOpts.page.categories) {
+    const category = await Page.findById(id)
+    req.viewOpts.categories.push({
+      title: category.title,
+      path: category.path
+    })
+  }
+
+  // Add special category data
+  if (req.viewOpts.page.types.includes('Category')) {
+    const { subcategories, pages } = await Page.findCategoryMembers(req.viewOpts.page.title)
+    req.viewOpts.subcategories = subcategories
+    req.viewOpts.pages = pages
+  }
+
+  // Render the page
   res.render('page', req.viewOpts)
 })
 
