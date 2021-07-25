@@ -13,6 +13,11 @@
     <main>
       <% if (page.file?.url && page.types.includes('Image file')) { %>
       <img src="<%= page.file.url %>" alt="<%= page.title %>" />
+      <% } else if (page.file?.url && !page.types.includes('Image file')) { %>
+      <a href="<%= page.file.url%>" class="download">
+        <strong>Download file</strong>
+        <small><%= page.file.mimetype %>; <%= page.file.size %></small>
+      </a>
       <% } %>
       <%- markup %>
       <% if (locals.subcategories && subcategories.length > 0) { %>
