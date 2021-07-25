@@ -171,6 +171,48 @@ describe('Page', () => {
     })
   })
 
+  describe('PageSchema.methods.parseTemplate', () => {
+    it('returns null if you try to parse a page that isn\'t a template', async () => {
+      expect.assertions(1)
+      const data = JSON.parse(JSON.stringify(testPageData))
+      data.title = 'TestTemplate'
+      data.body = '<strong>Hello, world!</strong>'
+      const tpl = await Page.create(data)
+      const actual = tpl.parseTemplate({ ordered: [], named: {} })
+      expect(actual).toEqual(null)
+    })
+
+    it('parses the template', async () => {
+      expect.assertions(1)
+      const data = JSON.parse(JSON.stringify(testPageData))
+      data.title = 'Template:Test'
+      data.body = '<strong>Hello, world!</strong>'
+      const tpl = await Page.create(data)
+      const actual = tpl.parseTemplate({ ordered: [], named: {} })
+      expect(actual).toEqual('<strong>Hello, world!</strong>')
+    })
+
+    it('parses ordered parameters', async () => {
+      expect.assertions(1)
+      const data = JSON.parse(JSON.stringify(testPageData))
+      data.title = 'Template:Test'
+      data.body = '<strong>{{{1}}}, {{{2}}}!</strong>'
+      const tpl = await Page.create(data)
+      const actual = tpl.parseTemplate({ ordered: [ 'Hello', 'world' ], named: {} })
+      expect(actual).toEqual('<strong>Hello, world!</strong>')
+    })
+
+    it('parses named parameters', async () => {
+      expect.assertions(1)
+      const data = JSON.parse(JSON.stringify(testPageData))
+      data.title = 'Template:Test'
+      data.body = '<strong>{{{greeting}}}, {{{subject}}}!</strong>'
+      const tpl = await Page.create(data)
+      const actual = tpl.parseTemplate({ ordered: [], named: { greeting: 'Hello', subject: 'world' } })
+      expect(actual).toEqual('<strong>Hello, world!</strong>')
+    })
+  })
+
   describe('PageSchema.statics.findByPath', () => {
     it('queries a Page by its path', async () => {
       expect.assertions(1)

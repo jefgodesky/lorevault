@@ -167,6 +167,43 @@ PageSchema.methods.rollback = function (id, editor) {
 }
 
 /**
+ * Parse a page's body as a template, given the parameters provided.
+ * @param {{ordered: *[], named: {}}} params - An object with readable
+ *   parameters. The `ordered` array presents the ordered array of parameters
+ *   received, while the `named` object presents a dictionary of the key/value
+ *   pairs that were passed as parameters.
+ * @returns {string|null} - The body of the page parsed as a template using the
+ *   parameters provided, or `null` if the page is not a template.
+ */
+
+PageSchema.methods.parseTemplate = function (params) {
+  if (!this.types.includes('Template')) return null
+  let str = this.body
+
+  // Remove noincludes
+  const noincludes = str.match(/<noinclude>(\r|\n|.)*?<\/noinclude>/gm)
+  if (noincludes) {
+    for (const noinclude of noincludes) {
+      str = str.replace(noinclude, '')
+    }
+  }
+
+  // Properly parse includeonlys
+  const includeonlys = str.match(/<includeonly>(\r|\n|.)*?<\/includeonly>/gm)
+  if (includeonlys) {
+    for (const includeonly of includeonlys) {
+      str = str.replace(includeonly, includeonly.substr(13, includeonly.length - 27).trim())
+    }
+  }
+
+  // Substitute parameters
+  for (const key of Object.keys(params.named)) str = str.replaceAll(`{{{${key}}}}`, params.named[key])
+  for (const index in params.ordered) str = str.replaceAll(`{{{${parseInt(index) + 1}}}}`, params.ordered[index])
+
+  return str
+}
+
+/**
  * Return a Page document that has a given path.
  * @param {string} url - The requesting URL.
  * @returns {*} - A Promise that returns with the result of the query.
