@@ -62,7 +62,59 @@ describe('parse', () => {
     })
   })
 
-  describe('Tags', () => {
+  describe('Parsing templates', () => {
+    it('parses templates', async () => {
+      expect.assertions(1)
+      const tplData = JSON.parse(JSON.stringify(testPageData))
+      tplData.title = 'Template:HelloWorld'
+      tplData.body = 'Hello, world!\n\n<noinclude>\n  This should not be included.\n</noinclude>'
+      await Page.create(tplData)
+      const actual = await parse('{{Template:HelloWorld}}\n\nThis is a test.')
+      expect(actual).toEqual('<p>Hello, world!</p>\n<p>This is a test.</p>\n')
+    })
+
+    it('parses multiple templates', async () => {
+      expect.assertions(1)
+      const tplData = JSON.parse(JSON.stringify(testPageData))
+      tplData.title = 'Template:HelloWorld'
+      tplData.body = 'Hello, world!\n\n<noinclude>\n  This should not be included.\n</noinclude>'
+      await Page.create(tplData)
+      const actual = await parse('{{Template:HelloWorld}}\n\n{{Template:HelloWorld}}\n\nThis is a test.')
+      expect(actual).toEqual('<p>Hello, world!</p>\n<p>Hello, world!</p>\n<p>This is a test.</p>\n')
+    })
+
+    it('passes along ordered parameters', async () => {
+      expect.assertions(1)
+      const tplData = JSON.parse(JSON.stringify(testPageData))
+      tplData.title = 'Template:HelloWorld'
+      tplData.body = '{{{1}}}, {{{2}}}!\n\n<noinclude>\n  This should not be included.\n</noinclude>'
+      await Page.create(tplData)
+      const actual = await parse('{{Template:HelloWorld|Hello|world}}\n\nThis is a test.')
+      expect(actual).toEqual('<p>Hello, world!</p>\n<p>This is a test.</p>\n')
+    })
+
+    it('lets you specify ordered parameters', async () => {
+      expect.assertions(1)
+      const tplData = JSON.parse(JSON.stringify(testPageData))
+      tplData.title = 'Template:HelloWorld'
+      tplData.body = '{{{1}}}, {{{2}}}!\n\n<noinclude>\n  This should not be included.\n</noinclude>'
+      await Page.create(tplData)
+      const actual = await parse('{{Template:HelloWorld|2=world|1=Hello}}\n\nThis is a test.')
+      expect(actual).toEqual('<p>Hello, world!</p>\n<p>This is a test.</p>\n')
+    })
+
+    it('lets you specify named parameters', async () => {
+      expect.assertions(1)
+      const tplData = JSON.parse(JSON.stringify(testPageData))
+      tplData.title = 'Template:HelloWorld'
+      tplData.body = '{{{greeting}}}, {{{subject}}}!\n\n<noinclude>\n  This should not be included.\n</noinclude>'
+      await Page.create(tplData)
+      const actual = await parse('{{Template:HelloWorld|greeting=Hello|subject=world}}\n\nThis is a test.')
+      expect(actual).toEqual('<p>Hello, world!</p>\n<p>This is a test.</p>\n')
+    })
+  })
+
+  describe('Removing tags', () => {
     it('removes tags from parsed output', async () => {
       expect.assertions(1)
       const actual = await parse('This text has a [[Link]].\n\n[[Type:Test]]\n[[Type:Unit Test]]\n[[Category:Test Category]]\n\nHere\'s a paragraph _after_ the tags. Ah-ha!')

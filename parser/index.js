@@ -36,6 +36,72 @@ const detag = str => {
 }
 
 /**
+ * Parse an array of elements into a readable set of parameters. The simplest
+ * way to pass a parameter is as a simple string. These are placed in the
+ * `ordered` array in the order that they are given. You can also assign a
+ * parameter to a name, in the form `key=value`. If you provide a string that
+ * can be parsed into an integer as the key (e.g., `1` or `2`, but not `one` or
+ * `two`), the element will be placed into the `ordered` array at that
+ * position. Note that this *can* override a previously-given paramter, such
+ * that `first|0=second` will return an `ordered` array of `['second']`.
+ * @param {string[]} elems - An array of strings to parse into readable
+ *   parameters.
+ * @returns {{ordered: *[], named: {}}} - An object presenting readable
+ *   parameters. The `ordered` array presents the ordered array of parameters
+ *   received, while the `named` object presents a dictionary of the key/value
+ *   pairs that were passed as parameters.
+ */
+
+const parseTemplateParam = elems => {
+  const params = {
+    ordered: [],
+    named :{}
+  }
+
+  for (const elem of elems) {
+    const pair = elem.split('=')
+    if (pair.length === 1) {
+      params.ordered.push(elem)
+    } else if (pair.length > 1) {
+      const num = parseInt(pair[0])
+      if (isNaN(num)) {
+        params.named[pair[0]] = pair[1]
+      } else if (num > -1) {
+        params.ordered[num - 1] = pair[1]
+      } else {
+        params.ordered.push(pair[1])
+      }
+    }
+  }
+
+  return params
+}
+
+/**
+ * Parse templates.
+ * @param {string} str - The string to be parsed.
+ * @returns {Promise<string>} - A Promise that resolves once all of the
+ *   templates invoked by the string have been parsed, with the original
+ *   string with all template invocations replaced by their appropriate
+ *   content.
+ */
+
+const parseTemplates = async str => {
+  const matches = str.match(/{{(.*?)}}/gm)
+  if (!matches) return str
+  for (const match of matches) {
+    const elems = match.substr(2, match.length - 4).split('|')
+    const name = elems.length > 0 ? elems[0] : null
+    const params = elems.length > 1 ? parseTemplateParam(elems.slice(1)) : { ordered: [], named: {} }
+    if (!name) continue
+    const tpl = await Page.findByTitle(name, 'Template')
+    if (!tpl) continue
+    str = str.replace(match, tpl.parseTemplate(params))
+  }
+  return str
+}
+
+/**
  * Parses wiki links into HTML links going to the appropriate URLs.
  * @param {string} str - The string to be parsed.
  * @returns {Promise<string>} - A Promise that resolves once all of the links
@@ -130,7 +196,8 @@ const restoreBlocks = (str, blocks) => {
 const parse = async str => {
   let { blockedStr, blocks } = removeBlocks(str)
   const detaggedStr = detag(blockedStr)
-  const linkedStr = await parseLinks(detaggedStr)
+  const templatedStr = await parseTemplates(detaggedStr)
+  const linkedStr = await parseLinks(templatedStr)
   const wrappedStr = wrapLinks(linkedStr)
   const markedStr = markdown(wrappedStr)
   return restoreBlocks(markedStr, blocks)
