@@ -1,5 +1,6 @@
 const { Router } = require('express')
 const diff = require('diff')
+const config = require('../config')
 const Page = require('../models/page')
 const upload = require('../middleware/upload')
 const parse = require('../parser')
@@ -21,7 +22,7 @@ router.post('/create', upload.single('file'), async (req, res, next) => {
   // Handle file uploads
   if (req.file) {
     data.file = {}
-    if (req.file.key) data.file.path = req.file.key
+    if (req.file.key) data.file.url = `${config.aws.domain}/${req.file.key}`
     if (req.file.contentType) data.file.mimetype = req.file.contentType
     if (req.file.size) data.file.size = req.file.size
   }
