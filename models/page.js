@@ -27,7 +27,7 @@ const PageSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
     ref: 'Page'
   }],
   file: {
-    path: String,
+    url: String,
     mimetype: String,
     size: Number
   },
