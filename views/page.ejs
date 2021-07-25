@@ -16,7 +16,7 @@
       <% } else if (page.file?.url && !page.types.includes('Image file')) { %>
       <a href="<%= page.file.url%>" class="download">
         <strong>Download file</strong>
-        <small><%= page.file.mimetype %>; <%= page.file.size %></small>
+        <small><%= page.file.mimetype %>; <%= formatSize(page.file.size) %></small>
       </a>
       <% } %>
       <%- markup %>
