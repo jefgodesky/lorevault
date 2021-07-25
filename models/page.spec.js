@@ -23,12 +23,35 @@ describe('Page', () => {
       expect(Array.from(page.types)).toEqual(['Test'])
     })
 
+    it('saves types specified by the file', async () => {
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.file = { mimetype: 'image/gif' }
+      const page = await Page.create(cpy)
+      expect(Array.from(page.types)).toEqual(['Image file', 'GIF image'])
+    })
+
     it('combines types taken from the title and from the body', async () => {
       const cpy = JSON.parse(JSON.stringify(testPageData))
       cpy.title = 'Category:Test'
       cpy.body = '[[Type:Test]]'
       const page = await Page.create(cpy)
       expect(Array.from(page.types)).toEqual(['Category', 'Test'])
+    })
+
+    it('combines types taken from the title and the file', async () => {
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.title = 'Image file:Test'
+      cpy.file = { mimetype: 'image/gif' }
+      const page = await Page.create(cpy)
+      expect(Array.from(page.types)).toEqual(['Image file', 'GIF image'])
+    })
+
+    it('combines types taken from the body and the file', async () => {
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.body = '[[Type:Test]]\n[[Type:GIF image]]'
+      cpy.file = { mimetype: 'image/gif' }
+      const page = await Page.create(cpy)
+      expect(Array.from(page.types)).toEqual(['Image file', 'GIF image', 'Test'])
     })
 
     it('does not include duplicates', async () => {
