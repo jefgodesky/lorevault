@@ -5,7 +5,12 @@ const { formatDate } = require('../views/helpers')
 
 const CorePageSchemaDefinition = {
   title: String,
-  body: String
+  body: String,
+  file: {
+    url: String,
+    mimetype: String,
+    size: Number
+  }
 }
 
 const VersionSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
@@ -26,11 +31,6 @@ const PageSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
     type: Schema.Types.ObjectId,
     ref: 'Page'
   }],
-  file: {
-    url: String,
-    mimetype: String,
-    size: Number
-  },
   path: {
     type: String,
     slug: 'title',
