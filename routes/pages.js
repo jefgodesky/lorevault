@@ -6,6 +6,23 @@ const upload = require('../middleware/upload')
 const parse = require('../parser')
 const router = Router()
 
+/**
+ * Get file data from file.
+ * @param {{ key: string, contentType: string, size: number}} file - An object
+ *   containing information about a file, including its S3 key (`key`), its
+ *   MIME type (`contentType`) and its size in bytes (`size`).
+ * @returns {object} - An object that can represent the file as part
+ *   of the Page schema.
+ */
+
+const getFileData = file => {
+  const data = {}
+  if (file.key) data.url = `${config.aws.domain}/${file.key}`
+  if (file.contentType) data.mimetype = file.contentType
+  if (file.size) data.size = file.size
+  return data
+}
+
 // GET /create
 router.get('/create', async (req, res, next) => {
   req.viewOpts.title = 'Create a New Page'
@@ -18,16 +35,7 @@ router.post('/create', upload.single('file'), async (req, res, next) => {
     title: req.body.title,
     body: req.body.body
   }
-
-  // Handle file uploads
-  if (req.file) {
-    data.file = {}
-    if (req.file.key) data.file.url = `${config.aws.domain}/${req.file.key}`
-    if (req.file.contentType) data.file.mimetype = req.file.contentType
-    if (req.file.size) data.file.size = req.file.size
-  }
-
-  // Create initial version
+  if (req.file) data.file = getFileData(req.file)
   data.versions = [
     Object.assign({}, data, {
       msg: req.body.msg,
