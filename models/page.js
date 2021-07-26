@@ -334,4 +334,19 @@ PageSchema.statics.makeUpdate = async function (url, update) {
   return doc && doc.makeUpdate ? doc.makeUpdate(update) : false
 }
 
+/**
+ * Returns the URL for the first file attached to a Page with the given title.
+ * @param {string} title - The Page title to find.
+ * @returns {Promise<string|undefined>} - The URL of the first file attached to
+ *   a Page with the given title if one could be found, or `undefined` if no
+ *   such Page could be found, or if no such Page documents have a file.
+ */
+
+PageSchema.statics.getFile = async function (title) {
+  const page = await this.findByTitle(title)
+  if (page?.file?.url) return page.file.url
+  const withFiles = page.filter(p => p.file.url)
+  return withFiles.length > 0 ? withFiles[0].file.url : undefined
+}
+
 module.exports = model('Page', PageSchema)
