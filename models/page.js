@@ -1,7 +1,9 @@
 const { Schema, model } = require('mongoose')
 const slugger = require('mongoose-slug-generator')
 const uniqueValidation = require('mongoose-unique-validator')
+const { getS3 } = require('../utils')
 const { formatDate } = require('../views/helpers')
+const { bucket, domain } = require('../config').aws
 
 const CorePageSchemaDefinition = {
   title: String,
@@ -240,6 +242,18 @@ PageSchema.methods.parseTemplate = function (params) {
   for (const index in params.ordered) str = str.replaceAll(`{{{${parseInt(index) + 1}}}}`, params.ordered[index])
 
   return str
+}
+
+/**
+ * This method delete the Page's file from S3.
+ * @returns {Promise<void>} - A Promise that resolves once the page's file (if
+ *   it has a file) has been deleted from S3.
+ */
+
+PageSchema.methods.deleteFile = async function () {
+  if (!this.file?.url) return
+  const s3 = getS3()
+  await s3.deleteObject({ bucket, key: this.file.url.substr(domain.length) }).promise()
 }
 
 /**
