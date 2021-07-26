@@ -148,7 +148,10 @@ PageSchema.pre('save', async function (next) {
 PageSchema.methods.makeUpdate = async function (update) {
   if (update.title) this.title = update.title
   if (update.body) this.body = update.body
-  if (update.file) this.file = update.file
+  if (update.file) {
+    await this.deleteFile()
+    this.file = update.file
+  }
   this.versions.push(update)
   await this.save()
   return this
@@ -253,7 +256,7 @@ PageSchema.methods.parseTemplate = function (params) {
 PageSchema.methods.deleteFile = async function () {
   if (!this.file?.url) return
   const s3 = getS3()
-  await s3.deleteObject({ bucket, key: this.file.url.substr(domain.length) }).promise()
+  await s3.deleteObject({ Bucket: bucket, Key: this.file.url.substr(domain.length + 1) }).promise()
 }
 
 /**
