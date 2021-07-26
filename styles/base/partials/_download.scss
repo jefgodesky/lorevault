@@ -1,0 +1,16 @@
+@forward '../modules/placeholders';
+
+.download {
+  @extend %box;
+  color: black;
+  display: block;
+  text-decoration: none;
+
+  small {
+    display: block;
+  }
+
+  &:hover {
+    background: #f8e9bd;
+  }
+}

@@ -23,12 +23,35 @@ describe('Page', () => {
       expect(Array.from(page.types)).toEqual(['Test'])
     })
 
+    it('saves types specified by the file', async () => {
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.file = { mimetype: 'image/gif' }
+      const page = await Page.create(cpy)
+      expect(Array.from(page.types)).toEqual(['Image file', 'GIF image'])
+    })
+
     it('combines types taken from the title and from the body', async () => {
       const cpy = JSON.parse(JSON.stringify(testPageData))
       cpy.title = 'Category:Test'
       cpy.body = '[[Type:Test]]'
       const page = await Page.create(cpy)
       expect(Array.from(page.types)).toEqual(['Category', 'Test'])
+    })
+
+    it('combines types taken from the title and the file', async () => {
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.title = 'Image file:Test'
+      cpy.file = { mimetype: 'image/gif' }
+      const page = await Page.create(cpy)
+      expect(Array.from(page.types)).toEqual(['Image file', 'GIF image'])
+    })
+
+    it('combines types taken from the body and the file', async () => {
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.body = '[[Type:Test]]\n[[Type:GIF image]]'
+      cpy.file = { mimetype: 'image/gif' }
+      const page = await Page.create(cpy)
+      expect(Array.from(page.types)).toEqual(['Image file', 'GIF image', 'Test'])
     })
 
     it('does not include duplicates', async () => {
@@ -83,6 +106,18 @@ describe('Page', () => {
       await page.makeUpdate(update)
       const actual = await Page.findById(page._id)
       expect(actual.title).toEqual(update.title)
+    })
+
+    it('updates the file', async () => {
+      expect.assertions(3)
+      const page = await Page.create(testPageData)
+      const update = JSON.parse(JSON.stringify(testPageData))
+      update.file = { url: 'test.png', mimetype: 'image/png', size: 256 }
+      await page.makeUpdate(update)
+      const actual = await Page.findById(page._id)
+      expect(actual.file.url).toEqual('test.png')
+      expect(actual.file.mimetype).toEqual('image/png')
+      expect(actual.file.size).toEqual(256)
     })
 
     it('adds a new version', async () => {

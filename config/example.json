@@ -3,6 +3,13 @@
   "db": "mongodb://127.0.0.1/lorevault",
   "secret": "LONG_RANDOM_STRING",
   "rules": [ "dnd5e" ],
+  "aws": {
+    "key": "S3_ACCESS_KEY",
+    "secret": "S3_SECRET_KEY",
+    "bucket": "BUCKET_NAME",
+    "endpoint": "S3_API_ENDPOINT",
+    "domain": "https://bucketname.region.host.com"
+  },
   "google": {
     "id": "GOOGLE_CLIENT_ID",
     "secret": "GOOGLE_SECRET",

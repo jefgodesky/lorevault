@@ -1,8 +1,27 @@
 const { Router } = require('express')
 const diff = require('diff')
+const config = require('../config')
 const Page = require('../models/page')
+const upload = require('../middleware/upload')
 const parse = require('../parser')
 const router = Router()
+
+/**
+ * Get file data from file.
+ * @param {{ key: string, contentType: string, size: number}} file - An object
+ *   containing information about a file, including its S3 key (`key`), its
+ *   MIME type (`contentType`) and its size in bytes (`size`).
+ * @returns {object} - An object that can represent the file as part
+ *   of the Page schema.
+ */
+
+const getFileData = file => {
+  const data = {}
+  if (file.key) data.url = `${config.aws.domain}/${file.key}`
+  if (file.contentType) data.mimetype = file.contentType
+  if (file.size) data.size = file.size
+  return data
+}
 
 // GET /create
 router.get('/create', async (req, res, next) => {
@@ -11,11 +30,12 @@ router.get('/create', async (req, res, next) => {
 })
 
 // POST /create
-router.post('/create', async (req, res, next) => {
+router.post('/create', upload.single('file'), async (req, res, next) => {
   const data = {
     title: req.body.title,
     body: req.body.body
   }
+  if (req.file) data.file = getFileData(req.file)
   data.versions = [
     Object.assign({}, data, {
       msg: req.body.msg,
@@ -26,16 +46,26 @@ router.post('/create', async (req, res, next) => {
   res.redirect(`/${page.path}`)
 })
 
+// GET /upload
+router.get('/upload', async (req, res, next) => {
+  req.viewOpts.title = 'Upload a File'
+  req.viewOpts.upload = true
+  res.render('create', req.viewOpts)
+})
+
 // GET /*/edit
 router.get('/*/edit', async (req, res, next) => {
   req.viewOpts.page = await Page.findByPath(req.originalUrl)
   req.viewOpts.title = `Editing ${req.viewOpts.page.title}`
+  req.viewOpts.upload = Boolean(req.viewOpts.page.file.url)
   res.render('edit', req.viewOpts)
 })
 
 // POST /*/edit
-router.post('/*/edit', async (req, res, next) => {
-  const update = Object.assign({}, req.body, { editor: req.user?._id })
+router.post('/*/edit', upload.single('file'), async (req, res, next) => {
+  const update = req.file
+    ? Object.assign({}, req.body, { file: getFileData(req.file) }, { editor: req.user?._id })
+    : Object.assign({}, req.body, { editor: req.user?._id })
   const page = await Page.makeUpdate(req.originalUrl, update)
   res.redirect(`/${page.path}`)
 })
