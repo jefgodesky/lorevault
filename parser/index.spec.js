@@ -126,6 +126,16 @@ describe('parse', () => {
       const actual = await parse('{{Template:HelloWorld|greeting=Hello|subject=world}}\n\nThis is a test.')
       expect(actual).toEqual('<p>Hello, world!</p>\n<p>This is a test.</p>\n')
     })
+
+    it('handles parameters on new lines', async () => {
+      expect.assertions(1)
+      const tplData = JSON.parse(JSON.stringify(testPageData))
+      tplData.title = 'Template:HelloWorld'
+      tplData.body = '{{{greeting}}}, {{{subject}}}!\n\n<noinclude>\n  This should not be included.\n</noinclude>'
+      await Page.create(tplData)
+      const actual = await parse('{{Template:HelloWorld\n  |greeting=Hello\n  |subject=world\n}}\n\nThis is a test.')
+      expect(actual).toEqual('<p>Hello, world!</p>\n<p>This is a test.</p>\n')
+    })
   })
 
   describe('Removing tags', () => {

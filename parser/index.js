@@ -87,10 +87,10 @@ const parseTemplateParam = elems => {
  */
 
 const parseTemplates = async str => {
-  const matches = str.match(/{{(.*?)}}/gm)
+  const matches = str.match(/{{((\n|\r|.)*?)}}/gm)
   if (!matches) return str
   for (const match of matches) {
-    const elems = match.substr(2, match.length - 4).split('|')
+    const elems = match.substr(2, match.length - 4).split('|').map(el => el.trim())
     const name = elems.length > 0 ? elems[0] : null
     const params = elems.length > 1 ? parseTemplateParam(elems.slice(1)) : { ordered: [], named: {} }
     if (!name) continue
