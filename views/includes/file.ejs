@@ -1,3 +1,8 @@
+<% if (locals.isForm === true) { %>
+  <label>Existing file</label>
+  <p>This is the file currently associated with this page. Uploading a new file will replace this file with the one
+    that you select. You can edit other parts of this page without changing the file by not uploading a file.</p>
+<% } %>
 <% if (url && isImage) { %>
   <img src="<%= url %>" alt="<%= title %>" />
 <% } else if (url && !isImage) { %>
