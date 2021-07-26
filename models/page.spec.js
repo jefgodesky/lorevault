@@ -108,6 +108,18 @@ describe('Page', () => {
       expect(actual.title).toEqual(update.title)
     })
 
+    it('updates the file', async () => {
+      expect.assertions(3)
+      const page = await Page.create(testPageData)
+      const update = JSON.parse(JSON.stringify(testPageData))
+      update.file = { url: 'test.png', mimetype: 'image/png', size: 256 }
+      await page.makeUpdate(update)
+      const actual = await Page.findById(page._id)
+      expect(actual.file.url).toEqual('test.png')
+      expect(actual.file.mimetype).toEqual('image/png')
+      expect(actual.file.size).toEqual(256)
+    })
+
     it('adds a new version', async () => {
       expect.assertions(1)
       const page = await Page.create(testPageData)

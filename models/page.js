@@ -146,6 +146,7 @@ PageSchema.pre('save', async function (next) {
 PageSchema.methods.makeUpdate = async function (update) {
   if (update.title) this.title = update.title
   if (update.body) this.body = update.body
+  if (update.file) this.file = update.file
   this.versions.push(update)
   await this.save()
   return this
