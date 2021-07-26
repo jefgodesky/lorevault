@@ -62,8 +62,9 @@ router.get('/*/edit', async (req, res, next) => {
 })
 
 // POST /*/edit
-router.post('/*/edit', async (req, res, next) => {
+router.post('/*/edit', upload.single('file'), async (req, res, next) => {
   const update = Object.assign({}, req.body, { editor: req.user?._id })
+  if (req.file) update.file = getFileData(req.file)
   const page = await Page.makeUpdate(req.originalUrl, update)
   res.redirect(`/${page.path}`)
 })
