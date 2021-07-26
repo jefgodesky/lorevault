@@ -1,0 +1,8 @@
+<% if (url && isImage) { %>
+  <img src="<%= url %>" alt="<%= title %>" />
+<% } else if (url && !isImage) { %>
+  <a href="<%= url%>" class="download">
+    <strong>Download file</strong>
+    <small><%= mimetype %>; <%= formatSize(size) %></small>
+  </a>
+<% } %>
