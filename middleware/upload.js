@@ -8,7 +8,9 @@ const upload = multer({
     s3: getS3(),
     acl: 'public-read',
     bucket,
-    contentType: multerS3.AUTO_CONTENT_TYPE,
+    contentType: (req, file, callback) => {
+      callback(null, file.mimetype)
+    },
     key: (req, file, callback) => {
       callback(null, `uploads/${file.originalname}`)
     }
