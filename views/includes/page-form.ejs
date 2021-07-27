@@ -1,4 +1,9 @@
-<form action="<%= locals.page ? `/${page.path}/edit` : '/create' %>" method="POST">
+<form action="<%= locals.page ? `/${page.path}/edit` : '/create' %>" method="POST"<% if (locals.upload === true) { %> enctype="multipart/form-data" class="upload"<% } %>>
+        <%- include('file', { isForm: true, isImage: locals.page && page.types.includes('Image file'), title: locals.page?.title, file: locals.page?.file }) %>
+        <% if (locals.upload) { %>
+        <label for="file">File</label>
+        <input type="file" id="file" name="file" />
+        <% } %>
         <label for="title">Title</label>
         <input type="text" id="title" name="title" placeholder="Enter the title for this page here" value="<%= locals.page ? page.title : '' %>" />
         <label for="body">Body</label>

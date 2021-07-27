@@ -23,12 +23,35 @@ describe('Page', () => {
       expect(Array.from(page.types)).toEqual(['Test'])
     })
 
+    it('saves types specified by the file', async () => {
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.file = { mimetype: 'image/gif' }
+      const page = await Page.create(cpy)
+      expect(Array.from(page.types)).toEqual(['Image file', 'GIF image'])
+    })
+
     it('combines types taken from the title and from the body', async () => {
       const cpy = JSON.parse(JSON.stringify(testPageData))
       cpy.title = 'Category:Test'
       cpy.body = '[[Type:Test]]'
       const page = await Page.create(cpy)
       expect(Array.from(page.types)).toEqual(['Category', 'Test'])
+    })
+
+    it('combines types taken from the title and the file', async () => {
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.title = 'Image file:Test'
+      cpy.file = { mimetype: 'image/gif' }
+      const page = await Page.create(cpy)
+      expect(Array.from(page.types)).toEqual(['Image file', 'GIF image'])
+    })
+
+    it('combines types taken from the body and the file', async () => {
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.body = '[[Type:Test]]\n[[Type:GIF image]]'
+      cpy.file = { mimetype: 'image/gif' }
+      const page = await Page.create(cpy)
+      expect(Array.from(page.types)).toEqual(['Image file', 'GIF image', 'Test'])
     })
 
     it('does not include duplicates', async () => {
@@ -83,6 +106,18 @@ describe('Page', () => {
       await page.makeUpdate(update)
       const actual = await Page.findById(page._id)
       expect(actual.title).toEqual(update.title)
+    })
+
+    it('updates the file', async () => {
+      expect.assertions(3)
+      const page = await Page.create(testPageData)
+      const update = JSON.parse(JSON.stringify(testPageData))
+      update.file = { url: 'test.png', mimetype: 'image/png', size: 256 }
+      await page.makeUpdate(update)
+      const actual = await Page.findById(page._id)
+      expect(actual.file.url).toEqual('test.png')
+      expect(actual.file.mimetype).toEqual('image/png')
+      expect(actual.file.size).toEqual(256)
     })
 
     it('adds a new version', async () => {
@@ -300,6 +335,40 @@ describe('Page', () => {
       update.body = 'This is an update.'
       const actual = await Page.makeUpdate(page.path, update)
       expect(actual.versions).toHaveLength(2)
+    })
+  })
+
+  describe('PageSchema.statics.getFile', () => {
+    it('returns the URL of the Page with that title', async () => {
+      expect.assertions(1)
+      const data = JSON.parse(JSON.stringify(testPageData))
+      data.title = 'Test File'
+      data.file = { url: 'test.txt', size: 64, mimetype: 'text/plain' }
+      await Page.create(data)
+      const actual = await Page.getFile('Test File')
+      expect(actual).toEqual('test.txt')
+    })
+
+    it('returns undefined if no such page exists', async () => {
+      await Page.create(testPageData)
+      const actual = await Page.getFile('Test File')
+      expect(actual).toEqual(undefined)
+    })
+
+    it('returns the URL for the first one that has a file if multiple Pages match', async () => {
+      expect.assertions(1)
+      await Page.create(testPageData)
+
+      const d1 = JSON.parse(JSON.stringify(testPageData))
+      d1.file = { url: 'one.txt', size: 64, mimetype: 'text/plain' }
+      await Page.create(d1)
+
+      const d2 = JSON.parse(JSON.stringify(testPageData))
+      d2.file = { url: 'two.txt', size: 64, mimetype: 'text/plain' }
+      await Page.create(d2)
+
+      const actual = await Page.getFile('Test')
+      expect(actual).toEqual('one.txt')
     })
   })
 })

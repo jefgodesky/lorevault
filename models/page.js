@@ -1,11 +1,18 @@
 const { Schema, model } = require('mongoose')
 const slugger = require('mongoose-slug-generator')
 const uniqueValidation = require('mongoose-unique-validator')
+const { getS3 } = require('../utils')
 const { formatDate } = require('../views/helpers')
+const { bucket, domain } = require('../config').aws
 
 const CorePageSchemaDefinition = {
   title: String,
-  body: String
+  body: String,
+  file: {
+    url: String,
+    mimetype: String,
+    size: Number
+  }
 }
 
 const VersionSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
@@ -46,7 +53,8 @@ PageSchema.plugin(slugger)
 PageSchema.plugin(uniqueValidation)
 
 /**
- * Before saving the page, figure out its types, based on its title and body.
+ * Before saving the page, figure out its types, based on its title, file,
+ * and body.
  */
 
 PageSchema.pre('save', function (next) {
@@ -56,13 +64,45 @@ PageSchema.pre('save', function (next) {
     ? this.title.substr(0, index).trim()
     : null
 
+  // If it has a file, add types around that.
+  const types = {
+    'text/plain': 'Plain text file',
+    'text/css': 'CSS file',
+    'text/html': 'HTML file',
+    'text/javascript': 'JavaScript file',
+    'text/ecmascript': 'JavaScript file',
+    'application/javascript': 'JavaScript file',
+    'application/ecmascript': 'JavaScript file',
+    'image/gif': 'GIF image',
+    'image/jpeg': 'JPEG image',
+    'image/png': 'PNG image',
+    'image/svg+xml': 'SVG image',
+    'image/webp': 'WebP image',
+    'audio/wave': 'WAVE file',
+    'audio/wav': 'WAVE file',
+    'audio/x-wav': 'WAVE file',
+    'audio/x-pn-wav': 'WAVE file',
+    'audio/webm': 'WebM audio file',
+    'video/webm': 'WebM video',
+    'audio/ogg': 'OGG audio file',
+    'video/ogg': 'OGG video'
+  }
+
+  const mime = this.file?.mimetype
+  const fileTypes = []
+  if (mime) fileTypes.push(mime.substr(0,1).toUpperCase() + mime.substr(1, mime.indexOf('/') - 1) + ' file')
+  if (mime && types[mime]) fileTypes.push(types[mime])
+
   // Fetch any other types specified in the body.
   const matches = this.body.match(/\[\[Type:(.*?)\]\]/gm)
   const bodyTypes = matches
     ? matches.map(m => m.substr(7, m.length - 9).trim())
     : []
 
-  this.types = titleType && !bodyTypes.includes(titleType) ? [ titleType, ...bodyTypes ] : bodyTypes
+  // Set types, remove nulls, and dedupe
+  this.types = [ titleType, ...fileTypes, ...bodyTypes ]
+  this.types = this.types.filter(type => type !== null)
+  this.types = [ ...new Set(this.types) ]
   return next()
 })
 
@@ -108,6 +148,10 @@ PageSchema.pre('save', async function (next) {
 PageSchema.methods.makeUpdate = async function (update) {
   if (update.title) this.title = update.title
   if (update.body) this.body = update.body
+  if (update.file) {
+    await this.deleteFile()
+    this.file = update.file
+  }
   this.versions.push(update)
   await this.save()
   return this
@@ -204,6 +248,18 @@ PageSchema.methods.parseTemplate = function (params) {
 }
 
 /**
+ * This method delete the Page's file from S3.
+ * @returns {Promise<void>} - A Promise that resolves once the page's file (if
+ *   it has a file) has been deleted from S3.
+ */
+
+PageSchema.methods.deleteFile = async function () {
+  if (!this.file?.url) return
+  const s3 = getS3()
+  await s3.deleteObject({ Bucket: bucket, Key: this.file.url.substr(domain.length + 1) }).promise()
+}
+
+/**
  * Return a Page document that has a given path.
  * @param {string} url - The requesting URL.
  * @returns {*} - A Promise that returns with the result of the query.
@@ -276,6 +332,21 @@ PageSchema.statics.findCategoryMembers = async function (category) {
 PageSchema.statics.makeUpdate = async function (url, update) {
   const doc = await this.findByPath(url)
   return doc && doc.makeUpdate ? doc.makeUpdate(update) : false
+}
+
+/**
+ * Returns the URL for the first file attached to a Page with the given title.
+ * @param {string} title - The Page title to find.
+ * @returns {Promise<string|undefined>} - The URL of the first file attached to
+ *   a Page with the given title if one could be found, or `undefined` if no
+ *   such Page could be found, or if no such Page documents have a file.
+ */
+
+PageSchema.statics.getFile = async function (title) {
+  const page = await this.findByTitle(title)
+  if (page?.file?.url) return page.file.url
+  const withFiles = page.filter(p => p.file.url)
+  return withFiles.length > 0 ? withFiles[0].file.url : undefined
 }
 
 module.exports = model('Page', PageSchema)

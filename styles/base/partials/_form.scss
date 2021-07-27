@@ -18,6 +18,15 @@ textarea {
   padding: 1em;
 }
 
+input[type="file"] {
+  background: transparent;
+  padding: 1em 0;
+}
+
 textarea.body {
   height: 40vh;
+}
+
+.upload textarea.body {
+  height: 20vh;
 }
