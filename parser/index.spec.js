@@ -138,6 +138,34 @@ describe('parse', () => {
     })
   })
 
+  describe('Parsing images', () => {
+    it('adds an empty img tag if there is no such image', async () => {
+      expect.assertions(1)
+      const actual = await parse('[[Image:Test]]')
+      expect(actual).toEqual('<img src="" alt="Image:Test" />\n')
+    })
+
+    it('adds the requested image', async () => {
+      expect.assertions(1)
+      const data = JSON.parse(JSON.stringify(testPageData))
+      data.title = 'Image:Test'
+      data.file = { url: 'test.gif', size: 64, mimetype: 'image/gif' }
+      await Page.create(data)
+      const actual = await parse('[[Image:Test]]')
+      expect(actual).toEqual('<img src="test.gif" alt="Image:Test" />\n')
+    })
+
+    it('can supply alt text', async () => {
+      expect.assertions(1)
+      const data = JSON.parse(JSON.stringify(testPageData))
+      data.title = 'Image:Test'
+      data.file = { url: 'test.gif', size: 64, mimetype: 'image/gif' }
+      await Page.create(data)
+      const actual = await parse('[[Image:Test|Test GIF]]')
+      expect(actual).toEqual('<img src="test.gif" alt="Test GIF" />\n')
+    })
+  })
+
   describe('Removing tags', () => {
     it('removes tags from parsed output', async () => {
       expect.assertions(1)
