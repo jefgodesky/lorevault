@@ -337,4 +337,38 @@ describe('Page', () => {
       expect(actual.versions).toHaveLength(2)
     })
   })
+
+  describe('PageSchema.statics.getFile', () => {
+    it('returns the URL of the Page with that title', async () => {
+      expect.assertions(1)
+      const data = JSON.parse(JSON.stringify(testPageData))
+      data.title = 'Test File'
+      data.file = { url: 'test.txt', size: 64, mimetype: 'text/plain' }
+      await Page.create(data)
+      const actual = await Page.getFile('Test File')
+      expect(actual).toEqual('test.txt')
+    })
+
+    it('returns undefined if no such page exists', async () => {
+      await Page.create(testPageData)
+      const actual = await Page.getFile('Test File')
+      expect(actual).toEqual(undefined)
+    })
+
+    it('returns the URL for the first one that has a file if multiple Pages match', async () => {
+      expect.assertions(1)
+      await Page.create(testPageData)
+
+      const d1 = JSON.parse(JSON.stringify(testPageData))
+      d1.file = { url: 'one.txt', size: 64, mimetype: 'text/plain' }
+      await Page.create(d1)
+
+      const d2 = JSON.parse(JSON.stringify(testPageData))
+      d2.file = { url: 'two.txt', size: 64, mimetype: 'text/plain' }
+      await Page.create(d2)
+
+      const actual = await Page.getFile('Test')
+      expect(actual).toEqual('one.txt')
+    })
+  })
 })

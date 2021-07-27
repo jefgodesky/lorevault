@@ -87,10 +87,10 @@ const parseTemplateParam = elems => {
  */
 
 const parseTemplates = async str => {
-  const matches = str.match(/{{(.*?)}}/gm)
+  const matches = str.match(/{{((\n|\r|.)*?)}}/gm)
   if (!matches) return str
   for (const match of matches) {
-    const elems = match.substr(2, match.length - 4).split('|')
+    const elems = match.substr(2, match.length - 4).split('|').map(el => el.trim())
     const name = elems.length > 0 ? elems[0] : null
     const params = elems.length > 1 ? parseTemplateParam(elems.slice(1)) : { ordered: [], named: {} }
     if (!name) continue
@@ -99,6 +99,26 @@ const parseTemplates = async str => {
     str = str.replace(match, tpl.parseTemplate(params))
   }
   return parseTemplates(str)
+}
+
+/**
+ * Parse out image tags and replace them with rendered HTML image tags.
+ * @param {string} str - The string to parse.
+ * @returns {Promise<string>} - A Promise that resolves with the original
+ *   string, but with all image tags parsed and rendered to HTML image tags.
+ */
+
+const parseImages = async str => {
+  const matches = str.match(/\[\[(Image|File):((\n|\r|.)*?)\]\]/gm)
+  if (!matches) return str
+  for (const match of matches) {
+    const elems = match.substr(2, match.length - 4).split('|').map(el => el.trim())
+    const name = elems.length > 0 ? elems[0] : null
+    const url = await Page.getFile(name) || ''
+    const alt = elems.length > 1 ? elems[1] : name
+    str = str.replace(match, `<img src="${url}" alt="${alt}" />`)
+  }
+  return str
 }
 
 /**
@@ -169,6 +189,36 @@ const removeBlocks = str => {
 }
 
 /**
+ * For any block-level tags (e.g., `img`, `figure`, `div`, etc.) that
+ * Remarkable may have wrapped inside paragraph (`p`) tags, this method
+ * returns a copy of the string with those tags unwrapped from their paragraph
+ * tag wrappers.
+ * @param {string} str - The string to parse.
+ * @returns {string} - A copy of the original string (`str`) with any
+ *   block-level tags unwrapped from their paragraph (`p`) tag parents.
+ */
+
+const unwrapTags = str => {
+  const tags = [
+    /<p><img(\r|\n|.)*?><\/p>/gmi,
+    /<p><div(\r|\n|.)*?>(\r|\n|.)*?<\/div><\/p>/gmi,
+    /<p><figure(\r|\n|.)*?>(\r|\n|.)*?<\/figure><\/p>/gmi,
+    /<p><section(\r|\n|.)*?>(\r|\n|.)*?<\/section><\/p>/gmi,
+    /<p><aside(\r|\n|.)*?>(\r|\n|.)*?<\/aside><\/p>/gmi,
+  ]
+
+  for (const tag of tags) {
+    const matches = str.match(tag)
+    if (!matches) continue
+    for (const match of matches) {
+      str = str.replace(match, match.substr(3, match.length - 7))
+    }
+  }
+
+  return str
+}
+
+/**
  * Restores blocks removed by `removeBlocks` to the string.
  * @param str {!string} - The string being parsed. This should have been
  *   taken from the `blocked` string returned by `saveBlocks`, perhaps after
@@ -197,10 +247,12 @@ const parse = async str => {
   let { blockedStr, blocks } = removeBlocks(str)
   const detaggedStr = detag(blockedStr)
   const templatedStr = await parseTemplates(detaggedStr)
-  const linkedStr = await parseLinks(templatedStr)
+  const imagedStr = await parseImages(templatedStr)
+  const linkedStr = await parseLinks(imagedStr)
   const wrappedStr = wrapLinks(linkedStr)
   const markedStr = markdown(wrappedStr)
-  return restoreBlocks(markedStr, blocks)
+  const unwrappedStr = unwrapTags(markedStr)
+  return restoreBlocks(unwrappedStr, blocks)
 }
 
 module.exports = parse
