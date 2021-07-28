@@ -2,6 +2,7 @@ const { Remarkable } = require('remarkable')
 const HeaderIdsPlugin = require('remarkable-header-ids')
 const slugify = require('slugify')
 const Page = require('../models/page')
+const { getSVG } = require('../utils')
 
 /**
  * Parses a Markdown string to HTML.
@@ -114,9 +115,16 @@ const parseImages = async str => {
   for (const match of matches) {
     const elems = match.substr(2, match.length - 4).split('|').map(el => el.trim())
     const name = elems.length > 0 ? elems[0] : null
-    const url = await Page.getFile(name) || ''
+    const page = await Page.findByTitle(name, 'Image file')
+    if (!page) continue
+    const { url } = page.file
     const alt = elems.length > 1 ? elems[1] : name
-    str = str.replace(match, `<img src="${url}" alt="${alt}" />`)
+    let parsed = `<img src="${url}" alt="${alt}" />`
+    if (page.types.includes('SVG image')) {
+      const svg = await getSVG(url)
+      if (svg !== '') parsed = svg
+    }
+    str = str.replace(match, parsed)
   }
   return str
 }
