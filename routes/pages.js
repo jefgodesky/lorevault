@@ -63,10 +63,13 @@ router.get('/*/edit', async (req, res, next) => {
 
 // POST /*/edit
 router.post('/*/edit', upload.single('file'), async (req, res, next) => {
+  const page = await Page.findByPath(req.originalUrl)
+  if (!page) res.redirect('/')
   const update = req.file
     ? Object.assign({}, req.body, { file: getFileData(req.file) }, { editor: req.user?._id })
     : Object.assign({}, req.body, { editor: req.user?._id })
-  const page = await Page.makeUpdate(req.originalUrl, update)
+  if (page.file?.url && update.file?.url && page.file.url !== update.file.url) await page.deleteFile()
+  await page.makeUpdate(update)
   res.redirect(`/${page.path}`)
 })
 
