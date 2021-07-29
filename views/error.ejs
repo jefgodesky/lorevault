@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
-  <%- include('includes/head', { title: message }) %>
+  <%- include('includes/head', { title: `${error.status} ${message}` }) %>
   <body>
-    <%- include('includes/header', { isLoggedIn, char, title: message }) %>
+    <%- include('includes/header', { isLoggedIn, char, title: `${error.status} ${message}` }) %>
     <main>
-      <p>Error <%= error.status %></p>
+      <p><%- resolution %></p>
       <div class="error-stack">
         <pre><%= error.stack %></pre>
       </div>
