@@ -53,6 +53,16 @@ router.get('/upload', async (req, res, next) => {
   res.render('create', req.viewOpts)
 })
 
+// GET /search
+router.get('/search', async (req, res, next) => {
+  const query = req.query.q
+  req.viewOpts.title = `Results for &ldquo;${query}&rdquo;`
+  req.viewOpts.searchResults = await Page
+    .find({ $text: { $search: query } }, { score: { $meta: 'textScore' } })
+    .sort({ score: { $meta: 'textScore' } })
+  res.render('search', req.viewOpts)
+})
+
 // GET /*/edit
 router.get('/*/edit', async (req, res, next) => {
   req.viewOpts.page = await Page.findByPath(req.originalUrl)
