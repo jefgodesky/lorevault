@@ -14,7 +14,6 @@ const initViewOpts = require('./middleware/initViewOpts')
 const ejsHelpers = require('./views/helpers')
 
 const { db, port, secret } = require('./config')
-const indexRouter = require('./routes/index')
 const authRouter = require('./routes/auth')
 const charRouter = require('./routes/characters')
 const pageRouter = require('./routes/pages')
@@ -50,7 +49,6 @@ server.use(passport.session())
 server.use(initViewOpts)
 
 // Set up routers
-server.use('/', indexRouter)
 server.use('/', authRouter)
 server.use('/characters', charRouter)
 server.use('/', pageRouter)
