@@ -19,3 +19,8 @@ form.search {
 body > header nav + form.search {
   margin-top: -1em;
 }
+
+ol.search-results li {
+  font-size: 125%;
+  margin-bottom: 1em;
+}
