@@ -15,7 +15,7 @@
       <% } %>
       </nav>
       <form action="/search" method="GET" class="search">
-        <input type="search" name="q" placeholder="Search for..." />
+        <input type="search" name="q" placeholder="Search for..." value="<%= locals.query ? query : '' %>" />
         <button>Search</button>
       </form>
       <h1><%= title %></h1>
