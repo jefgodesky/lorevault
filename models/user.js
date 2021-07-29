@@ -2,7 +2,11 @@ const { Schema, model } = require('mongoose')
 const { rules } = require('../config')
 
 const CharacterSchemaDefinition = {
-  name: String
+  name: String,
+  page: {
+    type: Schema.Types.ObjectId,
+    ref: 'Page'
+  }
 }
 
 for (const system of rules) {
