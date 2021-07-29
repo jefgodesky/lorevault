@@ -23,6 +23,12 @@ const getFileData = file => {
   return data
 }
 
+// GET /
+router.get('/', async (req, res, next) => {
+  const home = await Page.findByTitle(config.home)
+  res.redirect(home.path)
+})
+
 // GET /create
 router.get('/create', async (req, res, next) => {
   req.viewOpts.title = 'Create a New Page'
