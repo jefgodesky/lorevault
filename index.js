@@ -64,7 +64,12 @@ server.use((req, res, next) => {
 server.use((err, req, res, next) => {
   // Set locals, only providing error in development
   res.locals.message = err.message
+  res.locals.isLoggedIn = req.viewOpts.isLoggedIn
+  res.locals.char = req.viewOpts.char
   res.locals.error = req.app.get('env') === 'development' ? err : {}
+  res.locals.resolution = err.status === 404
+    ? 'Sorry, that pages does not exist. You can try using the search form above to find what you&rsquo;re looking for.'
+    : 'Sorry, something went wrong. Please try again later.'
 
   // Render the error page
   res.status(err.status || 500)

@@ -126,6 +126,7 @@ router.get('/*/*', async (req, res, next) => {
 // GET /*
 router.get('/*', async (req, res, next) => {
   req.viewOpts.page = await Page.findByPath(req.originalUrl)
+  if (!req.viewOpts.page) return next()
   req.viewOpts.markup = await parse(req.viewOpts.page.body)
 
   // Populate categories

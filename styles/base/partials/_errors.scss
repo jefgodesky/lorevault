@@ -1,0 +1,6 @@
+@forward '../modules/placeholders';
+
+.error-stack {
+  @extend %box;
+  overflow: auto;
+}
