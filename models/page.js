@@ -51,6 +51,8 @@ const PageSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
 
 PageSchema.plugin(slugger)
 PageSchema.plugin(uniqueValidation)
+PageSchema.index({ title: 'text', body: 'text' }, { name: 'Page Index', weights: { title: 10, body: 1 } })
+
 
 /**
  * Before saving the page, figure out its types, based on its title, file,
