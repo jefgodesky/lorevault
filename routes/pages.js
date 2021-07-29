@@ -56,6 +56,7 @@ router.get('/upload', async (req, res, next) => {
 // GET /search
 router.get('/search', async (req, res, next) => {
   const query = req.query.q
+  req.viewOpts.query = query
   req.viewOpts.title = `Results for &ldquo;${query}&rdquo;`
   req.viewOpts.searchResults = await Page
     .find({ $text: { $search: query } }, { score: { $meta: 'textScore' } })
