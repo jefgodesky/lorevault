@@ -1,3 +1,14 @@
-<h1><%= message %></h1>
-<h2><%= error.status %></h2>
-<pre><%= error.stack %></pre>
+<!DOCTYPE html>
+<html>
+  <%- include('includes/head', { title: message }) %>
+  <body>
+    <%- include('includes/header', { isLoggedIn, char, title: message }) %>
+    <main>
+      <p>Error <%= error.status %></p>
+      <div class="error-stack">
+        <pre><%= error.stack %></pre>
+      </div>
+    </main>
+    <%- include('includes/footer') %>
+  </body>
+</html>
