@@ -76,4 +76,24 @@ describe('User', () => {
       expect(user.charClaimMode).toEqual(false)
     })
   })
+
+  describe('UserSchema.methods.toggleCharClaimMode', () => {
+    it('sets the user\'s character claim mode flag to the opposite of what it was', async () => {
+      expect.assertions(1)
+      const user = await User.create({ googleID: 'google', discordID: 'discord' })
+      const before = user.charClaimMode
+      await user.toggleCharClaimMode()
+      expect(user.charClaimMode).toEqual(!before)
+    })
+
+    it('flips the value back and forth', async () => {
+      expect.assertions(1)
+      const times = Math.floor(Math.random() * 3) + 2
+      const user = await User.create({ googleID: 'google', discordID: 'discord' })
+      const before = user.charClaimMode
+      for (let i = 0; i < times; i++) await user.leaveCharClaimMode()
+      const expected = times % 2 === 0 ? before : !before
+      expect(user.charClaimMode).toEqual(expected)
+    })
+  })
 })

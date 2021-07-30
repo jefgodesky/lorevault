@@ -71,4 +71,18 @@ UserSchema.methods.leaveCharClaimMode = async function () {
   await this.save()
 }
 
+/**
+ * Toggles the user's character claim mode flag. If it was `false` before, this
+ * method will set it to `true`; likewise, if it was `true` before, this method
+ * will set it to `false`.
+ * @returns {Promise<void>} - A Promise that resolves when the user's character
+ *   claim mode flag has been set to the opposite of its previous value, and
+ *   the document has been saved to the database.
+ */
+
+UserSchema.methods.toggleCharClaimMode = async function () {
+  this.charClaimMode = !this.charClaimMode
+  await this.save()
+}
+
 module.exports = model('User', UserSchema)
