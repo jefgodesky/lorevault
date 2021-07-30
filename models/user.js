@@ -1,9 +1,12 @@
 const { Schema, model } = require('mongoose')
-const { rules } = require('../config')
 
 const UserSchema = new Schema({
   googleID: String,
-  discordID: String
+  discordID: String,
+  charClaimMode: {
+    type: Boolean,
+    default: false
+  }
 })
 
 const serviceKeys = {
