@@ -96,8 +96,11 @@ const parseTemplates = async str => {
     const params = elems.length > 1 ? parseTemplateParam(elems.slice(1)) : { ordered: [], named: {} }
     if (!name) continue
     const tpl = await Page.findByTitle(name, 'Template')
-    if (!tpl) continue
-    str = str.replace(match, tpl.parseTemplate(params))
+    if (!tpl || tpl.length === 0) {
+      str = str.replace(match, '')
+    } else {
+      str = str.replace(match, tpl.parseTemplate(params))
+    }
   }
   return parseTemplates(str)
 }
