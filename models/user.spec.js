@@ -57,4 +57,23 @@ describe('User', () => {
       expect(user.charClaimMode).toEqual(true)
     })
   })
+
+  describe('UserSchema.methods.leaveCharClaimMode', () => {
+    it('sets the user\'s character claim mode flag to false', async () => {
+      expect.assertions(1)
+      const user = await User.create({ googleID: 'google', discordID: 'discord' })
+      await user.enterCharClaimMode()
+      await user.leaveCharClaimMode()
+      expect(user.charClaimMode).toEqual(false)
+    })
+
+    it('sets the user\'s character claim mode flag to true no matter how many times you call it', async () => {
+      expect.assertions(1)
+      const times = Math.floor(Math.random() * 3) + 2
+      const user = await User.create({ googleID: 'google', discordID: 'discord' })
+      await user.enterCharClaimMode()
+      for (let i = 0; i < times; i++) await user.leaveCharClaimMode()
+      expect(user.charClaimMode).toEqual(false)
+    })
+  })
 })
