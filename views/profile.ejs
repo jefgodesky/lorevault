@@ -38,6 +38,14 @@
             </tr>
           </tbody>
         </table>
+        <h2>Characters</h2>
+        <p>
+        <% if (locals.charClaimMode) { %>
+          <a href="/toggle-char-claim-mode" class="toggle on">Turn off character claim mode</a>
+        <% } else { %>
+            <a href="/toggle-char-claim-mode" class="toggle off">Turn on character claim mode</a>
+        <% } %>
+        </p>
       <% } else { %>
         <p>You&rsquo;ll need to log before you can see or edit your profile.</p>
       <% } %>
