@@ -47,4 +47,17 @@ UserSchema.methods.disconnect = async function (service) {
   return true
 }
 
+/**
+ * Sets the user's character claim mode flag to true.
+ * @returns {Promise<boolean>} - A Promise that resolves when the user's
+ *   character claim mode flag has been set to true, and the document has been
+ *   saved to the database.
+ */
+
+UserSchema.methods.enterCharClaimMode = async function () {
+  this.charClaimMode = true
+  await this.save()
+  return true
+}
+
 module.exports = model('User', UserSchema)

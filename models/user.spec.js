@@ -41,70 +41,20 @@ describe('User', () => {
     })
   })
 
-  describe('UserSchema.methods.addCharacter', () => {
-    it('adds a character', async () => {
+  describe('UserSchema.methods.enterCharClaimMode', () => {
+    it('sets the user\'s character claim mode flag to true', async () => {
       expect.assertions(1)
-      const name = 'Tester'
-      const user = await User.create({ googleID: 'google' })
-      await user.addCharacter({ name })
-      expect(user.characters[0].name).toEqual(name)
+      const user = await User.create({ googleID: 'google', discordID: 'discord' })
+      await user.enterCharClaimMode()
+      expect(user.charClaimMode).toEqual(true)
     })
 
-    it('makes this your active character if this is your first character', async () => {
+    it('sets the user\'s character claim mode flag to true no matter how many times you call it', async () => {
       expect.assertions(1)
-      const name = 'Tester'
-      const user = await User.create({ googleID: 'google' })
-      await user.addCharacter({ name })
-      expect(user.active.name).toEqual(name)
-    })
-
-    it('doesn\'t makes this your active character if this isn\'t your first character', async () => {
-      expect.assertions(2)
-      const user = await User.create({})
-      await user.addCharacter({ name: 'Tester 1' })
-      await user.addCharacter({ name: 'Tester 2' })
-      expect(user.characters).toHaveLength(2)
-      expect(user.active.name).toEqual('Tester 1')
-    })
-  })
-
-  describe('UserSchema.methods.selectCharacter', () => {
-    it('selects a character as your new active character', async () => {
-      expect.assertions(1)
-      const user = await User.create({})
-      await user.addCharacter({ name: 'Tester 1' })
-      await user.addCharacter({ name: 'Tester 2' })
-      await user.selectCharacter(user.characters[1]._id.toString())
-      expect(user.active.name).toEqual('Tester 2')
-    })
-
-    it('does nothing if not given a valid ID for one of your characters', async () => {
-      expect.assertions(1)
-      const user = await User.create({})
-      await user.addCharacter({ name: 'Tester 1' })
-      await user.addCharacter({ name: 'Tester 2' })
-      await user.selectCharacter('nope')
-      expect(user.active.name).toEqual('Tester 1')
-    })
-  })
-
-  describe('UserSchema.methods.deleteCharacter', () => {
-    it('deletes a character', async () => {
-      expect.assertions(1)
-      const user = await User.create({})
-      await user.addCharacter({ name: 'Tester 1' })
-      await user.addCharacter({ name: 'Tester 2' })
-      await user.deleteCharacter(user.characters[1]._id.toString())
-      expect(user.characters).toHaveLength(1)
-    })
-
-    it('deletes your active status if you delete your active character', async () => {
-      expect.assertions(1)
-      const user = await User.create({})
-      await user.addCharacter({ name: 'Tester 1' })
-      await user.addCharacter({ name: 'Tester 2' })
-      await user.deleteCharacter(user.active._id.toString())
-      expect(user.active).not.toBeDefined()
+      const times = Math.floor(Math.random() * 3) + 2
+      const user = await User.create({ googleID: 'google', discordID: 'discord' })
+      for (let i = 0; i < times; i++) await user.enterCharClaimMode()
+      expect(user.charClaimMode).toEqual(true)
     })
   })
 })
