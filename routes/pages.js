@@ -2,6 +2,8 @@ const { Router } = require('express')
 const diff = require('diff')
 const config = require('../config')
 const Page = require('../models/page')
+const Character = require('../models/character')
+const User = require('../models/user')
 const upload = require('../middleware/upload')
 const parse = require('../parser')
 const router = Router()
@@ -114,6 +116,28 @@ router.get('/*/claim', async (req, res, next) => {
   }
   for (const stat of req.viewOpts.systems[0].stats) console.log(stat)
   res.render('claim', req.viewOpts)
+})
+
+// POST /*/claim
+router.post('/*/claim', async (req, res, next) => {
+  if (!req.user) return res.redirect('/')
+  const page = await Page.findByPath(req.originalUrl)
+  if (!page) return res.redirect('/profile')
+
+  const char = { page: page._id, player: req.user._id }
+  for (const system of config.rules) {
+    char[system] = {}
+    const stats = require(`../rules/${system}/sheet`)
+    for (const stat of Object.keys(stats)) {
+      char[system][stat] = stats[stat].type === Number
+        ? parseInt(req.body[`${system}-${stat}`])
+        : req.body[`${system}-${stat}`]
+    }
+  }
+
+  await Character.create(char)
+
+  res.redirect('/profile')
 })
 
 // POST /*/compare
