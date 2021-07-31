@@ -29,6 +29,10 @@ const VersionSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
 
 const PageSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
   types: [String],
+  claim: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  },
   categories: [{
     type: Schema.Types.ObjectId,
     ref: 'Page'
