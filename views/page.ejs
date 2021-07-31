@@ -33,6 +33,11 @@
         </ul>
       </section>
       <% } %>
+      <% if (locals.claimable) { %>
+      <p>
+        <a href="/<%= page.path %>/claim" class="button">Claim <%= page.title %></a>
+      </p>
+      <% } %>
       <% if (locals.categories && categories.length > 0) { %>
       <ul class="categories">
         <% for (const category of categories) { %>

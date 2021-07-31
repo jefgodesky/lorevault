@@ -131,9 +131,11 @@ router.get('/*/*', async (req, res, next) => {
 
 // GET /*
 router.get('/*', async (req, res, next) => {
-  req.viewOpts.page = await Page.findByPath(req.originalUrl)
-  if (!req.viewOpts.page) return next()
-  req.viewOpts.markup = await parse(req.viewOpts.page.body)
+  const page = await Page.findByPath(req.originalUrl)
+  if (!page) return next()
+  req.viewOpts.page = page
+  req.viewOpts.markup = await parse(page.body)
+  req.viewOpts.claimable = req.user?.charClaimMode === true && page.types.includes('Person') && !page.claim
 
   // Populate categories
   req.viewOpts.categories = []
