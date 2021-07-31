@@ -22,4 +22,17 @@ for (const system of rules) {
 
 const CharacterSchema = new Schema(CharacterSchemaDefinition)
 
+/**
+ * Return all of a user's characters.
+ * @param {User|Schema.Types.ObjectID} user - The user (or the ID of the user)
+ *   whose characters you wish to return.
+ * @returns {Promise<Character[]>} - A Promise tht resolves with the user's
+ *   characters.
+ */
+
+CharacterSchema.statics.getCharacters = async function (user) {
+  const id = user._id ? user._id : user
+  return this.find({ player: id }).populate('page')
+}
+
 module.exports = model('Character', CharacterSchema)
