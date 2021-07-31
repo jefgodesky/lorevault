@@ -15,6 +15,7 @@ const ejsHelpers = require('./views/helpers')
 
 const { db, port, secret } = require('./config')
 const authRouter = require('./routes/auth')
+const userRouter = require('./routes/users')
 const pageRouter = require('./routes/pages')
 
 const server = express()
@@ -49,6 +50,7 @@ server.use(initViewOpts)
 
 // Set up routers
 server.use('/', authRouter)
+server.use('/', userRouter)
 server.use('/', pageRouter)
 
 // Catch 404 and forward to error handler
