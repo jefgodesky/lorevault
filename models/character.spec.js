@@ -42,4 +42,23 @@ describe('Character', () => {
       expect(actual[0].page._id).toEqual(page._id)
     })
   })
+
+  describe('CharacterSchema.statics.isYourCharacter', () => {
+    it('returns false if it isn\'t your character', async () => {
+      expect.assertions(1)
+      const player = await User.create({googleID: 'google', discordID: 'discord'})
+      const page = await Page.create(testPageData)
+      const actual = await Character.isYourCharacter(page, player)
+      expect(actual).toEqual(false)
+    })
+
+    it('returns true if it is your character', async () => {
+      expect.assertions(1)
+      const player = await User.create({googleID: 'google', discordID: 'discord'})
+      const page = await Page.create(testPageData)
+      await Character.create({ page, player })
+      const actual = await Character.isYourCharacter(page, player)
+      expect(actual).toEqual(true)
+    })
+  })
 })
