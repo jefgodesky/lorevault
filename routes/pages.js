@@ -178,7 +178,8 @@ router.get('/*', async (req, res, next) => {
   if (!page) return next()
   req.viewOpts.page = page
   req.viewOpts.markup = await parse(page.body)
-  req.viewOpts.claimable = req.user?.charClaimMode === true && page.types.includes('Person') && !page.claim
+  const pageIsClaimable = await page.isClaimable()
+  req.viewOpts.claimable = req.user?.charClaimMode === true && pageIsClaimable
 
   // Populate categories
   req.viewOpts.categories = []
