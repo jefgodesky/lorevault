@@ -5,6 +5,8 @@
         <a href="<%= char.path %>" class="pov"><%= char.name %></a>
         <% } else if (locals.perspective === 'loremaster') { %>
         <a href="/profile" class="pov">Loremaster</a>
+        <% } else { %>
+        <span class="pov">Public</span>
         <% } %>
         <ul>
           <li><a href="/profile">Your Profile</a></li>
