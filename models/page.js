@@ -284,7 +284,7 @@ PageSchema.methods.isClaimable = async function () {
 PageSchema.methods.delete = async function () {
   const char = await Character.findOne({ page: this._id }).populate('player')
   if (char?.player) await char.player.releaseCharacter(char._id)
-  this.constructor.findByIdAndDelete(this._id)
+  await this.constructor.findByIdAndDelete(this._id)
 }
 
 /**
