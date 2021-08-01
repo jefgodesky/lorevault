@@ -53,4 +53,26 @@ CharacterSchema.statics.isYourCharacter = async function (page, user) {
   return Boolean(check)
 }
 
+/**
+ * Read the sort of form produced using the getSystemsDisplay utility and use
+ * it to produce the values used in a Character instance.
+ * @param {obj} form - An object with the results of a form created with the
+ *   getSystemsDisplay utility method.
+ * @returns {obj>} - An object ready to be used in a Character instance.
+ */
+
+CharacterSchema.statics.readForm = function (form) {
+  const obj = {}
+  for (const system of rules) {
+    obj[system] = {}
+    const stats = require(`../rules/${system}/sheet`)
+    for (const stat of Object.keys(stats)) {
+      obj[system][stat] = stats[stat].type === Number
+        ? parseInt(form[`${system}-${stat}`])
+        : form[`${system}-${stat}`]
+    }
+  }
+  return obj
+}
+
 module.exports = model('Character', CharacterSchema)

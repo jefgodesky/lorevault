@@ -61,4 +61,17 @@ describe('Character', () => {
       expect(actual).toEqual(true)
     })
   })
+
+  describe('CharacterSchema.statics.readForm', () => {
+    it('extracts values from a form', () => {
+      const actual = Character.readForm({
+        'dnd5e-int': '1',
+        'dnd5e-arcana': '2',
+        'dnd5e-history': '3',
+        'dnd5e-nature': '4',
+        'dnd5e-religion': '5'
+      })
+      expect(actual).toEqual({ dnd5e: { int: 1, arcana: 2, history: 3, nature: 4, religion: 5 } })
+    })
+  })
 })
