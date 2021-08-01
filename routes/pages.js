@@ -112,20 +112,8 @@ router.post('/*/claim', async (req, res, next) => {
   if (!req.user) return res.redirect('/')
   const page = await Page.findByPath(req.originalUrl)
   if (!page) return res.redirect('/profile')
-
-  const char = { page: page._id, player: req.user._id }
-  for (const system of config.rules) {
-    char[system] = {}
-    const stats = require(`../rules/${system}/sheet`)
-    for (const stat of Object.keys(stats)) {
-      char[system][stat] = stats[stat].type === Number
-        ? parseInt(req.body[`${system}-${stat}`])
-        : req.body[`${system}-${stat}`]
-    }
-  }
-
+  const char = Object.assign(Character.readForm(req.body), { page: page._id, player: req.user._id })
   await Character.create(char)
-
   res.redirect('/profile')
 })
 
