@@ -34,6 +34,25 @@ header nav {
     &:active {
       background: rgba(0, 0, 0, 0.1);
     }
+
+    &.active-char {
+      background: transparent;
+      float: left;
+      font-weight: normal;
+
+      &:before {
+        content: 'Active character:';
+        font-style: italic;
+      }
+
+      &:hover {
+        background: rgba(245, 225, 166, 1);
+      }
+
+      &:active {
+        background: rgba(0, 0, 0, 0.1);
+      }
+    }
   }
 }
 
