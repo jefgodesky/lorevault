@@ -4,7 +4,8 @@ const uniqueValidation = require('mongoose-unique-validator')
 const Character = require('./character')
 const { getS3 } = require('../utils')
 const { formatDate } = require('../views/helpers')
-const { bucket, domain, rules } = require('../config').aws
+const { rules, aws } = require('../config')
+const { bucket, domain } = aws
 
 const CorePageSchemaDefinition = {
   title: String,
