@@ -109,6 +109,7 @@ UserSchema.methods.releaseCharacter = async function (id) {
   if (!check) return false
   if (this.activeChar?.equals(id)) {
     this.activeChar = null
+    if (this.perspective === 'character') this.perspective = 'public'
     await this.save()
   }
   await Character.findByIdAndDelete(id)
