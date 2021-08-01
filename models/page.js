@@ -2,6 +2,7 @@ const { Schema, model } = require('mongoose')
 const slugger = require('mongoose-slug-generator')
 const uniqueValidation = require('mongoose-unique-validator')
 const Character = require('./character')
+const User = require('./user')
 const { getS3 } = require('../utils')
 const { formatDate } = require('../views/helpers')
 const { bucket, domain } = require('../config').aws
@@ -274,6 +275,19 @@ PageSchema.methods.isClaimable = async function () {
 }
 
 /**
+ * Delete the current page.
+ * @returns {Promise<void>} - A Promise that resolves once the page has been
+ *   deleted. Before it deletes itself, it checks and removes any dependencies,
+ *   such as characters and active characters.
+ */
+
+PageSchema.methods.delete = async function () {
+  const char = await Character.findOne({ page: this._id }).populate('player')
+  if (char?.player) await char.player.releaseCharacter(char._id)
+  await this.constructor.findByIdAndDelete(this._id)
+}
+
+/**
  * Return a Page document that has a given path.
  * @param {string} url - The requesting URL.
  * @returns {*} - A Promise that returns with the result of the query.
@@ -282,7 +296,7 @@ PageSchema.methods.isClaimable = async function () {
 PageSchema.statics.findByPath = function (url) {
   const parts = url.split('/')
   const path = parts[0] === '' ? parts[1] : parts[0]
-  return this.findOne({ path })
+  return this.findOne({ path }).populate('categories')
 }
 
 /**

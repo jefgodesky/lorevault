@@ -4,6 +4,7 @@ const config = require('../config')
 const Page = require('../models/page')
 const Character = require('../models/character')
 const { getSystemsDisplay } = require('../utils')
+const renderPage = require('../middleware/renderPage')
 const upload = require('../middleware/upload')
 const parse = require('../parser')
 const router = Router()
@@ -140,6 +141,20 @@ router.post('/*/*/rollback', async (req, res, next) => {
   res.redirect(`/${page.path}`)
 })
 
+// GET /*/delete
+router.get('/*/delete', renderPage, async (req, res, next) => {
+  if (!req.viewOpts.page) return next()
+  req.viewOpts.promptDelete = true
+  res.render('page', req.viewOpts)
+})
+
+// POST /*/delete
+router.post('/*/delete', async (req, res, next) => {
+  const page = await Page.findByPath(req.originalUrl)
+  if (page) await page.delete()
+  res.redirect('/')
+})
+
 // GET /*/*
 router.get('/*/*', async (req, res, next) => {
   const parts = req.originalUrl.split('/')
@@ -152,32 +167,8 @@ router.get('/*/*', async (req, res, next) => {
 })
 
 // GET /*
-router.get('/*', async (req, res, next) => {
-  const page = await Page.findByPath(req.originalUrl)
-  if (!page) return next()
-  req.viewOpts.page = page
-  req.viewOpts.markup = await parse(page.body)
-  const pageIsClaimable = await page.isClaimable()
-  req.viewOpts.claimable = req.user?.charClaimMode === true && pageIsClaimable
-
-  // Populate categories
-  req.viewOpts.categories = []
-  for (const id of req.viewOpts.page.categories) {
-    const category = await Page.findById(id)
-    req.viewOpts.categories.push({
-      title: category.title,
-      path: category.path
-    })
-  }
-
-  // Add special category data
-  if (req.viewOpts.page.types.includes('Category')) {
-    const { subcategories, pages } = await Page.findCategoryMembers(req.viewOpts.page.title)
-    req.viewOpts.subcategories = subcategories
-    req.viewOpts.pages = pages
-  }
-
-  // Render the page
+router.get('/*', renderPage, async (req, res, next) => {
+  if (!req.viewOpts.page) return next()
   res.render('page', req.viewOpts)
 })
 
