@@ -5,7 +5,7 @@
     <%- include('includes/header', { isLoggedIn, char, title }) %>
     <main>
       <p>Claiming a character allows you to view secrets from this character&rsquo;s point of view. Do you want to claim <strong><%= page.title %></strong> as one of your characters?</p>
-      <%- include('includes/char-form', { action: `/${page.path}/claim`, title: page.title, systems }) %>
+      <%- include('includes/char-form', { action: `/${page.path}/claim`, name: page.title, systems }) %>
     </main>
     <%- include('includes/footer') %>
   </body>
