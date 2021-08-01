@@ -34,25 +34,31 @@ header nav {
     &:active {
       background: rgba(0, 0, 0, 0.1);
     }
+  }
+}
 
-    &.active-char {
-      background: transparent;
-      float: left;
-      font-weight: normal;
+.pov {
+  background: transparent;
+  display: block;
+  float: left;
+  font-weight: normal;
+  padding: 1.25em 1em 1em 1em;
+  position: relative;
+  min-width: 10em;
+  text-align: left;
 
-      &:before {
-        content: 'Active character:';
-        font-style: italic;
-      }
+  &:before {
+    content: 'Current point of view';
+    font-size: 66%;
+    display: block;
+    left: 1.5em;
+    position: absolute;
+    top: 0.5em;
+  }
 
-      &:hover {
-        background: rgba(245, 225, 166, 1);
-      }
-
-      &:active {
-        background: rgba(0, 0, 0, 0.1);
-      }
-    }
+  &:hover,
+  &:active {
+    background: transparent;
   }
 }
 

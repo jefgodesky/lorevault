@@ -12,6 +12,7 @@ const initViewOpts = (req, res, next) => {
     char: req.user?.activeChar
       ? { id: req.user.activeChar._id, name: req.user.activeChar.page?.title, path: `/${req.user.activeChar.page?.path}` }
       : undefined,
+    perspective: req.user?.perspective || 'public',
     isLoggedIn: Boolean(req.user),
     charClaimMode: req.user?.charClaimMode
   }
