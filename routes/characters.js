@@ -33,4 +33,11 @@ router.get('/:id/select', async (req, res, next) => {
   res.redirect('/profile')
 })
 
+// GET /:id/release
+router.get('/:id/release', async (req, res, next) => {
+  if (!req.user) return res.redirect('/')
+  await req.user.releaseCharacter(req.params.id)
+  res.redirect('/profile')
+})
+
 module.exports = router
