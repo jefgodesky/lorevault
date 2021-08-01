@@ -20,3 +20,31 @@ describe('getSVG', () => {
     expect(actual).toEqual('')
   })
 })
+
+describe('getSystemsDisplay', () => {
+  it('provides meta information about each rule system', () => {
+    const actual = utils.getSystemsDisplay([ 'dnd5e' ])
+    expect(actual[0].id).toEqual('dnd5e')
+    expect(actual[0].name).toEqual('Dungeons & Dragons')
+    expect(actual[0].edition).toEqual('5th edition')
+  })
+
+  it('provides stats', () => {
+    const actual = utils.getSystemsDisplay([ 'dnd5e' ])
+    expect(actual[0].stats[0]).toEqual({ id: 'dnd5e-int', label: 'Intelligence Modifier', type: 'number', value: undefined })
+    expect(actual[0].stats[1]).toEqual({ id: 'dnd5e-arcana', label: 'Arcana Bonus', type: 'number', value: undefined })
+    expect(actual[0].stats[2]).toEqual({ id: 'dnd5e-history', label: 'History Bonus', type: 'number', value: undefined })
+    expect(actual[0].stats[3]).toEqual({ id: 'dnd5e-nature', label: 'Nature Bonus', type: 'number', value: undefined })
+    expect(actual[0].stats[4]).toEqual({ id: 'dnd5e-religion', label: 'Religion Bonus', type: 'number', value: undefined })
+  })
+
+  it('supplies the character\'s stats', () => {
+    const char = { dnd5e: { int: 1, arcana: 2, history: 3, nature: 4 } }
+    const actual = utils.getSystemsDisplay([ 'dnd5e' ], char)
+    expect(actual[0].stats[0]).toEqual({ id: 'dnd5e-int', label: 'Intelligence Modifier', type: 'number', value: 1 })
+    expect(actual[0].stats[1]).toEqual({ id: 'dnd5e-arcana', label: 'Arcana Bonus', type: 'number', value: 2 })
+    expect(actual[0].stats[2]).toEqual({ id: 'dnd5e-history', label: 'History Bonus', type: 'number', value: 3 })
+    expect(actual[0].stats[3]).toEqual({ id: 'dnd5e-nature', label: 'Nature Bonus', type: 'number', value: 4 })
+    expect(actual[0].stats[4]).toEqual({ id: 'dnd5e-religion', label: 'Religion Bonus', type: 'number', value: undefined })
+  })
+})
