@@ -287,6 +287,26 @@ PageSchema.methods.isClaimable = async function () {
 }
 
 /**
+ * Returns an array of the page's secret that the given character knows.
+ * @param {Character|string} char - A Character document, or the unique ID
+ *   string of a Character document, if viewing the page from a character's
+ *   point of view. The string "loremaster" sees the page as a loremaster,
+ *   revealing all secrets, while the string "public" sees the page as someone
+ *   not signed in, meaning that no secrets are shown.
+ * @returns {Promise<SecretSchema[]>} - A Promise that resolves with the array
+ *   of the page's secrets that the given character knows.
+ */
+
+PageSchema.methods.getKnownSecrets = async function (char) {
+  const id = char._id ? char._id.toString() : char.toString()
+  return this.secrets.filter(secret => {
+    if (id === 'loremaster') return true
+    if (id === 'public') return false
+    return secret.knowers.map(id => id.toString()).includes(id)
+  })
+}
+
+/**
  * Delete the current page.
  * @returns {Promise<void>} - A Promise that resolves once the page has been
  *   deleted. Before it deletes itself, it checks and removes any dependencies,

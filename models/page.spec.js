@@ -279,6 +279,38 @@ describe('Page', () => {
     })
   })
 
+  describe('PageSchema.methods.getKnownSecrets', () => {
+    it('returns all secrets for a loremaster', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      page.secrets.push({ text: 'Test' })
+      await page.save()
+      const actual = await page.getKnownSecrets('loremaster')
+      expect(actual).toHaveLength(1)
+    })
+
+    it('returns no secrets to the public', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      page.secrets.push({ text: 'Test' })
+      await page.save()
+      const actual = await page.getKnownSecrets('public')
+      expect(actual).toHaveLength(0)
+    })
+
+    it('returns the secrets that a character knows', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      const player = await User.create({ googleID: 'google', discordID: 'discord' })
+      const char = await Character.create({ page, player })
+      page.secrets.push({ text: 'Secret 1' })
+      page.secrets.push({ text: 'Secret 2', knowers: [ char._id] })
+      await page.save()
+      const actual = await page.getKnownSecrets(char)
+      expect(actual).toHaveLength(1)
+    })
+  })
+
   describe('PageSchema.methods.delete', () => {
     it('deletes a page', async () => {
       expect.assertions(1)
