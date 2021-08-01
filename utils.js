@@ -41,10 +41,10 @@ const getSVG = async url => {
  * that can be offered for a character under a particular set of rules systems.
  * @param {string[]} systems - An array of strings specifying the rules systems
  *   that you would like to use.
- * @param {Character} char - (Optional) A Character instance. If supplied, each
- *   field will have a value equal to the character's value for each statistic.
- *   If not supplied, or for any statistic that the character does not have,
- *   the object sets `value` to `undefined`.
+ * @param {Character?} char - (Optional) A Character instance. If supplied,
+ *   each field will have a value equal to the character's value for each
+ *   statistic. If not supplied, or for any statistic that the character does
+ *   not have, the object sets `value` to `undefined`.
  * @returns {obj} - An object describing the rules and the statistics for each
  *   ruleset, and how to render its form.
  */
