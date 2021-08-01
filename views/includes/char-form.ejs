@@ -8,7 +8,7 @@
                 <% for (const stat of system.stats) { %>
                   <div class="stat-wrapper">
                     <label for="<%= stat.id %>"><%= stat.label %></label>
-                    <input type="<%= stat.type %>" name="<%= stat.id %>" id="<%= stat.id %>" />
+                    <input type="<%= stat.type %>" name="<%= stat.id %>" id="<%= stat.id %>"<% if (stat.value) { %> value="<%= stat.value %>"<% } %> />
                   </div>
                 <% } %>
               </div>
