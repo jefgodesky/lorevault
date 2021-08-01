@@ -15,7 +15,6 @@ const initViewOpts = (req, res, next) => {
     isLoggedIn: Boolean(req.user),
     charClaimMode: req.user?.charClaimMode
   }
-  console.log(req.viewOpts)
   next()
 }
 
