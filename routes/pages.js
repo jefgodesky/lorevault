@@ -143,6 +143,7 @@ router.post('/*/*/rollback', async (req, res, next) => {
 
 // GET /*/delete
 router.get('/*/delete', renderPage, async (req, res, next) => {
+  if (!req.viewOpts.page) return next()
   req.viewOpts.promptDelete = true
   res.render('page', req.viewOpts)
 })
@@ -167,6 +168,7 @@ router.get('/*/*', async (req, res, next) => {
 
 // GET /*
 router.get('/*', renderPage, async (req, res, next) => {
+  if (!req.viewOpts.page) return next()
   res.render('page', req.viewOpts)
 })
 
