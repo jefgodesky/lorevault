@@ -104,7 +104,7 @@ router.get('/*/claim', async (req, res, next) => {
   req.viewOpts.page = await Page.findByPath(req.originalUrl)
   req.viewOpts.title = `Claiming ${req.viewOpts.page.title}`
   req.viewOpts.systems = getSystemsDisplay(config.rules)
-  res.render('claim', req.viewOpts)
+  res.render('char-claim', req.viewOpts)
 })
 
 // POST /*/claim
