@@ -2,7 +2,6 @@ const { Schema, model } = require('mongoose')
 const slugger = require('mongoose-slug-generator')
 const uniqueValidation = require('mongoose-unique-validator')
 const Character = require('./character')
-const User = require('./user')
 const { getS3 } = require('../utils')
 const { formatDate } = require('../views/helpers')
 const { bucket, domain } = require('../config').aws
