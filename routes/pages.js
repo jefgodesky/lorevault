@@ -3,7 +3,7 @@ const diff = require('diff')
 const config = require('../config')
 const Page = require('../models/page')
 const Character = require('../models/character')
-const User = require('../models/user')
+const { getSystemsDisplay } = require('../utils')
 const upload = require('../middleware/upload')
 const parse = require('../parser')
 const router = Router()
@@ -103,18 +103,7 @@ router.get('/*/history', async (req, res, next) => {
 router.get('/*/claim', async (req, res, next) => {
   req.viewOpts.page = await Page.findByPath(req.originalUrl)
   req.viewOpts.title = `Claiming ${req.viewOpts.page.title}`
-  req.viewOpts.systems = []
-  for (const system of config.rules) {
-    const meta = require(`../rules/${system}/meta.json`)
-    const sheet = require(`../rules/${system}/sheet`)
-    const stats = Object.keys(sheet).map(key => ({
-      id: `${system}-${key}`,
-      label: sheet[key].label,
-      type: sheet[key].type === Number ? 'number' : 'text'
-    }))
-    req.viewOpts.systems.push(Object.assign({}, meta, { stats }))
-  }
-  for (const stat of req.viewOpts.systems[0].stats) console.log(stat)
+  req.viewOpts.systems = getSystemsDisplay(config.rules)
   res.render('claim', req.viewOpts)
 })
 
