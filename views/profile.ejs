@@ -39,6 +39,22 @@
             </tr>
           </tbody>
         </table>
+        <% if (locals.loremaster) { %>
+        <h2>Loremaster</h2>
+        <p>
+          In <strong>loremaster mode</strong>, you can see all of the secrets on the site.
+          <% if (locals.perspective === 'loremaster') { %> You are currently in loremaster mode.<% } %>
+          <% if (locals.perspective === 'character') { %> You are currently in character mode, which shows you only those secrets known to <a href="<%= char.path %>"><%= char.name %></a>.<% } %>
+          <% if (locals.perspective === 'public') { %> You are currently in public mode, showing you only what someone who hasn&rsquo;t even logged in would see.<% } %>
+          <p>
+          <% if (locals.perspective === 'loremaster') { %>
+            <a href="/toggle-loremaster" class="toggle on">Turn off loremaster mode</a>
+          <% } else { %>
+            <a href="/toggle-loremaster" class="toggle off">Turn on loremaster mode</a>
+          <% } %>
+          </p>
+        </p>
+        <% } %>
         <h2>Characters</h2>
         <p>
         <% if (locals.charClaimMode) { %>
