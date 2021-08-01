@@ -49,11 +49,16 @@
         <% if (locals.characters && characters.length > 0) { %>
         <table>
           <thead>
-            <tr><th>Character</th><th /></tr>
+            <tr><th /><th>Character</th><th /></tr>
           </thead>
           <tbody>
             <tr>
               <% for (const char of characters) { %>
+              <td class="short">
+                <% if (char._id.toString() === locals.char?.id?.toString()) { %>
+                <span class="active-char">&starf;</span>
+                <% } %>
+              </td>
               <td><a href="/<%= char.page.path %>"><%= char.page.title %></a></td>
               <td class="actions">
                 <a href="/character/<%= char._id %>/update" class="button">Update</a>
