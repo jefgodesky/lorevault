@@ -36,6 +36,7 @@ router.get('/', async (req, res, next) => {
 router.get('/create', async (req, res, next) => {
   req.viewOpts.title = 'Create a New Page'
   req.viewOpts.get = req.query
+  req.viewOpts.numSecrets = 3
   res.render('create', req.viewOpts)
 })
 
@@ -80,6 +81,7 @@ router.get('/*/edit', async (req, res, next) => {
   req.viewOpts.title = `Editing ${req.viewOpts.page.title}`
   req.viewOpts.upload = Boolean(req.viewOpts.page.file.url)
   req.viewOpts.get = req.query
+  req.viewOpts.numSecrets = req.viewOpts.page.secrets.length + 1
   res.render('edit', req.viewOpts)
 })
 

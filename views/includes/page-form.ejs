@@ -10,6 +10,11 @@
         <textarea id="body" name="body" class="body"><% if (locals.page) { %><%= page.body %><% } else if (locals.get?.body) { %><%= get.body %><% } %></textarea>
         <label for="msg">Message</label>
         <input type="text" id="msg" name="msg" placeholder="A short description of the change that you’re making" value="<%= locals.get?.msg ? get.msg : locals.page ? null : 'Initial text' %>" />
+        <h2>Secrets</h2>
+        <% for (let i = 1; i <= numSecrets; i++) { %>
+        <label for="secret<%= i.toString().padStart(3, '0') %>">Secret #<%= i %></label>
+        <textarea id="secret<%= i.toString().padStart(3, '0') %>" name="secret"></textarea>
+        <% } %>
         <p class="actions">
           <button><% if (locals.page) { %>Save Changes<% } else { %>Create Page<% } %></button>
         </p>
