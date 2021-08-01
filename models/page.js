@@ -4,7 +4,7 @@ const uniqueValidation = require('mongoose-unique-validator')
 const Character = require('./character')
 const { getS3 } = require('../utils')
 const { formatDate } = require('../views/helpers')
-const { bucket, domain } = require('../config').aws
+const { bucket, domain, rules } = require('../config').aws
 
 const CorePageSchemaDefinition = {
   title: String,
@@ -28,7 +28,19 @@ const VersionSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
   }
 }))
 
+const SecretSchemaDefinition = {
+  text: String,
+  knowers: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Character'
+  }]
+}
+
+for (const system of rules) SecretSchemaDefinition[system] = String
+const SecretSchema = new Schema(SecretSchemaDefinition)
+
 const PageSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
+  secrets: [SecretSchema],
   types: [String],
   categories: [{
     type: Schema.Types.ObjectId,
