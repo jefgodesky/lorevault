@@ -5,27 +5,7 @@
     <%- include('includes/header', { isLoggedIn, char, title }) %>
     <main>
       <p>Claiming a character allows you to view secrets from this character&rsquo;s point of view. Do you want to claim <strong><%= page.title %></strong> as one of your characters?</p>
-      <form action="/<%= page.path %>/claim" method="POST">
-        <% if (locals.systems && systems.length > 0) { %>
-        <% for (const system of systems) { %>
-        <div class="<%= system.id %>">
-          <h2><em><%= system.name %></em><% if (system.edition) { %> (<%= system.edition %>)<% } %></h2>
-          <p>To automatically reveal secrets that <%= page.title %> would know according to the rules of <em><%= system.name %></em><% if (system.edition) { %> (<%= system.edition %>)<% } %>, please provide the appropriate values below.</p>
-          <div class="stats-wrapper">
-            <% for (const stat of system.stats) { %>
-            <div class="stat-wrapper">
-              <label for="<%= stat.id %>"><%= stat.label %></label>
-              <input type="<%= stat.type %>" name="<%= stat.id %>" id="<%= stat.id %>" />
-            </div>
-            <% } %>
-          </div>
-        </div>
-        <% } %>
-        <% } %>
-        <p>
-          <button>Claim <%= page.title %></button>
-        </p>
-      </form>
+      <%- include('includes/char-form', { action: `/${page.path}/claim`, title: page.title, systems }) %>
     </main>
     <%- include('includes/footer') %>
   </body>
