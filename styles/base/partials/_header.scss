@@ -1,0 +1,68 @@
+@forward '../modules/placeholders';
+
+header nav {
+  margin-top: 0;
+  padding: 0;
+  text-align: right;
+
+  ul {
+    @extend %unformatted-list;
+  }
+
+  li {
+    display: inline-block;
+    margin: 0;
+    vertical-align: middle;
+  }
+
+  a,
+  .status {
+    padding: 1em;
+  }
+
+  a {
+    background: rgba(245, 225, 166, 0.5);
+    color: black;
+    display: block;
+    font-weight: bold;
+    text-decoration: none;
+
+    &:hover {
+      background: rgba(245, 225, 166, 1);
+    }
+
+    &:active {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    &.active-char {
+      background: transparent;
+      float: left;
+      font-weight: normal;
+
+      &:before {
+        content: 'Active character:';
+        font-style: italic;
+      }
+
+      &:hover {
+        background: rgba(245, 225, 166, 1);
+      }
+
+      &:active {
+        background: rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+}
+
+header h1 {
+  font-size: 2em;
+  margin: 2em 2em 0 2em;
+  padding: 0 1em;
+
+  @media (min-width: 44em) {
+    margin: 2em auto 0 auto;
+    max-width: 20em;
+  }
+}

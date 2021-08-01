@@ -2,6 +2,8 @@ const { Router } = require('express')
 const diff = require('diff')
 const config = require('../config')
 const Page = require('../models/page')
+const Character = require('../models/character')
+const { getSystemsDisplay } = require('../utils')
 const upload = require('../middleware/upload')
 const parse = require('../parser')
 const router = Router()
@@ -22,6 +24,12 @@ const getFileData = file => {
   if (file.size) data.size = file.size
   return data
 }
+
+// GET /
+router.get('/', async (req, res, next) => {
+  const home = await Page.findByTitle(config.home)
+  res.redirect(home.path)
+})
 
 // GET /create
 router.get('/create', async (req, res, next) => {
@@ -91,6 +99,24 @@ router.get('/*/history', async (req, res, next) => {
   res.render('history', req.viewOpts)
 })
 
+// GET /*/claim
+router.get('/*/claim', async (req, res, next) => {
+  req.viewOpts.page = await Page.findByPath(req.originalUrl)
+  req.viewOpts.title = `Claiming ${req.viewOpts.page.title}`
+  req.viewOpts.systems = getSystemsDisplay(config.rules)
+  res.render('char-claim', req.viewOpts)
+})
+
+// POST /*/claim
+router.post('/*/claim', async (req, res, next) => {
+  if (!req.user) return res.redirect('/')
+  const page = await Page.findByPath(req.originalUrl)
+  if (!page) return res.redirect('/profile')
+  const char = Object.assign(Character.readForm(req.body), { page: page._id, player: req.user._id })
+  await Character.create(char)
+  res.redirect('/profile')
+})
+
 // POST /*/compare
 router.post('/*/compare', async (req, res, next) => {
   req.viewOpts.page = await Page.findByPath(req.originalUrl)
@@ -125,8 +151,12 @@ router.get('/*/*', async (req, res, next) => {
 
 // GET /*
 router.get('/*', async (req, res, next) => {
-  req.viewOpts.page = await Page.findByPath(req.originalUrl)
-  req.viewOpts.markup = await parse(req.viewOpts.page.body)
+  const page = await Page.findByPath(req.originalUrl)
+  if (!page) return next()
+  req.viewOpts.page = page
+  req.viewOpts.markup = await parse(page.body)
+  const pageIsClaimable = await page.isClaimable()
+  req.viewOpts.claimable = req.user?.charClaimMode === true && pageIsClaimable
 
   // Populate categories
   req.viewOpts.categories = []

@@ -1,8 +1,10 @@
 <header>
       <nav>
-      <% if (isLoggedIn) { %>
+      <% if (locals.isLoggedIn) { %>
+        <% if (locals.char) { %>
+        <a href="<%= char.path %>" class="active-char"><%= char.name %></a>
+        <% } %>
         <ul>
-          <li class="status"><em>Active character:</em> <%= char.name %></li>
           <li><a href="/profile">Your Profile</a></li>
           <li><a href="/logout">Logout</a></li>
         </ul>

@@ -36,7 +36,37 @@ const getSVG = async url => {
   }
 }
 
+/**
+ * Return an object that provides information needed to render the statistics
+ * that can be offered for a character under a particular set of rules systems.
+ * @param {string[]} systems - An array of strings specifying the rules systems
+ *   that you would like to use.
+ * @param {Character?} char - (Optional) A Character instance. If supplied,
+ *   each field will have a value equal to the character's value for each
+ *   statistic. If not supplied, or for any statistic that the character does
+ *   not have, the object sets `value` to `undefined`.
+ * @returns {obj} - An object describing the rules and the statistics for each
+ *   ruleset, and how to render its form.
+ */
+
+const getSystemsDisplay = (systems, char) => {
+  const arr = []
+  for (const system of systems) {
+    const meta = require(`./rules/${system}/meta.json`)
+    const sheet = require(`./rules/${system}/sheet`)
+    const stats = Object.keys(sheet).map(key => ({
+      id: `${system}-${key}`,
+      label: sheet[key].label,
+      type: sheet[key].type === Number ? 'number' : 'text',
+      value: char && char[system] && char[system][key] ? char[system][key] : undefined
+    }))
+    arr.push(Object.assign({}, meta, { stats }))
+  }
+  return arr
+}
+
 module.exports = {
   getS3,
-  getSVG
+  getSVG,
+  getSystemsDisplay
 }

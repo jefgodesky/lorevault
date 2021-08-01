@@ -14,8 +14,8 @@ const initViewOpts = require('./middleware/initViewOpts')
 const ejsHelpers = require('./views/helpers')
 
 const { db, port, secret } = require('./config')
-const indexRouter = require('./routes/index')
 const authRouter = require('./routes/auth')
+const userRouter = require('./routes/users')
 const charRouter = require('./routes/characters')
 const pageRouter = require('./routes/pages')
 
@@ -50,9 +50,9 @@ server.use(passport.session())
 server.use(initViewOpts)
 
 // Set up routers
-server.use('/', indexRouter)
 server.use('/', authRouter)
-server.use('/characters', charRouter)
+server.use('/', userRouter)
+server.use('/character', charRouter)
 server.use('/', pageRouter)
 
 // Catch 404 and forward to error handler
@@ -64,7 +64,12 @@ server.use((req, res, next) => {
 server.use((err, req, res, next) => {
   // Set locals, only providing error in development
   res.locals.message = err.message
+  res.locals.isLoggedIn = req.viewOpts.isLoggedIn
+  res.locals.char = req.viewOpts.char
   res.locals.error = req.app.get('env') === 'development' ? err : {}
+  res.locals.resolution = err.status === 404
+    ? 'Sorry, that pages does not exist. You can try using the search form above to find what you&rsquo;re looking for.'
+    : 'Sorry, something went wrong. Please try again later.'
 
   // Render the error page
   res.status(err.status || 500)

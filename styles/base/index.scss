@@ -2,6 +2,8 @@
 @use 'node_modules/normalize-scss/sass/normalize';
 
 @use 'partials/layout';
+@use 'partials/header';
+@use 'partials/footer';
 @use 'partials/buttons';
 @use 'partials/form';
 @use 'partials/table';
@@ -12,5 +14,7 @@
 @use 'partials/history';
 @use 'partials/categories';
 @use 'partials/download';
+@use 'partials/errors';
+@use 'partials/toggle';
 
 @use 'rules';

@@ -1,5 +1,7 @@
 const { TestDB, testPageData } = require('../test-utils')
 const Page = require('./page')
+const User = require('./user')
+const Character = require('./character')
 
 const db = new TestDB()
 
@@ -245,6 +247,35 @@ describe('Page', () => {
       const tpl = await Page.create(data)
       const actual = tpl.parseTemplate({ ordered: [], named: { greeting: 'Hello', subject: 'world' } })
       expect(actual).toEqual('<strong>Hello, world!</strong>')
+    })
+  })
+
+  describe('PageSchema.methods.isClaimable', () => {
+    it('returns false if the page isn\'t of type person', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      const actual = await page.isClaimable()
+      expect(actual).toEqual(false)
+    })
+
+    it('returns false if the page has been claimed by someone already', async () => {
+      expect.assertions(1)
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.body = '[[Type:Person]]'
+      const page = await Page.create(cpy)
+      const player = await User.create({ googleID: 'google', discordID: 'discord' })
+      await Character.create({ page, player })
+      const actual = await page.isClaimable()
+      expect(actual).toEqual(false)
+    })
+
+    it('returns true if the page is claimable', async () => {
+      expect.assertions(1)
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.body = '[[Type:Person]]'
+      const page = await Page.create(cpy)
+      const actual = await page.isClaimable()
+      expect(actual).toEqual(true)
     })
   })
 

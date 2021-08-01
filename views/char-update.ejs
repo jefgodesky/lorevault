@@ -4,7 +4,7 @@
   <body>
     <%- include('includes/header', { isLoggedIn, char, title }) %>
     <main>
-      <p>Hello, world!</p>
+      <%- include('includes/char-form', { action: `/character/${char._id}/update`, name: char.page.title, systems, update: true }) %>
     </main>
     <%- include('includes/footer') %>
   </body>

@@ -1,6 +1,7 @@
 const { Schema, model } = require('mongoose')
 const slugger = require('mongoose-slug-generator')
 const uniqueValidation = require('mongoose-unique-validator')
+const Character = require('./character')
 const { getS3 } = require('../utils')
 const { formatDate } = require('../views/helpers')
 const { bucket, domain } = require('../config').aws
@@ -256,6 +257,20 @@ PageSchema.methods.deleteFile = async function () {
   if (!this.file?.url) return
   const s3 = getS3()
   await s3.deleteObject({ Bucket: bucket, Key: this.file.url.substr(domain.length + 1) }).promise()
+}
+
+/**
+ * Checks if a page is claimable (e.g., it is of type "Person" and no one else
+ * has claimed it as a character yet).
+ * @returns {Promise<boolean>} - `true` if the page includes "Person" among its
+ *   types, and it has not been claimed as a character by anyone else yet, or
+ *   `false` if either of those conditions are not met.
+ */
+
+PageSchema.methods.isClaimable = async function () {
+  if (!this.types.includes('Person')) return false
+  const check = await Character.findOne({ page: this._id })
+  return !Boolean(check)
 }
 
 /**
