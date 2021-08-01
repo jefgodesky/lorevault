@@ -22,4 +22,15 @@ router.post('/:id/update', async (req, res, next) => {
   res.redirect('/profile')
 })
 
+// GET /:id/select
+router.get('/:id/select', async (req, res, next) => {
+  if (!req.user) return res.redirect('/')
+  const char = await Character.findById(req.params.id)
+  if (char && req.user._id.equals(char.player)) {
+    req.user.activeChar = char._id
+    await req.user.save()
+  }
+  res.redirect('/profile')
+})
+
 module.exports = router
