@@ -9,10 +9,13 @@
 const initViewOpts = (req, res, next) => {
   req.viewOpts = {
     title: 'LoreVault',
-    char: req.user?.active,
+    char: req.user?.activeChar
+      ? { id: req.user.activeChar._id, name: req.user.activeChar.page?.title, path: `/${req.user.activeChar.page?.path}` }
+      : undefined,
     isLoggedIn: Boolean(req.user),
     charClaimMode: req.user?.charClaimMode
   }
+  console.log(req.viewOpts)
   next()
 }
 
