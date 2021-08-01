@@ -140,6 +140,13 @@ router.post('/*/*/rollback', async (req, res, next) => {
   res.redirect(`/${page.path}`)
 })
 
+// POST /*/delete
+router.post('/*/delete', async (req, res, next) => {
+  const page = await Page.findByPath(req.originalUrl)
+  if (page) await page.delete()
+  res.redirect('/')
+})
+
 // GET /*/*
 router.get('/*/*', async (req, res, next) => {
   const parts = req.originalUrl.split('/')
