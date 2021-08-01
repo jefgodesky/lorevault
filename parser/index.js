@@ -119,7 +119,7 @@ const parseImages = async str => {
     const elems = match.substr(2, match.length - 4).split('|').map(el => el.trim())
     const name = elems.length > 0 ? elems[0] : null
     const page = await Page.findByTitle(name, 'Image file')
-    if (!page) continue
+    if (!page?.file?.url) continue
     const { url } = page.file
     const alt = elems.length > 1 ? elems[1] : name
     let parsed = `<img src="${url}" alt="${alt}" />`

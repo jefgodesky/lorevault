@@ -14,10 +14,4 @@ describe('initViewOpts', () => {
     initViewOpts(req, {}, () => {})
     expect(req.viewOpts.isLoggedIn).toEqual(true)
   })
-
-  it('provides the user\'s active character', () => {
-    const req = { user: { active: { name: 'Tester' } } }
-    initViewOpts(req, {}, () => {})
-    expect(req.viewOpts.char).toEqual(req.user.active)
-  })
 })

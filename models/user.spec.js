@@ -128,6 +128,17 @@ describe('User', () => {
       expect(user.activeChar).toBeNull()
     })
 
+    it('drops you to the public perspective if you\'re releasing your POV character', async () => {
+      expect.assertions(1)
+      const user = await User.create({ googleID: 'google', discordID: 'discord' })
+      const char = await Character.create({ player: user._id })
+      user.activeChar = char._id
+      user.perspective = 'character'
+      await user.save()
+      await user.releaseCharacter(char._id)
+      expect(user.perspective).toEqual('public')
+    })
+
     it('doesn\'t touch your active character if it isn\'t involved', async () => {
       expect.assertions(1)
       const user = await User.create({ googleID: 'google', discordID: 'discord' })

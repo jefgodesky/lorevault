@@ -8,6 +8,10 @@ const UserSchema = new Schema({
     type: Boolean,
     default: false
   },
+  perspective: {
+    type: String,
+    default: 'public'
+  },
   activeChar: {
     type: Schema.Types.ObjectId,
     ref: 'Character'
@@ -105,6 +109,7 @@ UserSchema.methods.releaseCharacter = async function (id) {
   if (!check) return false
   if (this.activeChar?.equals(id)) {
     this.activeChar = null
+    if (this.perspective === 'character') this.perspective = 'public'
     await this.save()
   }
   await Character.findByIdAndDelete(id)
