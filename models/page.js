@@ -296,7 +296,7 @@ PageSchema.methods.delete = async function () {
 PageSchema.statics.findByPath = function (url) {
   const parts = url.split('/')
   const path = parts[0] === '' ? parts[1] : parts[0]
-  return this.findOne({ path })
+  return this.findOne({ path }).populate('categories')
 }
 
 /**

@@ -17,16 +17,6 @@ const renderPage = async (req, res, next) => {
   const pageIsClaimable = await page.isClaimable()
   req.viewOpts.claimable = req.user?.charClaimMode === true && pageIsClaimable
 
-  // Populate categories
-  req.viewOpts.categories = []
-  for (const id of page.categories) {
-    const category = await Page.findById(id)
-    req.viewOpts.categories.push({
-      title: category.title,
-      path: category.path
-    })
-  }
-
   // Add special category data
   if (req.viewOpts.page.types.includes('Category')) {
     const { subcategories, pages } = await Page.findCategoryMembers(req.viewOpts.page.title)
