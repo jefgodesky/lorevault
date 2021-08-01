@@ -1,4 +1,5 @@
 const { Schema, model } = require('mongoose')
+const Character = require('./character')
 
 const UserSchema = new Schema({
   googleID: String,
@@ -87,6 +88,26 @@ UserSchema.methods.leaveCharClaimMode = async function () {
 UserSchema.methods.toggleCharClaimMode = async function () {
   this.charClaimMode = !this.charClaimMode
   await this.save()
+}
+
+/**
+ * Deletes the character with the given ID. If it's the user's active
+ * character, it also updates the user to remove hens active character.
+ * @param {Schema.Types.ObjectID} id - The ID of the Character document to
+ *   be deleted.
+ * @returns {Promise<void>} - A Promise that resolves once the Character
+ *   document identified by the given ID has been deleted, and the user's
+ *   active character has been removed if it is that character.
+ */
+
+UserSchema.methods.releaseCharacter = async function (id) {
+  const check = await Character.findOne({ _id: id, player: this._id, })
+  if (!check) return false
+  if (this.activeChar?.equals(id)) {
+    this.activeChar = null
+    await this.save()
+  }
+  await Character.findByIdAndDelete(id)
 }
 
 module.exports = model('User', UserSchema)
