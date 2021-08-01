@@ -145,10 +145,10 @@ describe('parse', () => {
   })
 
   describe('Parsing images', () => {
-    it('adds an empty img tag if there is no such image', async () => {
+    it('makes a new link if there is no such image', async () => {
       expect.assertions(1)
       const actual = await parse('[[Image:Test]]')
-      expect(actual).toEqual('<img src="" alt="Image:Test" />\n')
+      expect(actual).toEqual('<p><a href="/image:test" class="new">Image:Test</a></p>\n')
     })
 
     it('adds the requested image', async () => {
