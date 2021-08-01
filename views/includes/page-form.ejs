@@ -5,11 +5,11 @@
         <input type="file" id="file" name="file" />
         <% } %>
         <label for="title">Title</label>
-        <input type="text" id="title" name="title" placeholder="Enter the title for this page here" value="<%= locals.page ? page.title : '' %>" />
+        <input type="text" id="title" name="title" placeholder="Enter the title for this page here" value="<%= locals.page ? page.title : locals.query?.title ? query.title : '' %>" />
         <label for="body">Body</label>
-        <textarea id="body" name="body" class="body"><% if (locals.page) { %><%= page.body %><% } %></textarea>
+        <textarea id="body" name="body" class="body"><% if (locals.page) { %><%= page.body %><% } else if (locals.query?.body) { %><%= query.body %><% } %></textarea>
         <label for="msg">Message</label>
-        <input type="text" id="msg" name="msg" placeholder="A short description of the change that you’re making" value="<%= locals.page ? null : 'Initial text' %>" />
+        <input type="text" id="msg" name="msg" placeholder="A short description of the change that you’re making" value="<%= locals.query?.msg ? query.msg : locals.page ? null : 'Initial text' %>" />
         <p class="actions">
           <button><% if (locals.page) { %>Save Changes<% } else { %>Create Page<% } %></button>
         </p>

@@ -34,6 +34,7 @@ router.get('/', async (req, res, next) => {
 // GET /create
 router.get('/create', async (req, res, next) => {
   req.viewOpts.title = 'Create a New Page'
+  req.viewOpts.query = req.query
   res.render('create', req.viewOpts)
 })
 
