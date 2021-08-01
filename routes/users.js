@@ -15,6 +15,18 @@ router.get('/profile', async (req, res, next) => {
   res.render('profile', req.viewOpts)
 })
 
+// GET /toggle-loremaster
+router.get('/toggle-loremaster', async (req, res, next) => {
+  if (!req.user) return res.redirect('/')
+  req.user.perspective = loremasters.includes(req.user._id.toString()) && req.user.perspective !== 'loremaster'
+    ? 'loremaster'
+    : req.user.activeChar
+      ? 'character'
+      : 'public'
+  await req.user.save()
+  res.redirect('/profile')
+})
+
 // GET /toggle-char-claim-mode
 router.get('/toggle-char-claim-mode', async (req, res, next) => {
   if (req.user) await req.user.toggleCharClaimMode()
