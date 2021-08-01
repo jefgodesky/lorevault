@@ -8,6 +8,10 @@ const UserSchema = new Schema({
     type: Boolean,
     default: false
   },
+  perspective: {
+    type: String,
+    default: 'public'
+  },
   activeChar: {
     type: Schema.Types.ObjectId,
     ref: 'Character'

@@ -28,6 +28,7 @@ router.get('/:id/select', async (req, res, next) => {
   const char = await Character.findById(req.params.id)
   if (char && req.user._id.equals(char.player)) {
     req.user.activeChar = char._id
+    if (req.user.perspective === 'public') req.user.perspective = 'character'
     await req.user.save()
   }
   res.redirect('/profile')
