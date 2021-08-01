@@ -78,6 +78,7 @@ router.get('/*/edit', async (req, res, next) => {
   req.viewOpts.page = await Page.findByPath(req.originalUrl)
   req.viewOpts.title = `Editing ${req.viewOpts.page.title}`
   req.viewOpts.upload = Boolean(req.viewOpts.page.file.url)
+  req.viewOpts.get = req.query
   res.render('edit', req.viewOpts)
 })
 
