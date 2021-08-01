@@ -3,6 +3,7 @@
 <%- include('./includes/head', { title }) %>
   <body>
     <%- include('./includes/header', { isLoggedIn, char, title }) %>
+    <!-- Your User ID: <%= id %> -->
     <main class="profile">
       <% if (isLoggedIn) { %>
         <h2>Logins</h2>
