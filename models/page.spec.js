@@ -279,6 +279,44 @@ describe('Page', () => {
     })
   })
 
+  describe('PageSchema.methods.delete', () => {
+    it('deletes a page', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      await page.delete()
+      const actual = await Page.find({ path: testPageData.path })
+      expect(actual).toEqual([])
+    })
+
+    it('deletes a character (if there is one)', async () => {
+      expect.assertions(1)
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.body = '[[Type:Person]]'
+      const page = await Page.create(testPageData)
+      const player = await User.create({ googleID: 'google', discordID: 'discord' })
+      await Character.create({ page, player })
+      await page.delete()
+      const actual = await Character.find({ page: page._id })
+      expect(actual).toEqual([])
+    })
+
+    it('removes the page as a user\'s active character (if anyone has it)', async () => {
+      expect.assertions(2)
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.body = '[[Type:Person]]'
+      const page = await Page.create(testPageData)
+      const player = await User.create({ googleID: 'google', discordID: 'discord' })
+      const char = await Character.create({ page, player })
+      player.activeChar = char._id
+      player.perspective = 'character'
+      await player.save()
+      await page.delete()
+      const actual = await User.findById(player._id)
+      expect(actual.activeChar).toBeNull()
+      expect(actual.perspective).toEqual('public')
+    })
+  })
+
   describe('PageSchema.statics.findByPath', () => {
     it('queries a Page by its path', async () => {
       expect.assertions(1)
