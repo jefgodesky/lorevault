@@ -52,7 +52,7 @@ const initPassport = passport => {
 
   passport.serializeUser((user, done) => done(null, user.id))
   passport.deserializeUser((id, done) => {
-    User.findById(id, (err, user) => done(err, user))
+    User.findById(id, (err, user) => done(err, user)).populate({ path: 'activeChar', populate: { path: 'page' } })
   })
 }
 

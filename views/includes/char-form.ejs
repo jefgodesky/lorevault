@@ -1,0 +1,21 @@
+<form action="<%= action %>" method="POST">
+        <% if (locals.systems && systems.length > 0) { %>
+          <% for (const system of systems) { %>
+            <div class="<%= system.id %>">
+              <h2><em><%= system.name %></em><% if (system.edition) { %> (<%= system.edition %>)<% } %></h2>
+              <p>To automatically reveal secrets that <%= name %> would know according to the rules of <em><%= system.name %></em><% if (system.edition) { %> (<%= system.edition %>)<% } %>, please provide the appropriate values below.</p>
+              <div class="stats-wrapper">
+                <% for (const stat of system.stats) { %>
+                  <div class="stat-wrapper">
+                    <label for="<%= stat.id %>"><%= stat.label %></label>
+                    <input type="<%= stat.type %>" name="<%= stat.id %>" id="<%= stat.id %>"<% if (stat.value) { %> value="<%= stat.value %>"<% } %> />
+                  </div>
+                <% } %>
+              </div>
+            </div>
+          <% } %>
+        <% } %>
+        <p>
+          <button><%= locals.update ? 'Update' : 'Claim' %> <%= name %></button>
+        </p>
+      </form>

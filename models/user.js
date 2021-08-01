@@ -1,25 +1,17 @@
 const { Schema, model } = require('mongoose')
-const { rules } = require('../config')
-
-const CharacterSchemaDefinition = {
-  name: String
-}
-
-for (const system of rules) {
-  const orig = require(`../rules/${system}/sheet`)
-  CharacterSchemaDefinition[system] = {}
-  for (const stat of Object.keys(orig)) {
-    CharacterSchemaDefinition[system][stat] = orig[stat].type
-  }
-}
-
-const CharacterSchema = new Schema(CharacterSchemaDefinition)
+const Character = require('./character')
 
 const UserSchema = new Schema({
   googleID: String,
   discordID: String,
-  characters: [CharacterSchema],
-  active: CharacterSchema
+  charClaimMode: {
+    type: Boolean,
+    default: false
+  },
+  activeChar: {
+    type: Schema.Types.ObjectId,
+    ref: 'Character'
+  }
 })
 
 const serviceKeys = {
@@ -61,56 +53,61 @@ UserSchema.methods.disconnect = async function (service) {
 }
 
 /**
- * Add a character to a user document.
- * @param {CharacterSchemaDefinition} char - The character object to add to the
- *   user document. This object should conform to CharacterSchema.
- * @returns {Promise<void>} - A Promise that resolves when the character has
- *   been added to the user's array, and the user's document has been saved to
+ * Sets the user's character claim mode flag to true.
+ * @returns {Promise<void>} - A Promise that resolves when the user's character
+ *   claim mode flag has been set to true, and the document has been saved to
  *   the database.
  */
 
-UserSchema.methods.addCharacter = async function (char) {
-  if (this.characters.length === 0) this.active = char
-  this.characters.push(char)
+UserSchema.methods.enterCharClaimMode = async function () {
+  this.charClaimMode = true
   await this.save()
 }
 
 /**
- * Select a character as the user's active character.
- * @param {{ _id: ObjectId|string}|string} char - Either an object which has an
- *   `_id` property that can be cast into a string, or a string itself. This is
- *   used to identify the character to select by ID.
- * @returns {Promise<void>} - A Promise that resolves when the user document
- *   has been updated to set the selected character as hens active character,
- *   and then saved to the database. This method does nothing if it can't find
- *   a character in the user's characters array that matches the argument
- *   provided.
+ * Sets the user's character claim mode flag to false.
+ * @returns {Promise<void>} - A Promise that resolves when the user's character
+ *   claim mode flag has been set to false, and the document has been saved to
+ *   the database.
  */
 
-UserSchema.methods.selectCharacter = async function (char) {
-  const id = char._id?.toString() || char.toString()
-  const filtered = this.characters.filter(c => c._id.toString() === id)
-  if (filtered.length > 0) {
-    this.active = filtered[0]
+UserSchema.methods.leaveCharClaimMode = async function () {
+  this.charClaimMode = false
+  await this.save()
+}
+
+/**
+ * Toggles the user's character claim mode flag. If it was `false` before, this
+ * method will set it to `true`; likewise, if it was `true` before, this method
+ * will set it to `false`.
+ * @returns {Promise<void>} - A Promise that resolves when the user's character
+ *   claim mode flag has been set to the opposite of its previous value, and
+ *   the document has been saved to the database.
+ */
+
+UserSchema.methods.toggleCharClaimMode = async function () {
+  this.charClaimMode = !this.charClaimMode
+  await this.save()
+}
+
+/**
+ * Deletes the character with the given ID. If it's the user's active
+ * character, it also updates the user to remove hens active character.
+ * @param {Schema.Types.ObjectID} id - The ID of the Character document to
+ *   be deleted.
+ * @returns {Promise<void>} - A Promise that resolves once the Character
+ *   document identified by the given ID has been deleted, and the user's
+ *   active character has been removed if it is that character.
+ */
+
+UserSchema.methods.releaseCharacter = async function (id) {
+  const check = await Character.findOne({ _id: id, player: this._id, })
+  if (!check) return false
+  if (this.activeChar?.equals(id)) {
+    this.activeChar = null
     await this.save()
   }
-}
-
-/**
- * Delete a character from a user document.
- * @param {{ _id: ObjectId|string}|string} char - Either an object which has an
- *   `_id` property that can be cast into a string, or a string itself. This is
- *   used to identify the character to delete by ID.
- * @returns {Promise<void>} - A Promise that resolves when the character has
- *   been removed from the user document, and the user document has been saved
- *   to the database.
- */
-
-UserSchema.methods.deleteCharacter = async function (char) {
-  const id = char._id?.toString() || char.toString()
-  this.characters = this.characters.filter(c => c._id.toString() !== id)
-  if (this.active?._id?.toString() === id) this.active = undefined
-  await this.save()
+  await Character.findByIdAndDelete(id)
 }
 
 module.exports = model('User', UserSchema)

@@ -136,6 +136,12 @@ describe('parse', () => {
       const actual = await parse('{{Template:HelloWorld\n  |greeting=Hello\n  |subject=world\n}}\n\nThis is a test.')
       expect(actual).toEqual('<p>Hello, world!</p>\n<p>This is a test.</p>\n')
     })
+
+    it('ignores templates that don\'t exist', async () => {
+      expect.assertions(1)
+      const actual = await parse('{{Template:HelloWorld\n  |greeting=Hello\n  |subject=world\n}}\n\nThis is a test.')
+      expect(actual).toEqual('<p>This is a test.</p>\n')
+    })
   })
 
   describe('Parsing images', () => {
