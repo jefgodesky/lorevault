@@ -46,6 +46,14 @@
         <a href="/<%= page.path %>/claim" class="button">Claim <%= page.title %></a>
       </p>
       <% } %>
+      <% if (locals.secrets && secrets.length > 0) { %>
+      <h2>Secrets</h2>
+      <ul>
+        <% for (const secret of secrets) { %>
+        <li><%- secret.markup %></li>
+        <% } %>
+      </ul>
+      <% } %>
       <% if (page.categories && page.categories.length > 0) { %>
       <ul class="categories">
         <% for (const category of page.categories) { %>

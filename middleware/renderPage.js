@@ -24,6 +24,13 @@ const renderPage = async (req, res, next) => {
     req.viewOpts.pages = pages
   }
 
+  // Get secrets
+  const pov = req.viewOpts.perspective === 'character' ? req.viewOpts.char : req.viewOpts.perspective
+  req.viewOpts.secrets = await page.getKnownSecrets(pov)
+  for (const secret of req.viewOpts.secrets) {
+    secret.markup = await parse(secret.text)
+  }
+
   // Carry on to next middleware
   next()
 }
