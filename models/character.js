@@ -58,7 +58,7 @@ CharacterSchema.statics.isYourCharacter = async function (page, user) {
  * it to produce the values used in a Character instance.
  * @param {obj} form - An object with the results of a form created with the
  *   getSystemsDisplay utility method.
- * @returns {obj>} - An object ready to be used in a Character instance.
+ * @returns {obj} - An object ready to be used in a Character instance.
  */
 
 CharacterSchema.statics.readForm = function (form) {
