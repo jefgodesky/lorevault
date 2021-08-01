@@ -6,6 +6,10 @@ const UserSchema = new Schema({
   charClaimMode: {
     type: Boolean,
     default: false
+  },
+  activeChar: {
+    type: Schema.Types.ObjectId,
+    ref: 'Character'
   }
 })
 
