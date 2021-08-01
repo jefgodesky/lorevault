@@ -141,6 +141,12 @@ router.post('/*/*/rollback', async (req, res, next) => {
   res.redirect(`/${page.path}`)
 })
 
+// GET /*/delete
+router.get('/*/delete', renderPage, async (req, res, next) => {
+  req.viewOpts.promptDelete = true
+  res.render('page', req.viewOpts)
+})
+
 // POST /*/delete
 router.post('/*/delete', async (req, res, next) => {
   const page = await Page.findByPath(req.originalUrl)
