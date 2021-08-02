@@ -79,12 +79,12 @@ router.get('/search', async (req, res, next) => {
 })
 
 // GET /*/edit
-router.get('/*/edit', async (req, res, next) => {
+router.get('/*/edit', addKnownSecrets, async (req, res, next) => {
   req.viewOpts.page = await Page.findByPath(req.originalUrl)
   req.viewOpts.title = `Editing ${req.viewOpts.page.title}`
   req.viewOpts.upload = Boolean(req.viewOpts.page.file.url)
   req.viewOpts.get = req.query
-  req.viewOpts.numSecrets = req.viewOpts.page.secrets.length + 1
+  req.viewOpts.numSecrets = req.viewOpts.secrets.length + 1
   res.render('edit', req.viewOpts)
 })
 
