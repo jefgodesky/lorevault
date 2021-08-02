@@ -455,19 +455,8 @@ PageSchema.statics.findByTitle = async function (title, type) {
 
 PageSchema.statics.findCategoryMembers = async function (category) {
   const c = await this.findByTitle(category, 'Category')
-  const cat = c && c._id ? c : Array.isArray(c) && c.length > 0 ? c[0] : null
-  if (!cat) return null
-  const all = await this.find({ categories: cat._id })
-  const subcategories = []
-  const pages = []
-  for (const page of all) {
-    if (page.types.includes('Category')) {
-      subcategories.push(page)
-    } else {
-      pages.push(page)
-    }
-  }
-  return { subcategories, pages }
+  if (!c || !c._id) return null
+  return c.findMembers()
 }
 
 /**
