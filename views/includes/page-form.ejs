@@ -13,7 +13,7 @@
         <h2>Secrets</h2>
         <% for (let i = 1; i <= numSecrets; i++) { %>
         <label for="secret<%= i.toString().padStart(3, '0') %>">Secret #<%= i %></label>
-        <textarea id="secret<%= i.toString().padStart(3, '0') %>" name="secret"></textarea>
+        <textarea id="secret<%= i.toString().padStart(3, '0') %>" name="secret"><% if (page.secrets.length > i - 1) { %><%= page.secrets[i - 1].text %><% } %></textarea>
         <% } %>
         <p class="actions">
           <button><% if (locals.page) { %>Save Changes<% } else { %>Create Page<% } %></button>
