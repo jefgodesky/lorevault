@@ -372,6 +372,31 @@ describe('Page', () => {
     })
   })
 
+  describe('PageSchema.methods.revealSecret', () => {
+    it('does nothing if you don\'t provide a valid secret', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
+      const player = await User.create({ googleID: 'google', discordID: 'discord' })
+      const char = await Character.create({ page, player })
+      await page.revealSecret('nope', char)
+      const actual = await page.getKnownSecrets(char)
+      expect(Array.from(actual)).toEqual([])
+    })
+
+    it('reveals a secret', async () => {
+      expect.assertions(2)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
+      const player = await User.create({ googleID: 'google', discordID: 'discord' })
+      const char = await Character.create({ page, player })
+      await page.revealSecret(page.secrets[0], char)
+      const actual = await page.getKnownSecrets(char)
+      expect(actual).toHaveLength(1)
+      expect(actual[0].text).toEqual('Secret 1')
+    })
+  })
+
   describe('PageSchema.methods.delete', () => {
     it('deletes a page', async () => {
       expect.assertions(1)

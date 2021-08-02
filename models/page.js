@@ -347,6 +347,24 @@ PageSchema.methods.updateSecrets = async function (secrets, ids) {
 }
 
 /**
+ * Reveals a secret to a character.
+ * @param {SecretSchema|Schema.Types.ObjectID|string} secret - Either a Secret
+ *   schema object, or the unique ID string for a Secret schema object.
+ * @param {Character|Schema.Types.ObjectID|string} char - Either  Character
+ *   document, or the unique ID string for a Character document.
+ * @returns {Promise<void>} - A Promise that resolves when the secret has been
+ *   revealed to the given character.
+ */
+
+PageSchema.methods.revealSecret = async function (secret, char) {
+  const s = this.findSecretByID(secret)
+  if (!s) return
+  const id = char && char._id ? char._id : char
+  s.knowers = [ ...new Set([ ...s.knowers, id ]) ]
+  await this.save()
+}
+
+/**
  * Delete the current page.
  * @returns {Promise<void>} - A Promise that resolves once the page has been
  *   deleted. Before it deletes itself, it checks and removes any dependencies,
