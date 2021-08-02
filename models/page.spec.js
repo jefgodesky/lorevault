@@ -302,6 +302,24 @@ describe('Page', () => {
     })
   })
 
+  describe('PageSchema.methods.findCharacter', () => {
+    it('returns null if there is no character', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      const actual = await page.findCharacter()
+      expect(actual).toBeNull()
+    })
+
+    it('returns the character if one exists', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      const player = await User.create({ googleID: 'google', discordID: 'discord' })
+      const char = await Character.create({ page, player })
+      const actual = await page.findCharacter()
+      expect(actual._id).toEqual(char._id)
+    })
+  })
+
   describe('PageSchema.methods.getKnownSecrets', () => {
     it('returns all secrets for a loremaster', async () => {
       expect.assertions(1)

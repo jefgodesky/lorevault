@@ -309,6 +309,18 @@ PageSchema.methods.isClaimable = async function () {
 }
 
 /**
+ * Return the Character associated with this Page.
+ * @returns {Promise<Character|null>} - A Promise that resolves with the
+ *   Character associated with this page if one exists, or `null` if no such
+ *   Character exists.
+ */
+
+PageSchema.methods.findCharacter = async function () {
+  const char = await Character.findOne({ page: this._id })
+  return char
+}
+
+/**
  * Returns an array of the page's secret that the given character knows.
  * @param {Character|string} char - A Character document, or the unique ID
  *   string of a Character document, if viewing the page from a character's
