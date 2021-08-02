@@ -381,21 +381,29 @@ PageSchema.methods.updateSecrets = async function (secrets, ids) {
 }
 
 /**
- * Reveals a secret to a character.
+ * Reveals a secret to a character or a group of characters.
  * @param {SecretSchema|Schema.Types.ObjectID|string} secret - Either a Secret
  *   schema object, or the unique ID string for a Secret schema object.
- * @param {Character|Schema.Types.ObjectID|string} char - Either  Character
- *   document, or the unique ID string for a Character document.
+ * @param {Character|Schema.Types.ObjectID|string} page - A Page indicating who
+ *   the secret should be revealed to. If this is a character's page, then the
+ *   secret is revealed to that character. If it is a category, the secret is
+ *   revealed to all characters in that category, and then recursively to any
+ *   and all characters in any subcategories.
  * @returns {Promise<void>} - A Promise that resolves when the secret has been
- *   revealed to the given character.
+ *   revealed to the characters indicated.
  */
 
-PageSchema.methods.revealSecret = async function (secret, char) {
+PageSchema.methods.revealSecret = async function (secret, page) {
   const s = this.findSecretByID(secret)
   if (!s) return
-  const id = char && char._id ? char._id : char
-  s.knowers = [ ...new Set([ ...s.knowers, id ]) ]
-  await this.save()
+  const character = await page.findCharacter()
+  if (character) {
+    s.knowers = [ ...new Set([ ...s.knowers, character._id ]) ]
+  } else if (page.types.includes('Category')) {
+    const members = await page.findMembers()
+    if (!members) return
+    for (const member of [ ...members.pages, ...members.subcategories ]) await this.revealSecret(secret, member)
+  }
 }
 
 /**
