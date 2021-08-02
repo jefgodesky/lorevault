@@ -5,6 +5,7 @@ const Page = require('../models/page')
 const Character = require('../models/character')
 const { getSystemsDisplay } = require('../utils')
 const renderPage = require('../middleware/renderPage')
+const addKnownSecrets = require('../middleware/addKnownSecrets')
 const upload = require('../middleware/upload')
 const parse = require('../parser')
 const router = Router()
@@ -171,7 +172,7 @@ router.get('/*/*', async (req, res, next) => {
 })
 
 // GET /*
-router.get('/*', renderPage, async (req, res, next) => {
+router.get('/*', renderPage, addKnownSecrets, async (req, res, next) => {
   if (!req.viewOpts.page) return next()
   res.render('page', req.viewOpts)
 })
