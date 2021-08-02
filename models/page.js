@@ -306,6 +306,19 @@ PageSchema.methods.getKnownSecrets = async function (char) {
   })
 }
 
+PageSchema.methods.updateSecrets = async function (secrets, ids) {
+  for (let i = 0; i < secrets.length; i++) {
+    const id = ids && Array.isArray(ids) ? ids[i] : null
+    const match = id ? this.secrets.filter(s => s._id.toString() === id) : []
+    if (match.length > 0) {
+      match[0].text = secrets[i]
+    } else {
+      this.secrets.push({ text: secrets[i] })
+    }
+  }
+  await this.save()
+}
+
 /**
  * Delete the current page.
  * @returns {Promise<void>} - A Promise that resolves once the page has been

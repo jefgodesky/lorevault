@@ -311,6 +311,25 @@ describe('Page', () => {
     })
   })
 
+  describe('PageSchema.methods.updateSecrets', () => {
+    it('can add new secrets', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
+      const actual = await Page.findById(page._id)
+      expect(actual.secrets).toHaveLength(3)
+    })
+
+    it('can update existing secrets', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
+      await page.updateSecrets([ 'Updated' ], [ page.secrets[0]._id.toString() ])
+      const actual = await Page.findById(page._id)
+      expect(actual.secrets[0].text).toEqual('Updated')
+    })
+  })
+
   describe('PageSchema.methods.delete', () => {
     it('deletes a page', async () => {
       expect.assertions(1)
