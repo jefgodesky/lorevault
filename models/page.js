@@ -306,6 +306,20 @@ PageSchema.methods.getKnownSecrets = async function (char) {
   })
 }
 
+/**
+ * Return one of a page's secrets, identified by its ID.
+ * @param {SecretSchema|Schema.Types.ObjectID|string} secret - Either a Secret
+ *   schema object, or the unique ID string for a Secret schema object.
+ * @returns {SecretSchema|null} - The Page's matching secret, if it could be
+ *   found, or `null` if it could not be.
+ */
+
+PageSchema.methods.findSecretByID = function (secret) {
+  const id = secret && secret._id ? secret._id.toString() : secret.toString()
+  const matching = this.secrets.filter(s => s._id.toString() === id)
+  return matching.length > 0 ? matching[0] : null
+}
+
 PageSchema.methods.updateSecrets = async function (secrets, ids) {
   for (let i = 0; i < secrets.length; i++) {
     const id = ids && Array.isArray(ids) ? ids[i] : null

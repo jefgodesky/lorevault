@@ -311,6 +311,39 @@ describe('Page', () => {
     })
   })
 
+  describe('PageSchema.methods.findSecretByID', () => {
+    it('returns null if there is no such secret', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      const actual = await page.findSecretByID('nope')
+      expect(actual).toBeNull()
+    })
+
+    it('returns the matching secret, given a secret', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
+      const actual = await page.findSecretByID(page.secrets[0])
+      expect(actual.text).toEqual('Secret 1')
+    })
+
+    it('returns the matching secret, given an ID', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
+      const actual = await page.findSecretByID(page.secrets[0]._id)
+      expect(actual.text).toEqual('Secret 1')
+    })
+
+    it('returns the matching secret, given a string', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
+      const actual = await page.findSecretByID(page.secrets[0]._id.toString())
+      expect(actual.text).toEqual('Secret 1')
+    })
+  })
+
   describe('PageSchema.methods.updateSecrets', () => {
     it('can add new secrets', async () => {
       expect.assertions(1)
