@@ -316,6 +316,7 @@ PageSchema.methods.updateSecrets = async function (secrets, ids) {
       this.secrets.push({ text: secrets[i] })
     }
   }
+  this.secrets = this.secrets.filter(s => s.text !== '')
   await this.save()
 }
 

@@ -328,6 +328,15 @@ describe('Page', () => {
       const actual = await Page.findById(page._id)
       expect(actual.secrets[0].text).toEqual('Updated')
     })
+
+    it('can delete secrets', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
+      await page.updateSecrets([ '' ], [ page.secrets[0]._id.toString() ])
+      const actual = await Page.findById(page._id)
+      expect(actual.secrets).toHaveLength(2)
+    })
   })
 
   describe('PageSchema.methods.delete', () => {
