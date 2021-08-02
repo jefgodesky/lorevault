@@ -320,12 +320,24 @@ PageSchema.methods.findSecretByID = function (secret) {
   return matching.length > 0 ? matching[0] : null
 }
 
+/**
+ * Update a page's secrets.
+ * @param {string[]} secrets - An array of strings, providing the new values
+ *   for the texts of the page's secrets, in order.
+ * @param {string[]} ids - An array of strings, providing the unique ID's for
+ *   the existing secrets that are to be updated. These should be in order,
+ *   such that for any value `x`, `ids[x]` provides the ID for the secret whose
+ *   text is in `secrets[x]`.
+ * @returns {Promise<void>} - A Promise that resolves when the page's secrets
+ *   have been updated.
+ */
+
 PageSchema.methods.updateSecrets = async function (secrets, ids) {
   for (let i = 0; i < secrets.length; i++) {
     const id = ids && Array.isArray(ids) ? ids[i] : null
-    const match = id ? this.secrets.filter(s => s._id.toString() === id) : []
-    if (match.length > 0) {
-      match[0].text = secrets[i]
+    const secret = id ? this.findSecretByID(id) : null
+    if (secret) {
+      secret.text = secrets[i]
     } else {
       this.secrets.push({ text: secrets[i] })
     }
