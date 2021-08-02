@@ -97,6 +97,12 @@ router.post('/*/edit', upload.single('file'), async (req, res, next) => {
     : Object.assign({}, req.body, { editor: req.user?._id })
   if (page.file?.url && update.file?.url && page.file.url !== update.file.url) await page.deleteFile()
   await page.makeUpdate(update)
+
+  // Update secrets
+  const secrets = Array.isArray(req.body.secret) ? req.body.secret : [req.body.secret]
+  const secretIDs = Array.isArray(req.body['secret-id']) ? req.body['secret-id'] : [req.body['secret-id']]
+  await page.updateSecrets(secrets, secretIDs)
+
   res.redirect(`/${page.path}`)
 })
 
