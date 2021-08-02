@@ -250,6 +250,29 @@ describe('Page', () => {
     })
   })
 
+  describe('PageSchema.methods.findMembers', () => {
+    it('returns a category\'s members', async () => {
+      expect.assertions(2)
+
+      const d1 = JSON.parse(JSON.stringify(testPageData))
+      d1.title = 'Test Category'
+      d1.body = '[[Type:Category]]'
+      const p1 = await Page.create(d1)
+
+      const d2 = JSON.parse(JSON.stringify(testPageData))
+      d2.body = '[[Category:Test Category]]'
+      const p2 = await Page.create(d2)
+
+      const d3 = JSON.parse(JSON.stringify(testPageData))
+      d3.body = '[[Category:Test Category]]\n[[Type:Category]]'
+      const p3 = await Page.create(d3)
+
+      const actual = await p1.findMembers()
+      expect(actual.pages.map(p => p._id)).toEqual([ p2._id ])
+      expect(actual.subcategories.map(p => p._id)).toEqual([ p3._id ])
+    })
+  })
+
   describe('PageSchema.methods.isClaimable', () => {
     it('returns false if the page isn\'t of type person', async () => {
       expect.assertions(1)

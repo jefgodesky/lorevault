@@ -261,6 +261,28 @@ PageSchema.methods.parseTemplate = function (params) {
 }
 
 /**
+ * Returns the pages that belong to this page as a category.
+ * @returns {Promise<{pages: Page[], subcategories: Page[]}|null>} - A Promise
+ *   that resolves with the category's members, broken into pages (`pages`) and
+ *   subcategories (`subcategories`), or `null` if this page is not a category.
+ */
+
+PageSchema.methods.findMembers = async function () {
+  if (!this.types.includes('Category')) return null
+  const all = await this.constructor.find({ categories: this._id })
+  const subcategories = []
+  const pages = []
+  for (const page of all) {
+    if (page.types.includes('Category')) {
+      subcategories.push(page)
+    } else {
+      pages.push(page)
+    }
+  }
+  return { subcategories, pages }
+}
+
+/**
  * This method delete the Page's file from S3.
  * @returns {Promise<void>} - A Promise that resolves once the page's file (if
  *   it has a file) has been deleted from S3.
