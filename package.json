@@ -27,7 +27,7 @@
     "css:compile": "node sass.js",
     "css:postcss": "postcss public/css/*.css --use autoprefixer --dir public/css",
     "css:watch": "chokidar './styles/**/*.scss' './rules/**/*.scss' -i './styles/**/rules.scss' --command 'npm run css:compile'",
-    "css:sync": "browser-sync start --proxy localhost:8080 --files 'public/css/*.css' --no-ui --no-inject-changes",
+    "css:sync": "browser-sync start --proxy localhost:8080 --files 'public/css/*.css' 'public/js/*.js' 'views/*.ejs' 'views/**/*.ejs' --no-ui --no-inject-changes",
     "js:build": "webpack --config webpack.prod.config.js"
   },
   "dependencies": {
