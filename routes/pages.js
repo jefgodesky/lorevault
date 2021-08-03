@@ -121,6 +121,18 @@ router.get('/*/claim', async (req, res, next) => {
   res.render('char-claim', req.viewOpts)
 })
 
+// GET /*/reveal/:id
+router.get('/*/reveal/:id', async (req, res, next) => {
+  const page = await Page.findByPath(req.originalUrl)
+  if (!page) return res.redirect('/')
+  const secret = page.findSecretByID(req.params.id)
+  if (secret && req.query.to) {
+    const character = await Page.findByTitle(req.query.to)
+    await page.revealSecret(secret, character)
+  }
+  res.redirect(`/${page.path}`)
+})
+
 // POST /*/claim
 router.post('/*/claim', async (req, res, next) => {
   if (!req.user) return res.redirect('/')
