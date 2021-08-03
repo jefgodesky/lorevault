@@ -47,12 +47,9 @@
       </p>
       <% } %>
       <% if (locals.secrets && secrets.length > 0) { %>
-      <h2>Secrets &amp; Uncommon Knowledge</h2>
-      <ul>
-        <% for (const secret of secrets) { %>
-        <li><%- secret.markup %></li>
-        <% } %>
-      </ul>
+      <% for (const secret of secrets) { %>
+      <%- secret.markup %>
+      <% } %>
       <% } %>
       <% if (page.categories && page.categories.length > 0) { %>
       <ul class="categories">
