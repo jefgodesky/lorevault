@@ -2,10 +2,10 @@ const { Schema, model } = require('mongoose')
 const slugger = require('mongoose-slug-generator')
 const uniqueValidation = require('mongoose-unique-validator')
 const Character = require('./character')
-const User = require('./user')
 const { getS3 } = require('../utils')
 const { formatDate } = require('../views/helpers')
-const { bucket, domain } = require('../config').aws
+const { rules, aws } = require('../config')
+const { bucket, domain } = aws
 
 const CorePageSchemaDefinition = {
   title: String,
@@ -29,7 +29,19 @@ const VersionSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
   }
 }))
 
+const SecretSchemaDefinition = {
+  text: String,
+  knowers: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Character'
+  }]
+}
+
+for (const system of rules) SecretSchemaDefinition[system] = String
+const SecretSchema = new Schema(SecretSchemaDefinition)
+
 const PageSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
+  secrets: [SecretSchema],
   types: [String],
   categories: [{
     type: Schema.Types.ObjectId,
@@ -249,6 +261,28 @@ PageSchema.methods.parseTemplate = function (params) {
 }
 
 /**
+ * Returns the pages that belong to this page as a category.
+ * @returns {Promise<{pages: Page[], subcategories: Page[]}|null>} - A Promise
+ *   that resolves with the category's members, broken into pages (`pages`) and
+ *   subcategories (`subcategories`), or `null` if this page is not a category.
+ */
+
+PageSchema.methods.findMembers = async function () {
+  if (!this.types.includes('Category')) return null
+  const all = await this.constructor.find({ categories: this._id })
+  const subcategories = []
+  const pages = []
+  for (const page of all) {
+    if (page.types.includes('Category')) {
+      subcategories.push(page)
+    } else {
+      pages.push(page)
+    }
+  }
+  return { subcategories, pages }
+}
+
+/**
  * This method delete the Page's file from S3.
  * @returns {Promise<void>} - A Promise that resolves once the page's file (if
  *   it has a file) has been deleted from S3.
@@ -272,6 +306,105 @@ PageSchema.methods.isClaimable = async function () {
   if (!this.types.includes('Person')) return false
   const check = await Character.findOne({ page: this._id })
   return !Boolean(check)
+}
+
+/**
+ * Return the Character associated with this Page.
+ * @returns {Promise<Character|null>} - A Promise that resolves with the
+ *   Character associated with this page if one exists, or `null` if no such
+ *   Character exists.
+ */
+
+PageSchema.methods.findCharacter = async function () {
+  const char = await Character.findOne({ page: this._id })
+  return char
+}
+
+/**
+ * Returns an array of the page's secret that the given character knows.
+ * @param {Character|string} char - A Character document, or the unique ID
+ *   string of a Character document, if viewing the page from a character's
+ *   point of view. The string "loremaster" sees the page as a loremaster,
+ *   revealing all secrets, while the string "public" sees the page as someone
+ *   not signed in, meaning that no secrets are shown.
+ * @returns {Promise<SecretSchema[]>} - A Promise that resolves with the array
+ *   of the page's secrets that the given character knows.
+ */
+
+PageSchema.methods.getKnownSecrets = function (char) {
+  const id = char._id ? char._id.toString() : char.id ? char.id.toString() : char.toString()
+  return this.secrets.filter(secret => {
+    if (id === 'loremaster') return true
+    if (id === 'public') return false
+    return secret.knowers.map(id => id.toString()).includes(id)
+  })
+}
+
+/**
+ * Return one of a page's secrets, identified by its ID.
+ * @param {SecretSchema|Schema.Types.ObjectID|string} secret - Either a Secret
+ *   schema object, or the unique ID string for a Secret schema object.
+ * @returns {SecretSchema|null} - The Page's matching secret, if it could be
+ *   found, or `null` if it could not be.
+ */
+
+PageSchema.methods.findSecretByID = function (secret) {
+  const id = secret && secret._id ? secret._id.toString() : secret.toString()
+  const matching = this.secrets.filter(s => s._id.toString() === id)
+  return matching.length > 0 ? matching[0] : null
+}
+
+/**
+ * Update a page's secrets.
+ * @param {string[]} secrets - An array of strings, providing the new values
+ *   for the texts of the page's secrets, in order.
+ * @param {string[]} ids - An array of strings, providing the unique ID's for
+ *   the existing secrets that are to be updated. These should be in order,
+ *   such that for any value `x`, `ids[x]` provides the ID for the secret whose
+ *   text is in `secrets[x]`.
+ * @returns {Promise<void>} - A Promise that resolves when the page's secrets
+ *   have been updated.
+ */
+
+PageSchema.methods.updateSecrets = async function (secrets, ids) {
+  for (let i = 0; i < secrets.length; i++) {
+    const id = ids && Array.isArray(ids) ? ids[i] : null
+    const secret = id ? this.findSecretByID(id) : null
+    if (secret) {
+      secret.text = secrets[i]
+    } else {
+      this.secrets.push({ text: secrets[i] })
+    }
+  }
+  this.secrets = this.secrets.filter(s => s.text !== '')
+  await this.save()
+}
+
+/**
+ * Reveals a secret to a character or a group of characters.
+ * @param {SecretSchema|Schema.Types.ObjectID|string} secret - Either a Secret
+ *   schema object, or the unique ID string for a Secret schema object.
+ * @param {Character|Schema.Types.ObjectID|string} page - A Page indicating who
+ *   the secret should be revealed to. If this is a character's page, then the
+ *   secret is revealed to that character. If it is a category, the secret is
+ *   revealed to all characters in that category, and then recursively to any
+ *   and all characters in any subcategories.
+ * @returns {Promise<void>} - A Promise that resolves when the secret has been
+ *   revealed to the characters indicated.
+ */
+
+PageSchema.methods.revealSecret = async function (secret, page) {
+  const s = this.findSecretByID(secret)
+  if (!s) return
+  const character = await page.findCharacter()
+  if (character) {
+    s.knowers = [ ...new Set([ ...s.knowers, character._id ]) ]
+    await this.save()
+  } else if (page.types.includes('Category')) {
+    const members = await page.findMembers()
+    if (!members) return
+    for (const member of [ ...members.pages, ...members.subcategories ]) await this.revealSecret(secret, member)
+  }
 }
 
 /**
@@ -331,19 +464,8 @@ PageSchema.statics.findByTitle = async function (title, type) {
 
 PageSchema.statics.findCategoryMembers = async function (category) {
   const c = await this.findByTitle(category, 'Category')
-  const cat = c && c._id ? c : Array.isArray(c) && c.length > 0 ? c[0] : null
-  if (!cat) return null
-  const all = await this.find({ categories: cat._id })
-  const subcategories = []
-  const pages = []
-  for (const page of all) {
-    if (page.types.includes('Category')) {
-      subcategories.push(page)
-    } else {
-      pages.push(page)
-    }
-  }
-  return { subcategories, pages }
+  if (!c || !c._id) return null
+  return c.findMembers()
 }
 
 /**
