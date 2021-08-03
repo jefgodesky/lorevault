@@ -127,8 +127,8 @@ router.get('/*/reveal/:id', async (req, res, next) => {
   if (!page) return res.redirect('/')
   const secret = page.findSecretByID(req.params.id)
   if (secret && req.query.to) {
-    const character = await Page.findByTitle(req.query.to)
-    await page.revealSecret(secret, character)
+    const character = await Page.findOne({ title: req.query.to })
+    if (character) await page.revealSecret(secret, character)
   }
   res.redirect(`/${page.path}`)
 })
