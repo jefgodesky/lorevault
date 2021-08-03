@@ -326,7 +326,7 @@ describe('Page', () => {
       const page = await Page.create(testPageData)
       page.secrets.push({ text: 'Test' })
       await page.save()
-      const actual = await page.getKnownSecrets('loremaster')
+      const actual = page.getKnownSecrets('loremaster')
       expect(actual).toHaveLength(1)
     })
 
@@ -335,7 +335,7 @@ describe('Page', () => {
       const page = await Page.create(testPageData)
       page.secrets.push({ text: 'Test' })
       await page.save()
-      const actual = await page.getKnownSecrets('public')
+      const actual = page.getKnownSecrets('public')
       expect(actual).toHaveLength(0)
     })
 
@@ -347,7 +347,7 @@ describe('Page', () => {
       page.secrets.push({ text: 'Secret 1' })
       page.secrets.push({ text: 'Secret 2', knowers: [ char._id] })
       await page.save()
-      const actual = await page.getKnownSecrets(char)
+      const actual = page.getKnownSecrets(char)
       expect(actual).toHaveLength(1)
     })
   })

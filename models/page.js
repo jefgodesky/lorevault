@@ -331,7 +331,7 @@ PageSchema.methods.findCharacter = async function () {
  *   of the page's secrets that the given character knows.
  */
 
-PageSchema.methods.getKnownSecrets = async function (char) {
+PageSchema.methods.getKnownSecrets = function (char) {
   const id = char._id ? char._id.toString() : char.id ? char.id.toString() : char.toString()
   return this.secrets.filter(secret => {
     if (id === 'loremaster') return true
