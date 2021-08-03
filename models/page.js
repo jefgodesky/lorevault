@@ -399,6 +399,7 @@ PageSchema.methods.revealSecret = async function (secret, page) {
   const character = await page.findCharacter()
   if (character) {
     s.knowers = [ ...new Set([ ...s.knowers, character._id ]) ]
+    await this.save()
   } else if (page.types.includes('Category')) {
     const members = await page.findMembers()
     if (!members) return
