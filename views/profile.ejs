@@ -69,8 +69,8 @@
             <tr><th /><th>Character</th><th /></tr>
           </thead>
           <tbody>
+          <% for (const char of characters) { %>
             <tr>
-              <% for (const char of characters) { %>
               <td class="short">
                 <% if (char._id.toString() === locals.char?.id?.toString()) { %>
                 <span class="active-char">&starf;</span>
@@ -82,8 +82,8 @@
                 <a href="/character/<%= char._id %>/select" class="button">Select</a>
                 <a href="/character/<%= char._id %>/release" class="button">Release</a>
               </td>
-              <% } %>
             </tr>
+          <% } %>
           </tbody>
         </table>
         <% } else { %>
