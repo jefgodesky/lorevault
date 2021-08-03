@@ -12,7 +12,7 @@
         <input type="text" id="msg" name="msg" placeholder="A short description of the change that you’re making" value="<%= locals.get?.msg ? get.msg : locals.page ? null : 'Initial text' %>" />
         <h2>Secrets</h2>
         <% for (let i = 1; i <= numSecrets; i++) { %>
-        <% const existing = secrets.length > i - 1 ? secrets[i - 1] : null %>
+        <% const existing = locals.secrets && secrets?.length > i - 1 ? secrets[i - 1] : null %>
         <% if (existing) {%><input type="hidden" name="secret-id" value="<%= existing._id %>" /><% } %>
         <label for="secret<%= i.toString().padStart(3, '0') %>">Secret #<%= i %></label>
         <textarea id="secret<%= i.toString().padStart(3, '0') %>" name="secret"><% if (existing) { %><%= existing.text %><% } %></textarea>
