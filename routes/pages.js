@@ -129,9 +129,12 @@ router.get('/*/reveal/:id', async (req, res, next) => {
   const userPOV = req.user?.perspective === 'character' ? req.user?.activeChar : req.user?.perspective
   const userKnows = userPOV ? page.getKnownSecrets(userPOV) : []
   const userKnowsIDs = userKnows.map(s => s._id.toString())
-  if (secret && userKnowsIDs.includes(req.params.id) && req.query.to) {
-    const character = await Page.findOne({ title: req.query.to })
-    if (character) await page.revealSecret(secret, character)
+  if (secret && userKnowsIDs.includes(req.params.id)) {
+    const names = req.query.to.split(/[,;]+/).map(name => name.trim())
+    for (const title of names) {
+      const character = await Page.findOne({ title })
+      if (character) await page.revealSecret(secret, character)
+    }
   }
   res.redirect(`/${page.path}`)
 })
