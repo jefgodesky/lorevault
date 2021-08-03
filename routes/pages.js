@@ -5,6 +5,7 @@ const Page = require('../models/page')
 const Character = require('../models/character')
 const { getSystemsDisplay } = require('../utils')
 const renderPage = require('../middleware/renderPage')
+const addKnownSecrets = require('../middleware/addKnownSecrets')
 const upload = require('../middleware/upload')
 const parse = require('../parser')
 const router = Router()
@@ -36,6 +37,7 @@ router.get('/', async (req, res, next) => {
 router.get('/create', async (req, res, next) => {
   req.viewOpts.title = 'Create a New Page'
   req.viewOpts.get = req.query
+  req.viewOpts.numSecrets = 3
   res.render('create', req.viewOpts)
 })
 
@@ -52,6 +54,8 @@ router.post('/create', upload.single('file'), async (req, res, next) => {
       editor: req.user?._id
     })
   ]
+  const secrets = req.body.secret.filter(s => s !== '')
+  if (secrets && secrets.length > 0) data.secrets = secrets.map(text => ({ text }))
   const page = await Page.create(data)
   res.redirect(`/${page.path}`)
 })
@@ -75,11 +79,12 @@ router.get('/search', async (req, res, next) => {
 })
 
 // GET /*/edit
-router.get('/*/edit', async (req, res, next) => {
+router.get('/*/edit', addKnownSecrets, async (req, res, next) => {
   req.viewOpts.page = await Page.findByPath(req.originalUrl)
   req.viewOpts.title = `Editing ${req.viewOpts.page.title}`
   req.viewOpts.upload = Boolean(req.viewOpts.page.file.url)
   req.viewOpts.get = req.query
+  req.viewOpts.numSecrets = req.viewOpts.secrets.length + 1
   res.render('edit', req.viewOpts)
 })
 
@@ -92,6 +97,12 @@ router.post('/*/edit', upload.single('file'), async (req, res, next) => {
     : Object.assign({}, req.body, { editor: req.user?._id })
   if (page.file?.url && update.file?.url && page.file.url !== update.file.url) await page.deleteFile()
   await page.makeUpdate(update)
+
+  // Update secrets
+  const secrets = Array.isArray(req.body.secret) ? req.body.secret : [req.body.secret]
+  const secretIDs = Array.isArray(req.body['secret-id']) ? req.body['secret-id'] : [req.body['secret-id']]
+  await page.updateSecrets(secrets, secretIDs)
+
   res.redirect(`/${page.path}`)
 })
 
@@ -108,6 +119,24 @@ router.get('/*/claim', async (req, res, next) => {
   req.viewOpts.title = `Claiming ${req.viewOpts.page.title}`
   req.viewOpts.systems = getSystemsDisplay(config.rules)
   res.render('char-claim', req.viewOpts)
+})
+
+// GET /*/reveal/:id
+router.get('/*/reveal/:id', async (req, res, next) => {
+  const page = await Page.findByPath(req.originalUrl)
+  if (!page) return res.redirect('/')
+  const secret = page.findSecretByID(req.params.id)
+  const userPOV = req.user?.perspective === 'character' ? req.user?.activeChar : req.user?.perspective
+  const userKnows = userPOV ? page.getKnownSecrets(userPOV) : []
+  const userKnowsIDs = userKnows.map(s => s._id.toString())
+  if (secret && userKnowsIDs.includes(req.params.id)) {
+    const names = req.query.to.split(/[,;]+/).map(name => name.trim())
+    for (const title of names) {
+      const character = await Page.findOne({ title })
+      if (character) await page.revealSecret(secret, character)
+    }
+  }
+  res.redirect(`/${page.path}`)
 })
 
 // POST /*/claim
@@ -167,7 +196,7 @@ router.get('/*/*', async (req, res, next) => {
 })
 
 // GET /*
-router.get('/*', renderPage, async (req, res, next) => {
+router.get('/*', renderPage, addKnownSecrets, async (req, res, next) => {
   if (!req.viewOpts.page) return next()
   res.render('page', req.viewOpts)
 })

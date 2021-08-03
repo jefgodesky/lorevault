@@ -250,6 +250,29 @@ describe('Page', () => {
     })
   })
 
+  describe('PageSchema.methods.findMembers', () => {
+    it('returns a category\'s members', async () => {
+      expect.assertions(2)
+
+      const d1 = JSON.parse(JSON.stringify(testPageData))
+      d1.title = 'Test Category'
+      d1.body = '[[Type:Category]]'
+      const p1 = await Page.create(d1)
+
+      const d2 = JSON.parse(JSON.stringify(testPageData))
+      d2.body = '[[Category:Test Category]]'
+      const p2 = await Page.create(d2)
+
+      const d3 = JSON.parse(JSON.stringify(testPageData))
+      d3.body = '[[Category:Test Category]]\n[[Type:Category]]'
+      const p3 = await Page.create(d3)
+
+      const actual = await p1.findMembers()
+      expect(actual.pages.map(p => p._id)).toEqual([ p2._id ])
+      expect(actual.subcategories.map(p => p._id)).toEqual([ p3._id ])
+    })
+  })
+
   describe('PageSchema.methods.isClaimable', () => {
     it('returns false if the page isn\'t of type person', async () => {
       expect.assertions(1)
@@ -276,6 +299,174 @@ describe('Page', () => {
       const page = await Page.create(cpy)
       const actual = await page.isClaimable()
       expect(actual).toEqual(true)
+    })
+  })
+
+  describe('PageSchema.methods.findCharacter', () => {
+    it('returns null if there is no character', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      const actual = await page.findCharacter()
+      expect(actual).toBeNull()
+    })
+
+    it('returns the character if one exists', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      const player = await User.create({ googleID: 'google', discordID: 'discord' })
+      const char = await Character.create({ page, player })
+      const actual = await page.findCharacter()
+      expect(actual._id).toEqual(char._id)
+    })
+  })
+
+  describe('PageSchema.methods.getKnownSecrets', () => {
+    it('returns all secrets for a loremaster', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      page.secrets.push({ text: 'Test' })
+      await page.save()
+      const actual = page.getKnownSecrets('loremaster')
+      expect(actual).toHaveLength(1)
+    })
+
+    it('returns no secrets to the public', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      page.secrets.push({ text: 'Test' })
+      await page.save()
+      const actual = page.getKnownSecrets('public')
+      expect(actual).toHaveLength(0)
+    })
+
+    it('returns the secrets that a character knows', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      const player = await User.create({ googleID: 'google', discordID: 'discord' })
+      const char = await Character.create({ page, player })
+      page.secrets.push({ text: 'Secret 1' })
+      page.secrets.push({ text: 'Secret 2', knowers: [ char._id] })
+      await page.save()
+      const actual = page.getKnownSecrets(char)
+      expect(actual).toHaveLength(1)
+    })
+  })
+
+  describe('PageSchema.methods.findSecretByID', () => {
+    it('returns null if there is no such secret', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      const actual = await page.findSecretByID('nope')
+      expect(actual).toBeNull()
+    })
+
+    it('returns the matching secret, given a secret', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
+      const actual = await page.findSecretByID(page.secrets[0])
+      expect(actual.text).toEqual('Secret 1')
+    })
+
+    it('returns the matching secret, given an ID', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
+      const actual = await page.findSecretByID(page.secrets[0]._id)
+      expect(actual.text).toEqual('Secret 1')
+    })
+
+    it('returns the matching secret, given a string', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
+      const actual = await page.findSecretByID(page.secrets[0]._id.toString())
+      expect(actual.text).toEqual('Secret 1')
+    })
+  })
+
+  describe('PageSchema.methods.updateSecrets', () => {
+    it('can add new secrets', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
+      const actual = await Page.findById(page._id)
+      expect(actual.secrets).toHaveLength(3)
+    })
+
+    it('can update existing secrets', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
+      await page.updateSecrets([ 'Updated' ], [ page.secrets[0]._id.toString() ])
+      const actual = await Page.findById(page._id)
+      expect(actual.secrets[0].text).toEqual('Updated')
+    })
+
+    it('can delete secrets', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
+      await page.updateSecrets([ '' ], [ page.secrets[0]._id.toString() ])
+      const actual = await Page.findById(page._id)
+      expect(actual.secrets).toHaveLength(2)
+    })
+  })
+
+  describe('PageSchema.methods.revealSecret', () => {
+    it('does nothing if you don\'t provide a valid secret', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
+      const player = await User.create({ googleID: 'google', discordID: 'discord' })
+      const char = await Character.create({ page, player })
+      await page.revealSecret('nope', char)
+      const actual = await page.getKnownSecrets(char)
+      expect(Array.from(actual)).toEqual([])
+    })
+
+    it('reveals a secret', async () => {
+      expect.assertions(2)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
+      const player = await User.create({ googleID: 'google', discordID: 'discord' })
+      const char = await Character.create({ page, player })
+      await page.revealSecret(page.secrets[0], page)
+      const actual = await page.getKnownSecrets(char)
+      expect(actual).toHaveLength(1)
+      expect(actual[0].text).toEqual('Secret 1')
+    })
+
+    it('reveals a secret to all characters in a category', async () => {
+      expect.assertions(1)
+      const player = await User.create({ googleID: 'google', discordID: 'discord' })
+
+      const d1 = JSON.parse(JSON.stringify(testPageData))
+      d1.title = 'Group'
+      d1.body = '[[Type:Category]]'
+      const p1 = await Page.create(d1)
+
+      const d2 = JSON.parse(JSON.stringify(testPageData))
+      d2.title = 'Subgroup'
+      d2.body = '[[Category:Group]]\n[[Type:Category]]'
+      await Page.create(d2)
+
+      const d3 = JSON.parse(JSON.stringify(testPageData))
+      d3.title = 'Number One'
+      d3.body = '[[Category:Group]]\n[[Type:Person]]'
+      const p3 = await Page.create(d3)
+      const c1 = await Character.create({ page: p3, player })
+
+      const d4 = JSON.parse(JSON.stringify(testPageData))
+      d4.title = 'Number Two'
+      d4.body = '[[Category:Subgroup]]\n[[Type:Person]]'
+      const p4 = await Page.create(d4)
+      const c2 = await Character.create({ page: p4, player })
+
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
+      await page.revealSecret(page.secrets[0], p1)
+      expect(Array.from(page.secrets[0].knowers)).toEqual([c1._id, c2._id])
     })
   })
 

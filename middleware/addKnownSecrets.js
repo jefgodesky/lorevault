@@ -2,28 +2,17 @@ const Page = require('../models/page')
 const parse = require('../parser')
 
 /**
- * Express.js middleware that loads a page and then prepares the variables
- * necessary to render it.
+ * Express.js middleware that adds the secrets from a page that the user should
+ * see, given hens current perspective.
  * @param {object} req - The Express.js request object.
  * @param {object} res - The Express.js response object.
  * @param {function} next - The next function to call.
  */
 
-const renderPage = async (req, res, next) => {
+const addKnownSecrets = async (req, res, next) => {
   if (!req.viewOpts.page) req.viewOpts.page = await Page.findByPath(req.originalUrl)
   const { page } = req.viewOpts
   if (!page) return next()
-
-  req.viewOpts.markup = await parse(page.body)
-  const pageIsClaimable = await page.isClaimable()
-  req.viewOpts.claimable = req.user?.charClaimMode === true && pageIsClaimable
-
-  // Add special category data
-  if (req.viewOpts.page.types.includes('Category')) {
-    const { subcategories, pages } = await Page.findCategoryMembers(req.viewOpts.page.title)
-    req.viewOpts.subcategories = subcategories
-    req.viewOpts.pages = pages
-  }
 
   // Get secrets
   const pov = req.viewOpts.perspective === 'character' ? req.viewOpts.char : req.viewOpts.perspective
@@ -36,4 +25,4 @@ const renderPage = async (req, res, next) => {
   next()
 }
 
-module.exports = renderPage
+module.exports = addKnownSecrets
