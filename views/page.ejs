@@ -48,11 +48,13 @@
       <% } %>
       <% if (locals.secrets && secrets.length > 0) { %>
       <% for (const secret of secrets) { %>
-      <%- secret.markup %>
-      <form class="reveal" action="/<%= page.path %>/reveal/<%= secret._id %>" method="GET">
-        <input type="text" placeholder="Reveal this secret to..." name="to" />
-        <button>Reveal</button>
-      </form>
+      <div class="secret">
+        <%- secret.markup %>
+        <form class="reveal" action="/<%= page.path %>/reveal/<%= secret._id %>" method="GET">
+          <input type="text" placeholder="Reveal this secret to..." name="to" />
+          <button>Reveal</button>
+        </form>
+      </div>
       <% } %>
       <% } %>
       <% if (page.categories && page.categories.length > 0) { %>
