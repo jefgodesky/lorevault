@@ -7,7 +7,8 @@ import {
   ready,
   select,
   create,
-  hasClass
+  hasClass,
+  addClass
 } from './utils'
 
 describe('ready', () => {
@@ -91,5 +92,25 @@ describe('hasClass', () => {
   it('returns false if the element does not have the class', () => {
     const el = create('div', ['somethingelse'])
     expect(hasClass(el, 'test')).toEqual(false)
+  })
+})
+
+describe('addClass', () => {
+  it('adds a class', () => {
+    const el = create()
+    addClass(el, 'test')
+    expect(el.outerHTML).toEqual('<div class="test"></div>')
+  })
+
+  it('adds multiple classes', () => {
+    const el = create()
+    addClass(el, 'test1', 'test2')
+    expect(el.outerHTML).toEqual('<div class="test1 test2"></div>')
+  })
+
+  it('doesn\'t duplicate classes', () => {
+    const el = create('div', ['test1'])
+    addClass(el, 'test1', 'test2')
+    expect(el.outerHTML).toEqual('<div class="test1 test2"></div>')
   })
 })

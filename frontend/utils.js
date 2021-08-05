@@ -62,9 +62,29 @@ const hasClass = (el, ...classes) => {
   return intersection.length > 0
 }
 
+/**
+ * Add one or more classes to an element.
+ * @param el {Element} - The element to add the classes to.
+ * @param classes {string} - The classes to add to the element.
+ */
+
+const addClass = (el, ...classes) => {
+  classes.forEach(className => {
+    if (el.classList) {
+      el.classList.add(className)
+    } else {
+      const curr = el.className.split(' ')
+      if (!curr.includes(className)) {
+        el.className += ` ${className}`
+      }
+    }
+  })
+}
+
 export {
   ready,
   select,
   create,
-  hasClass
+  hasClass,
+  addClass
 }
