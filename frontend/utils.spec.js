@@ -6,7 +6,8 @@
 import {
   ready,
   select,
-  create
+  create,
+  hasClass
 } from './utils'
 
 describe('ready', () => {
@@ -73,5 +74,22 @@ describe('create', () => {
   it('does it all at once', () => {
     const actual = create('p', ['test1', 'test2'], { id: 'test' }, 'Test')
     expect(actual.outerHTML).toEqual('<p class="test1 test2" id="test">Test</p>')
+  })
+})
+
+describe('hasClass', () => {
+  it('returns true if the element has the class', () => {
+    const el = create('div', ['test'])
+    expect(hasClass(el, 'test')).toEqual(true)
+  })
+
+  it('returns true if the element has any of the classes', () => {
+    const el = create('div', ['test1', 'test2'])
+    expect(hasClass(el, 'test1', 'test2', 'test3')).toEqual(true)
+  })
+
+  it('returns false if the element does not have the class', () => {
+    const el = create('div', ['somethingelse'])
+    expect(hasClass(el, 'test')).toEqual(false)
   })
 })

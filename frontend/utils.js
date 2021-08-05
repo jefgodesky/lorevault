@@ -48,8 +48,23 @@ const create = (tag = 'div', classes, attrs, text) => {
   return el
 }
 
+/**
+ * Tests if an element has a partciular class.
+ * @param el {Element} - The element to test.
+ * @param classes {string} - The class to test for.
+ * @returns {boolean} - `true` if `el` has the class `className`, or `false`
+ *   if it does not.
+ */
+
+const hasClass = (el, ...classes) => {
+  const has = el.classList ? Array.from(el.classList) : el.className.split(' ')
+  const intersection = has.filter(x => classes.includes(x))
+  return intersection.length > 0
+}
+
 export {
   ready,
   select,
-  create
+  create,
+  hasClass
 }
