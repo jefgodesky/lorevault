@@ -30,6 +30,7 @@ const VersionSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
 }))
 
 const SecretSchemaDefinition = {
+  section: String,
   text: String,
   knowers: [{
     type: Schema.Types.ObjectId,
