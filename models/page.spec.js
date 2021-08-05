@@ -87,6 +87,14 @@ describe('Page', () => {
       expect(page.categories[0].toString()).toEqual(check._id.toString())
       expect(page._id.toString()).not.toEqual(check._id.toString())
     })
+
+    it('assigns secrets to sections', async () => {
+      expect.assertions(1)
+      const pageData = JSON.parse(JSON.stringify(testPageData))
+      pageData.secrets = [{ text: '[Test] This secret is in the test section.' }]
+      const page = await Page.create(pageData)
+      expect(page.secrets[0].section).toEqual('Test')
+    })
   })
 
   describe('PageSchema.methods.makeUpdate', () => {
