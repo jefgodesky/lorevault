@@ -1,5 +1,7 @@
 const { Remarkable } = require('remarkable')
 const HeaderIdsPlugin = require('remarkable-header-ids')
+const { render } = require('ejs')
+const fs = require('fs').promises
 const slugify = require('slugify')
 const Page = require('../models/page')
 const { getSVG } = require('../utils')
@@ -79,27 +81,75 @@ const parseTemplateParam = elems => {
 }
 
 /**
+ * Parse the special {{Secrets}} template.
+ * @param {string} str - The string to parse.
+ * @param {string} match - The invocation of the template.
+ * @param {{ordered: *[], named: {}, page: Page, char: Character}} params -
+ *   Template parameters as parsed by `parseTemplateParam`, with optional
+ *   parameters `page` and `char` that may be added.
+ * @returns {Promise<string>} - A Promise that resolves with the new string
+ *   once the given instance of the special {{Secrets}} template has been
+ *   correctly parsed.
+ */
+
+const parseSecrets = async (str, match, params) => {
+  const { ordered, page, char } = params
+  if (!page || !char) return str
+  const template = await fs.readFile('views/partials/secret.ejs', 'utf8')
+  const section = ordered && ordered.length > 0 ? ordered[0] : null
+  const secrets = page.getKnownSecrets(char, section)
+
+  for (const secret of secrets) {
+    const match = secret.text.match(/^\[(.*?)\]/m)
+    const text = match && match.length > 0
+      ? secret.text.substr(match[0].length).trim()
+      : secret.text.trim()
+    secret.markup = await parse(text)
+  }
+
+  const markup = secrets.map(secret => render(template, Object.assign({}, secret, { action: `/${page.path}/reveal/${secret._id}` })))
+  return str.replace(match, markup.join('\n'))
+}
+
+/**
  * Parse templates.
  * @param {string} str - The string to be parsed.
+ * @param {Page} page - (Optional) The page being parsed.
+ * @param {Character} char - (Optional) The character viewing this content.
  * @returns {Promise<string>} - A Promise that resolves once all of the
  *   templates invoked by the string have been parsed, with the original
  *   string with all template invocations replaced by their appropriate
  *   content.
  */
 
-const parseTemplates = async str => {
+const parseTemplates = async (str, page, char) => {
   const matches = str.match(/{{((\n|\r|.)*?)}}/gm)
   if (!matches) return str
   for (const match of matches) {
     const elems = match.substr(2, match.length - 4).split('|').map(el => el.trim())
     const name = elems.length > 0 ? elems[0] : null
     const params = elems.length > 1 ? parseTemplateParam(elems.slice(1)) : { ordered: [], named: {} }
+    if (page) params.page = page
+    if (char) params.char = char
     if (!name) continue
-    const tpl = await Page.findByTitle(name, 'Template')
-    if (!tpl || tpl.length === 0) {
-      str = str.replace(match, '')
+
+    const special = {
+      'Secrets': { fn: parseSecrets, async: true }
+    }
+
+    if (Object.keys(special).includes(name)) {
+      if (special[name].async) {
+        str = await special[name].fn(str, match, params)
+      } else {
+        str = special[name].fn(str, match, params)
+      }
     } else {
-      str = str.replace(match, tpl.parseTemplate(params))
+      const tpl = await Page.findByTitle(name, 'Template')
+      if (!tpl || tpl.length === 0) {
+        str = str.replace(match, '')
+      } else {
+        str = str.replace(match, tpl.parseTemplate(params))
+      }
     }
   }
   return parseTemplates(str)
@@ -229,6 +279,24 @@ const unwrapTags = str => {
   return str
 }
 
+const trimEmptySections = str => {
+  for (let depth = 1; depth < 7; depth++) {
+    const r = new RegExp(`<h${depth}(.*?)>(.*?)<\/h${depth}>`, 'gm')
+    const matches = str.match(r)
+    if (matches) {
+      for (let i = 0; i < matches.length; i++) {
+        const start = str.indexOf(matches[i]) + matches[i].length
+        const end = i === matches.length - 1
+          ? undefined
+          : str.indexOf(matches[i + 1])
+        const between = str.substring(start, end).trim()
+        if (between === '') str = str.replace(matches[i], '')
+      }
+    }
+  }
+  return str
+}
+
 /**
  * Restores blocks removed by `removeBlocks` to the string.
  * @param str {!string} - The string being parsed. This should have been
@@ -251,19 +319,24 @@ const restoreBlocks = (str, blocks) => {
 /**
  * Parse a string to HTML.
  * @param {string} str - The string to parse.
+ * @param {Page?} page - (Optional) The page that you are parsing
+ *   (if applicable).
+ * @param {Character|string?} pov - (Optional) The character who is viewing
+ *   this content.
  * @returns {Promise<string>} - A Promise that resolves with the parsed HTML.
  */
 
-const parse = async str => {
+const parse = async (str, page, char) => {
   let { blockedStr, blocks } = removeBlocks(str)
   const detaggedStr = detag(blockedStr)
-  const templatedStr = await parseTemplates(detaggedStr)
+  const templatedStr = await parseTemplates(detaggedStr, page, char)
   const imagedStr = await parseImages(templatedStr)
   const linkedStr = await parseLinks(imagedStr)
   const wrappedStr = wrapLinks(linkedStr)
   const markedStr = markdown(wrappedStr)
   const unwrappedStr = unwrapTags(markedStr)
-  return restoreBlocks(unwrappedStr, blocks)
+  const trimmedStr = trimEmptySections(unwrappedStr)
+  return restoreBlocks(trimmedStr, blocks)
 }
 
 module.exports = parse

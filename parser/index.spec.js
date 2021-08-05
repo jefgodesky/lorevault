@@ -20,8 +20,8 @@ describe('parse', () => {
 
     it('provides IDs for headers', async () => {
       expect.assertions(1)
-      const actual = await parse('## Section 1\n\n## Section 2')
-      expect(actual).toEqual('<h2 id="heading-section-1"><a class="header-anchor" id="section-1" href="#section-1">#</a>Section 1</h2>\n<h2 id="heading-section-2"><a class="header-anchor" id="section-2" href="#section-2">#</a>Section 2</h2>\n')
+      const actual = await parse('## Section 1\n\nFirst section.\n\n## Section 2\n\nSecond section.')
+      expect(actual).toEqual('<h2 id="heading-section-1"><a class="header-anchor" id="section-1" href="#section-1">#</a>Section 1</h2>\n<p>First section.</p>\n<h2 id="heading-section-2"><a class="header-anchor" id="section-2" href="#section-2">#</a>Section 2</h2>\n<p>Second section.</p>\n')
     })
   })
 
@@ -141,6 +141,34 @@ describe('parse', () => {
       expect.assertions(1)
       const actual = await parse('{{Template:HelloWorld\n  |greeting=Hello\n  |subject=world\n}}\n\nThis is a test.')
       expect(actual).toEqual('<p>This is a test.</p>\n')
+    })
+  })
+
+  describe('Parsing special templates: Secrets', () => {
+    it('renders secrets that you know', async () => {
+      expect.assertions(2)
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.body = '{{Secrets}}'
+      const page = await Page.create(cpy)
+      page.secrets.push({ text: 'Test' })
+      await page.save()
+      const actual = await parse(page.body, page, 'loremaster')
+      expect(actual.startsWith('<div class="secret">')).toEqual(true)
+      expect(actual).toContain('<p>Test</p>')
+    })
+
+    it('renders secrets that you know in a given section', async () => {
+      expect.assertions(3)
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.body = '{{Secrets|Test}}'
+      const page = await Page.create(cpy)
+      page.secrets.push({ text: 'Secret #1' })
+      page.secrets.push({ text: '[Test] Secret #2' })
+      await page.save()
+      const actual = await parse(page.body, page, 'loremaster')
+      expect(actual.startsWith('<div class="secret">')).toEqual(true)
+      expect(actual).toContain('<p>Secret #2</p>')
+      expect(actual).not.toContain('<p>Secret #1</p>')
     })
   })
 
