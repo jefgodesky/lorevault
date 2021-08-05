@@ -12,13 +12,17 @@ const { getSVG } = require('../utils')
  * @returns {string} - The parsed string.
  */
 
-const markdown = str => {
+const markdown = async str => {
   const md = new Remarkable({
     html: true,
     xhtmlOut: true,
     typographer: true
   })
-  md.use(HeaderIdsPlugin({ headerId: slug => `heading-${slug}` }))
+  const anchorText = await fs.readFile('views/partials/heading-anchor.ejs', 'utf8')
+  md.use(HeaderIdsPlugin({
+    anchorText,
+    headerId: slug => `heading-${slug}`
+  }))
   return md.render(str)
 }
 
@@ -333,7 +337,7 @@ const parse = async (str, page, char) => {
   const imagedStr = await parseImages(templatedStr)
   const linkedStr = await parseLinks(imagedStr)
   const wrappedStr = wrapLinks(linkedStr)
-  const markedStr = markdown(wrappedStr)
+  const markedStr = await markdown(wrappedStr)
   const unwrappedStr = unwrapTags(markedStr)
   const trimmedStr = trimEmptySections(unwrappedStr)
   return restoreBlocks(trimmedStr, blocks)
