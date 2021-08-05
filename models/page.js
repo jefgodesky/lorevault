@@ -155,6 +155,18 @@ PageSchema.pre('save', async function (next) {
 })
 
 /**
+ * Assign secrets to the sections indicated.
+ */
+
+PageSchema.pre('save', function (next) {
+  for (const secret of this.secrets) {
+    const match = secret.text.match(/^\[(.*?)\]/m)
+    if (match && match.length > 1) secret.section = match[1]
+  }
+  next()
+})
+
+/**
  * Makes an update to a Page document.
  * @param {object} update - The update to make. This object should conform to
  *   the `VersionSchema` outline.
