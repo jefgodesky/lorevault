@@ -98,11 +98,30 @@ const removeClass = (el, ...classes) => {
   })
 }
 
+/**
+ * Toggle one or more classes from an element. For each class, if the element
+ * has that class, this method removes it, and if it doesn't have the class, it
+ * adds it.
+ * @param el {Element} - The element to toggle the classes on.
+ * @param classes {string} - The classes to toggle on the element.
+ */
+
+const toggleClass = (el, ...classes) => {
+  classes.forEach(className => {
+    if (hasClass(el, className)) {
+      removeClass(el, className)
+    } else {
+      addClass(el, className)
+    }
+  })
+}
+
 export {
   ready,
   select,
   create,
   hasClass,
   addClass,
-  removeClass
+  removeClass,
+  toggleClass
 }

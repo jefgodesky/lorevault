@@ -9,7 +9,7 @@ import {
   create,
   hasClass,
   addClass,
-  removeClass
+  removeClass, toggleClass
 } from './utils'
 
 describe('ready', () => {
@@ -127,5 +127,25 @@ describe('removeClass', () => {
     const el = create('div', ['test1', 'test2', 'test3'])
     removeClass(el, 'test1', 'test2')
     expect(el.outerHTML).toEqual('<div class="test3"></div>')
+  })
+})
+
+describe('toggleClass', () => {
+  it('adds class to element that doesn\'t have it', () => {
+    const el = create('div')
+    toggleClass(el, 'test')
+    expect(el.outerHTML).toEqual('<div class="test"></div>')
+  })
+
+  it('removes class from element that has it', () => {
+    const el = create('div', ['test'])
+    toggleClass(el, 'test')
+    expect(el.outerHTML).toEqual('<div class=""></div>')
+  })
+
+  it('can remove one test and add a different one at the same time', () => {
+    const el = create('div', ['test1'])
+    toggleClass(el, 'test1', 'test2')
+    expect(el.outerHTML).toEqual('<div class="test2"></div>')
   })
 })
