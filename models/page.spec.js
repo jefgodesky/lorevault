@@ -358,6 +358,40 @@ describe('Page', () => {
       const actual = page.getKnownSecrets(char)
       expect(actual).toHaveLength(1)
     })
+
+    it('returns only secrets for the specified section to the loremaster', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      page.secrets.push({ text: '[Test] Test' })
+      page.secrets.push({ text: 'Test' })
+      await page.save()
+      const actual = page.getKnownSecrets('loremaster', 'Test')
+      expect(actual).toHaveLength(1)
+    })
+
+    it('returns only secrets that have no section when not given a section', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      page.secrets.push({ text: '[Test] Test' })
+      page.secrets.push({ text: 'Test' })
+      await page.save()
+      const actual = page.getKnownSecrets('loremaster')
+      expect(actual).toHaveLength(1)
+    })
+
+    it('returns only secrets for the specified section to a character', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      const player = await User.create({ googleID: 'google', discordID: 'discord' })
+      const char = await Character.create({ page, player })
+      page.secrets.push({ text: 'Secret 1' })
+      page.secrets.push({ text: 'Secret 2', knowers: [ char._id] })
+      page.secrets.push({ text: '[Test] Secret 1' })
+      page.secrets.push({ text: '[Test] Secret 2', knowers: [ char._id] })
+      await page.save()
+      const actual = page.getKnownSecrets(char, 'Test')
+      expect(actual).toHaveLength(1)
+    })
   })
 
   describe('PageSchema.methods.findSecretByID', () => {

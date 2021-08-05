@@ -340,16 +340,19 @@ PageSchema.methods.findCharacter = async function () {
  *   point of view. The string "loremaster" sees the page as a loremaster,
  *   revealing all secrets, while the string "public" sees the page as someone
  *   not signed in, meaning that no secrets are shown.
+ * @param {string} section - (Optional) If provided, the method will only
+ *   return secrets that belong to the specified section.
  * @returns {Promise<SecretSchema[]>} - A Promise that resolves with the array
  *   of the page's secrets that the given character knows.
  */
 
-PageSchema.methods.getKnownSecrets = function (char) {
+PageSchema.methods.getKnownSecrets = function (char, section) {
   const id = char._id ? char._id.toString() : char.id ? char.id.toString() : char.toString()
   return this.secrets.filter(secret => {
-    if (id === 'loremaster') return true
+    const inSection = !section && !secret.section || secret.section === section
+    if (inSection && id === 'loremaster') return true
     if (id === 'public') return false
-    return secret.knowers.map(id => id.toString()).includes(id)
+    return secret.knowers.map(id => id.toString()).includes(id) && inSection
   })
 }
 
