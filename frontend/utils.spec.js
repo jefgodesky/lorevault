@@ -8,7 +8,8 @@ import {
   select,
   create,
   hasClass,
-  addClass
+  addClass,
+  removeClass
 } from './utils'
 
 describe('ready', () => {
@@ -112,5 +113,19 @@ describe('addClass', () => {
     const el = create('div', ['test1'])
     addClass(el, 'test1', 'test2')
     expect(el.outerHTML).toEqual('<div class="test1 test2"></div>')
+  })
+})
+
+describe('removeClass', () => {
+  it('removes a class', () => {
+    const el = create('div', ['test'])
+    removeClass(el, 'test')
+    expect(el.outerHTML).toEqual('<div class=""></div>')
+  })
+
+  it('removes multiple classes', () => {
+    const el = create('div', ['test1', 'test2', 'test3'])
+    removeClass(el, 'test1', 'test2')
+    expect(el.outerHTML).toEqual('<div class="test3"></div>')
   })
 })
