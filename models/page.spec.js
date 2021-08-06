@@ -95,6 +95,21 @@ describe('Page', () => {
       const page = await Page.create(pageData)
       expect(page.secrets[0].section).toEqual('Test')
     })
+
+    it('orders secrets', async () => {
+      expect.assertions(2)
+      const pageData = JSON.parse(JSON.stringify(testPageData))
+      pageData.secrets = [
+        { text: 'Secret #1', order: 1 },
+        { text: 'Secret #2', order: 4 },
+        { text: 'Secret #3', order: 1 }
+      ]
+      const page = await Page.create(pageData)
+      const texts = Array.from(page.secrets.map(secret => secret.text))
+      const orders = Array.from(page.secrets.map(secret => secret.order))
+      expect(orders).toEqual([1, 2, 3])
+      expect(texts).toEqual(['Secret #1', 'Secret #3', 'Secret #2'])
+    })
   })
 
   describe('PageSchema.methods.makeUpdate', () => {

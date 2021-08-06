@@ -167,6 +167,12 @@ PageSchema.pre('save', function (next) {
   next()
 })
 
+PageSchema.pre('save', function (next) {
+  this.secrets = this.secrets.sort((a, b) => a.order - b.order)
+  for (let i = 0; i < this.secrets.length; i++) this.secrets[i].order = i + 1
+  next()
+})
+
 /**
  * Makes an update to a Page document.
  * @param {object} update - The update to make. This object should conform to
