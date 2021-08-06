@@ -349,7 +349,7 @@ PageSchema.methods.findCharacter = async function () {
 PageSchema.methods.getKnownSecrets = function (char, section) {
   const id = char._id ? char._id.toString() : char.id ? char.id.toString() : char.toString()
   return this.secrets.filter(secret => {
-    const inSection = !section && !secret.section || secret.section === section
+    const inSection = section === 'all' || !section && !secret.section || secret.section === section
     if (inSection && id === 'loremaster') return true
     if (id === 'public') return false
     return secret.knowers.map(id => id.toString()).includes(id) && inSection

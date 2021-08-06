@@ -392,6 +392,16 @@ describe('Page', () => {
       const actual = page.getKnownSecrets(char, 'Test')
       expect(actual).toHaveLength(1)
     })
+
+    it('can return secrets from all sections', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      page.secrets.push({ text: '[Test] Test' })
+      page.secrets.push({ text: 'Test' })
+      await page.save()
+      const actual = page.getKnownSecrets('loremaster', 'all')
+      expect(actual).toHaveLength(2)
+    })
   })
 
   describe('PageSchema.methods.findSecretByID', () => {
