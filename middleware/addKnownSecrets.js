@@ -16,7 +16,7 @@ const addKnownSecrets = async (req, res, next) => {
 
   // Get secrets
   const pov = req.viewOpts.perspective === 'character' ? req.viewOpts.char : req.viewOpts.perspective
-  req.viewOpts.secrets = await page.getKnownSecrets(pov)
+  req.viewOpts.secrets = await page.getKnownSecrets(pov, 'all')
   for (const secret of req.viewOpts.secrets) {
     secret.markup = await parse(secret.text)
   }

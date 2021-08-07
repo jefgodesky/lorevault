@@ -25,4 +25,5 @@ const initComponent = async (selector, component) => {
 
 ready(async () => {
   await initComponent('.secret', 'toggle-reveal')
+  await initComponent('.sortable-list', 'sortable')
 })

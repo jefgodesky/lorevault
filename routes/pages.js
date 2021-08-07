@@ -101,7 +101,8 @@ router.post('/*/edit', upload.single('file'), async (req, res, next) => {
   // Update secrets
   const secrets = Array.isArray(req.body.secret) ? req.body.secret : [req.body.secret]
   const secretIDs = Array.isArray(req.body['secret-id']) ? req.body['secret-id'] : [req.body['secret-id']]
-  await page.updateSecrets(secrets, secretIDs)
+  const secretOrder = Array.isArray(req.body['secret-order']) ? req.body['secret-order'].map(o => parseInt(o)) : [parseInt(req.body['secret-order'])]
+  await page.updateSecrets(secrets, secretIDs, secretOrder)
 
   res.redirect(`/${page.path}`)
 })
