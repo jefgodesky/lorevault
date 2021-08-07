@@ -56,7 +56,8 @@
     "regenerator-runtime": "^0.13.9",
     "remarkable": "^2.0.1",
     "remarkable-header-ids": "^0.2.0",
-    "slugify": "^1.6.0"
+    "slugify": "^1.6.0",
+    "sortablejs": "^1.14.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.14.8",
