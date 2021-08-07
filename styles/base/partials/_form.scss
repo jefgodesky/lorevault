@@ -30,3 +30,12 @@ textarea.body {
 .upload textarea.body {
   height: 20vh;
 }
+
+.secret-form {
+  margin: 1em 0;
+
+  input[name="number"] {
+    margin: 0 0 0.5em 0;
+    width: 6em;
+  }
+}
