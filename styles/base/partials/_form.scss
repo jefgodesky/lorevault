@@ -39,3 +39,31 @@ textarea.body {
     width: 6em;
   }
 }
+
+.sortable-list.initialized {
+  .secret-form {
+    padding-left: 2em;
+    position: relative;
+
+    .handle {
+      cursor: grab;
+      height: 1em;
+      left: 0;
+      margin-top: -0.5em;
+      position: absolute;
+      top: 50%;
+      width: 1em;
+    }
+
+    .in-sorting {
+      background-color: rgba(245, 225, 166, 1);
+      cursor: grabbing;
+      opacity: 0.6666;
+    }
+
+    input[name="number"] {
+      position: absolute;
+      transform: scale(0);
+    }
+  }
+}
