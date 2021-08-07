@@ -470,6 +470,19 @@ describe('Page', () => {
       expect(actual.secrets[0].text).toEqual('Updated')
     })
 
+    it('can reorder secrets', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ], null, [1, 2, 3])
+      await page.updateSecrets(
+        ['Updated', 'Secret 2', 'Secret 3'],
+        [page.secrets[0]._id, page.secrets[1]._id, page.secrets[2]._id],
+        [2, 1, 3]
+      )
+      const actual = await Page.findById(page._id)
+      expect(actual.secrets[1].text).toEqual('Updated')
+    })
+
     it('can delete secrets', async () => {
       expect.assertions(1)
       const page = await Page.create(testPageData)
