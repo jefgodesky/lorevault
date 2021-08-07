@@ -95,6 +95,21 @@ describe('Page', () => {
       const page = await Page.create(pageData)
       expect(page.secrets[0].section).toEqual('Test')
     })
+
+    it('orders secrets', async () => {
+      expect.assertions(2)
+      const pageData = JSON.parse(JSON.stringify(testPageData))
+      pageData.secrets = [
+        { text: 'Secret #1', order: 1 },
+        { text: 'Secret #2', order: 4 },
+        { text: 'Secret #3', order: 1 }
+      ]
+      const page = await Page.create(pageData)
+      const texts = Array.from(page.secrets.map(secret => secret.text))
+      const orders = Array.from(page.secrets.map(secret => secret.order))
+      expect(orders).toEqual([1, 2, 3])
+      expect(texts).toEqual(['Secret #1', 'Secret #3', 'Secret #2'])
+    })
   })
 
   describe('PageSchema.methods.makeUpdate', () => {
@@ -453,6 +468,19 @@ describe('Page', () => {
       await page.updateSecrets([ 'Updated' ], [ page.secrets[0]._id.toString() ])
       const actual = await Page.findById(page._id)
       expect(actual.secrets[0].text).toEqual('Updated')
+    })
+
+    it('can reorder secrets', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ], null, [1, 2, 3])
+      await page.updateSecrets(
+        ['Updated', 'Secret 2', 'Secret 3'],
+        [page.secrets[0]._id, page.secrets[1]._id, page.secrets[2]._id],
+        [2, 1, 3]
+      )
+      const actual = await Page.findById(page._id)
+      expect(actual.secrets[1].text).toEqual('Updated')
     })
 
     it('can delete secrets', async () => {

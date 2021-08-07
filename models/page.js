@@ -30,6 +30,7 @@ const VersionSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
 }))
 
 const SecretSchemaDefinition = {
+  order: Number,
   section: String,
   text: String,
   knowers: [{
@@ -163,6 +164,12 @@ PageSchema.pre('save', function (next) {
     const match = secret.text.match(/^\[(.*?)\]/m)
     if (match && match.length > 1) secret.section = match[1]
   }
+  next()
+})
+
+PageSchema.pre('save', function (next) {
+  this.secrets = this.secrets.sort((a, b) => a.order - b.order)
+  for (let i = 0; i < this.secrets.length; i++) this.secrets[i].order = i + 1
   next()
 })
 
@@ -378,18 +385,22 @@ PageSchema.methods.findSecretByID = function (secret) {
  *   the existing secrets that are to be updated. These should be in order,
  *   such that for any value `x`, `ids[x]` provides the ID for the secret whose
  *   text is in `secrets[x]`.
+ * @param {number[]} orders - An array of numbers, providing the order for each
+ *   secret to be placed in.
  * @returns {Promise<void>} - A Promise that resolves when the page's secrets
  *   have been updated.
  */
 
-PageSchema.methods.updateSecrets = async function (secrets, ids) {
+PageSchema.methods.updateSecrets = async function (secrets, ids, orders) {
   for (let i = 0; i < secrets.length; i++) {
     const id = ids && Array.isArray(ids) ? ids[i] : null
     const secret = id ? this.findSecretByID(id) : null
+    const order = orders && Array.isArray(orders) && orders.length > i ? orders[i] : i
     if (secret) {
       secret.text = secrets[i]
+      secret.order = order
     } else {
-      this.secrets.push({ text: secrets[i] })
+      this.secrets.push({ text: secrets[i], order })
     }
   }
   this.secrets = this.secrets.filter(s => s.text !== '')
