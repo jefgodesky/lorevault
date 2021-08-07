@@ -11,14 +11,16 @@
         <label for="msg">Message</label>
         <input type="text" id="msg" name="msg" placeholder="A short description of the change that you’re making" value="<%= locals.get?.msg ? get.msg : locals.page ? null : 'Initial text' %>" />
         <h2>Secrets</h2>
-        <% for (let i = 1; i <= numSecrets; i++) { %>
-        <div class="secret-form">
-          <% const existing = locals.secrets && secrets?.length > i - 1 ? secrets[i - 1] : null %>
-          <% if (existing) {%><input type="hidden" name="secret-id" value="<%= existing._id %>" /><% } %>
-          <input type="number" name="secret-order" value="<%= i %>" />
-          <textarea name="secret"><% if (existing) { %><%= existing.text %><% } %></textarea>
+        <div class="sortable-list">
+          <% for (let i = 1; i <= numSecrets; i++) { %>
+          <div class="secret-form list-group-item">
+            <% const existing = locals.secrets && secrets?.length > i - 1 ? secrets[i - 1] : null %>
+            <% if (existing) {%><input type="hidden" name="secret-id" value="<%= existing._id %>" /><% } %>
+            <input type="number" name="secret-order" value="<%= i %>" />
+            <textarea name="secret"><% if (existing) { %><%= existing.text %><% } %></textarea>
+          </div>
+          <% } %>
         </div>
-        <% } %>
         <p class="actions">
           <button><% if (locals.page) { %>Save Changes<% } else { %>Create Page<% } %></button>
         </p>
