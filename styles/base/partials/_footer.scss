@@ -1,3 +1,17 @@
+@forward '../modules/placeholders';
+
 footer {
   margin-bottom: 0;
+}
+
+nav ul {
+  @extend %unformatted-list;
+
+  li {
+    display: inline-block;
+  }
+
+  li + li:before {
+    content: ' | ';
+  }
 }
