@@ -1,4 +1,4 @@
-const { skin } = require('../config')
+const { skin, footer } = require('../config')
 
 /**
  * Express.js middleware that initializes a `viewOpts` object that can
@@ -12,6 +12,7 @@ const initViewOpts = (req, res, next) => {
   req.viewOpts = {
     title: 'LoreVault',
     skin,
+    footer,
     char: req.user?.activeChar
       ? { id: req.user.activeChar._id, name: req.user.activeChar.page?.title, path: `/${req.user.activeChar.page?.path}` }
       : undefined,
