@@ -550,12 +550,62 @@ describe('Page', () => {
     })
   })
 
+  describe('PageSchema.methods.checkSecret', () => {
+    it('can take a character', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
+
+      const player = await User.create({ googleID: 'google', discordID: 'discord' })
+      const charData = JSON.parse(JSON.stringify(testPageData))
+      charData.title = 'Character'
+      const charPage = await Page.create(charData)
+      const char = await Character.create({ page: charPage, player })
+
+      await page.checkSecret(page.secrets[0]._id, char)
+      const actual = await Page.findByTitle(testPageData.title)
+      expect(actual.secrets[0].checked[0].toString()).toEqual(char._id.toString())
+    })
+
+    it('can take a string', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
+
+      const player = await User.create({ googleID: 'google', discordID: 'discord' })
+      const charData = JSON.parse(JSON.stringify(testPageData))
+      charData.title = 'Character'
+      const charPage = await Page.create(charData)
+      const char = await Character.create({ page: charPage, player })
+
+      await page.checkSecret(page.secrets[0]._id, char._id.toString())
+      const actual = await Page.findByTitle(testPageData.title)
+      expect(actual.secrets[0].checked[0].toString()).toEqual(char._id.toString())
+    })
+
+    it('can take an object with an ID property', async () => {
+      expect.assertions(1)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
+
+      const player = await User.create({ googleID: 'google', discordID: 'discord' })
+      const charData = JSON.parse(JSON.stringify(testPageData))
+      charData.title = 'Character'
+      const charPage = await Page.create(charData)
+      const char = await Character.create({ page: charPage, player })
+
+      await page.checkSecret(page.secrets[0]._id, { id: char._id.toString() })
+      const actual = await Page.findByTitle(testPageData.title)
+      expect(actual.secrets[0].checked[0].toString()).toEqual(char._id.toString())
+    })
+  })
+
   describe('PageSchema.methods.delete', () => {
     it('deletes a page', async () => {
       expect.assertions(1)
       const page = await Page.create(testPageData)
       await page.delete()
-      const actual = await Page.find({ path: testPageData.path })
+      const actual = await Page.findByTitle(testPageData.title)
       expect(actual).toEqual([])
     })
 
