@@ -32,7 +32,7 @@ const addSecret = (list, btn) => {
 const initAddSecret = lists => {
   for (const list of lists) {
     const wrapper = create('p', ['actions', 'add-secret'])
-    const btn = create('button', [], {}, 'Add Secret')
+    const btn = create('button', [], {}, '+ Add Secret')
     wrapper.appendChild(btn)
     list.appendChild(wrapper)
     btn.addEventListener('click', event => {
