@@ -33,6 +33,10 @@ const SecretSchemaDefinition = {
   order: Number,
   section: String,
   text: String,
+  checked: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Character'
+  }],
   knowers: [{
     type: Schema.Types.ObjectId,
     ref: 'Character'
@@ -431,6 +435,65 @@ PageSchema.methods.revealSecret = async function (secret, page) {
     const members = await page.findMembers()
     if (!members) return
     for (const member of [ ...members.pages, ...members.subcategories ]) await this.revealSecret(secret, member)
+  }
+}
+
+/**
+ * Add a character to the list of checked characters.
+ * @param {SecretSchema|Schema.Types.ObjectID|string} secret - Either a Secret
+ *   schema object, or the unique ID string for a Secret schema object.
+ * @param {Character|{ id: string }|string} char - Ether a Character schema
+ *   object, or an object with an `id` property that contains the ID of a
+ *   Character schema object, or a string, which is the ID of a Character
+ *   schema object. This is used to identify the character who has now checked
+ *   the secret.
+ * @returns {Promise<void>} - A Promise that resolves when the secret has been
+ *   updated and the page has been saved.
+ */
+
+PageSchema.methods.checkSecret = async function (secret, char) {
+  const s = this.findSecretByID(secret)
+  if (!s) return
+  const c = char?.constructor?.name === 'Character'
+    ? char
+    : char.id
+      ? await Character.findById(char.id)
+      : await Character.findById(char)
+  if (!c) return
+
+  // If the character hasn't checked this secret before, check if it should
+  // be revealed according to any of our rules systems.
+
+  if (!s.checked.includes(c._id)) {
+    let reveal = false
+    for (const system of rules) {
+      const check = (await import(`../rules/${system}/check.js`)).default
+      reveal = reveal || check(s.text, c)
+    }
+    if (reveal) s.knowers = [...new Set([...s.knowers, c._id])]
+  }
+
+  // In any case, we note that the character has checked this secret, so hen
+  // won't keep checking every time hen visits the page, and we save the page.
+
+  s.checked = [ ...new Set([ ...s.checked, c._id ]) ]
+  await this.save()
+}
+
+/**
+ * Run PageSchema.methods.checkSecret on each of the page's secrets.
+ * @param {Character|{ id: string }|string} char - Ether a Character schema
+ *   object, or an object with an `id` property that contains the ID of a
+ *   Character schema object, or a string, which is the ID of a Character
+ *   schema object. This is used to identify the character who has now checked
+ *   the secret.
+ * @returns {Promise<void>} - A Promise that resolves once all of the page's
+ *   secrets have been checked.
+ */
+
+PageSchema.methods.checkSecrets = async function (char) {
+  for (const secret of this.secrets) {
+    await this.checkSecret(secret, char)
   }
 }
 
