@@ -1,24 +1,23 @@
 <header>
       <nav>
       <% if (locals.isLoggedIn) { %>
-        <% if (locals.char && locals.perspective === 'character') { %>
-        <a href="<%= char.path %>" class="pov"><%= char.name %></a>
-        <% } else if (locals.perspective === 'loremaster') { %>
-        <a href="/profile" class="pov">Loremaster</a>
-        <% } else { %>
-        <span class="pov">Public</span>
-        <% } %>
         <ul>
           <li><a href="/profile">Your Profile</a></li>
           <li><a href="/logout">Logout</a></li>
         </ul>
       <% } else { %>
-        <span class="pov">Public</span>
         <ul>
           <li class="status"><em>Log in with:</em></li>
           <li><a href="/login/google">Google</a></li>
           <li><a href="/login/discord">Discord</a></li>
         </ul>
+      <% } %>
+      <% if (locals.char && locals.perspective === 'character') { %>
+        <a href="<%= char.path %>" class="pov"><%= char.name %></a>
+      <% } else if (locals.perspective === 'loremaster') { %>
+        <a href="/profile" class="pov">Loremaster</a>
+      <% } else { %>
+        <span class="pov">Public</span>
       <% } %>
       </nav>
       <form action="/search" method="GET" class="search">

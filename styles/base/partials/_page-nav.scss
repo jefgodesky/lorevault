@@ -2,6 +2,12 @@
 
 nav.page {
   @extend %tabs;
+
+  @media (max-width: 30em) {
+    .active {
+      font-size: 0;
+    }
+  }
 }
 
 nav.page + main {
