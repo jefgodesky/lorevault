@@ -598,6 +598,39 @@ describe('Page', () => {
       const actual = await Page.findByTitle(testPageData.title)
       expect(actual.secrets[0].checked[0].toString()).toEqual(char._id.toString())
     })
+
+    it('uses modular system rules to reveal a secret', async () => {
+      expect.assertions(2)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ '[Intelligence DC 0] Secret 1', 'Secret 2', 'Secret 3' ])
+
+      const player = await User.create({ googleID: 'google', discordID: 'discord' })
+      const charData = JSON.parse(JSON.stringify(testPageData))
+      charData.title = 'Character'
+      const charPage = await Page.create(charData)
+      const char = await Character.create({ page: charPage, player, dnd5e: { int: 0, arcana: 0, history: 0, nature: 0, religion: 0 } })
+
+      await page.checkSecret(page.secrets[0]._id, { id: char._id.toString() })
+      const actual = await Page.findByTitle(testPageData.title)
+      expect(actual.secrets[0].checked[0].toString()).toEqual(char._id.toString())
+      expect(actual.secrets[0].knowers[0].toString()).toEqual(char._id.toString())
+    })
+
+    it('marks that you\'ve checked before if you fail', async () => {
+      expect.assertions(2)
+      const page = await Page.create(testPageData)
+      await page.updateSecrets([ '[Intelligence DC 21] Secret 1', 'Secret 2', 'Secret 3' ])
+
+      const player = await User.create({ googleID: 'google', discordID: 'discord' })
+      const charData = JSON.parse(JSON.stringify(testPageData))
+      charData.title = 'Character'
+      const charPage = await Page.create(charData)
+      const char = await Character.create({ page: charPage, player, dnd5e: { int: 0, arcana: 0, history: 0, nature: 0, religion: 0 } })
+
+      const actual = await Page.findByTitle(testPageData.title)
+      expect(actual.secrets[0].checked[0].toString()).toEqual(char._id.toString())
+      expect(actual.secrets[0].knowers).toHaveLength(0)
+    })
   })
 
   describe('PageSchema.methods.delete', () => {

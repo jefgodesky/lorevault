@@ -460,6 +460,22 @@ PageSchema.methods.checkSecret = async function (secret, char) {
       ? await Character.findById(char.id)
       : await Character.findById(char)
   if (!c) return
+
+  // If the character hasn't checked this secret before, check if it should
+  // be revealed according to any of our rules systems.
+
+  if (!s.checked.includes(c._id)) {
+    let reveal = false
+    for (const system of rules) {
+      const check = (await import(`../rules/${system}/check`)).default
+      reveal = reveal || check(s.text, c)
+    }
+    if (reveal) s.knowers = [...new Set([...s.knowers, c._id])]
+  }
+
+  // In any case, we note that the character has checked this secret, so hen
+  // won't keep checking every time hen visits the page, and we save the page.
+
   s.checked = [ ...new Set([ ...s.checked, c._id ]) ]
   await this.save()
 }
