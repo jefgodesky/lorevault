@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-  <%- include('includes/head', { title: `${error.status} ${message}` }) %>
+  <%- include('includes/head', { title: `${error.status} ${message}`, skin }) %>
   <body>
     <%- include('includes/header', { isLoggedIn, char, title: `${error.status} ${message}` }) %>
     <main>

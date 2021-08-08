@@ -1,3 +1,5 @@
+const { skin } = require('../config')
+
 /**
  * Express.js middleware that initializes a `viewOpts` object that can
  * accumulate data to pass to the template.
@@ -9,6 +11,7 @@
 const initViewOpts = (req, res, next) => {
   req.viewOpts = {
     title: 'LoreVault',
+    skin,
     char: req.user?.activeChar
       ? { id: req.user.activeChar._id, name: req.user.activeChar.page?.title, path: `/${req.user.activeChar.page?.path}` }
       : undefined,
