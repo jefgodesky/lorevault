@@ -1,8 +1,14 @@
 import Sortable from 'sortablejs'
 import { create, addClass } from '../utils'
 
+/**
+ * Resort the values of the secret order fields to reflect their current
+ * positions.
+ * @param {Node} list - The list element to be re-sorted.
+ */
+
 const resort = list => {
-  const numbers = list.querySelectorAll('input[name="number"]')
+  const numbers = list.querySelectorAll('input[name="secret-order"]')
   for (let i = 0; i < numbers.length; i++) numbers[i].value = i+1
 }
 
