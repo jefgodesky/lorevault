@@ -1,3 +1,5 @@
+const checks = require('./checks')
+
 /**
  * Roll a d20, add the modifier, and return the result.
  * @param {number} modifier - (Optional) A number to add to the die roll.
@@ -18,14 +20,6 @@ const roll = (modifier = 0) => Math.floor(Math.random() * 20) + 1 + modifier
  */
 
 const checkSecret = (secret, char) => {
-  const checks = [
-    { regex: /\[Intelligence DC (\d*?)\]/mi, stat: 'int' },
-    { regex: /\[Arcana DC (\d*?)\]/mi, stat: 'arcana' },
-    { regex: /\[History DC (\d*?)\]/mi, stat: 'history' },
-    { regex: /\[Nature DC (\d*?)\]/mi, stat: 'nature' },
-    { regex: /\[Religion DC (\d*?)\]/mi, stat: 'religion' }
-  ]
-
   for (const check of checks) {
     const { regex, stat } = check
     const match = secret.match(regex)
