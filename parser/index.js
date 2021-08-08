@@ -216,6 +216,22 @@ const parseLinks = async str => {
 }
 
 /**
+ * Apply parser methods for each of the systems listed in the configuration.
+ * @param {string} str - The string being parsed.
+ * @returns {Promise<string>} - A Promise that resolves with the string after
+ *   it has been parsed by the parsers from each of the systems listed in the
+ *   configuration.
+ */
+
+const parseSystems = async str => {
+  for (const system of rules) {
+    const parser = (await import(`../rules/${system}/parse.js`)).default
+    str = parser(str)
+  }
+  return str
+}
+
+/**
  * If any HTML links appear in the given string in the middle of a word, this
  * function returns a new version of the string with all such links extended to
  * wrap around the word. For example, `<a href="/">save</a>d` becomes
@@ -322,22 +338,6 @@ const restoreBlocks = (str, blocks) => {
 }
 
 /**
- * Apply parser methods for each of the systems listed in the configuration.
- * @param {string} str - The string being parsed.
- * @returns {Promise<string>} - A Promise that resolves with the string after
- *   it has been parsed by the parsers from each of the systems listed in the
- *   configuration.
- */
-
-const parseSystems = async str => {
-  for (const system of rules) {
-    const parser = (await import(`../rules/${system}/parse.js`)).default
-    str = parser(str)
-  }
-  return str
-}
-
-/**
  * Parse a string to HTML.
  * @param {string} str - The string to parse.
  * @param {Page?} page - (Optional) The page that you are parsing
@@ -353,12 +353,12 @@ const parse = async (str, page, char) => {
   const templatedStr = await parseTemplates(detaggedStr, page, char)
   const imagedStr = await parseImages(templatedStr)
   const linkedStr = await parseLinks(imagedStr)
-  const wrappedStr = wrapLinks(linkedStr)
+  const systemmedStr = await parseSystems(linkedStr)
+  const wrappedStr = wrapLinks(systemmedStr)
   const markedStr = await markdown(wrappedStr)
   const unwrappedStr = unwrapTags(markedStr)
   const trimmedStr = trimEmptySections(unwrappedStr)
-  const systemmedStr = parseSystems(trimmedStr)
-  return restoreBlocks(systemmedStr, blocks)
+  return restoreBlocks(trimmedStr, blocks)
 }
 
 module.exports = parse
