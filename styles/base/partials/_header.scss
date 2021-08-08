@@ -30,6 +30,18 @@ header nav {
       background: rgba(0, 0, 0, 0.1);
     }
   }
+
+  @media (min-width: 35em) {
+    text-align: right;
+
+    ul {
+      margin-right: 0.25em;
+    }
+
+    li {
+      display: inline-block;
+    }
+  }
 }
 
 .pov {
@@ -53,6 +65,11 @@ header nav {
   &:hover,
   &:active {
     background: transparent;
+  }
+
+  @media (min-width: 35em) {
+    margin-top: -3em;
+    max-width: 15em;
   }
 }
 
