@@ -1,4 +1,10 @@
 <footer>
-
-    </footer>
-    <script src="/js/bundle.js"></script>
+  <% if (locals.footer) { %><p><%= footer %></p><% } %>
+    <nav class="footer">
+      <ul>
+        <li><a href="/create">Create a New Page</a></li>
+        <li><a href="/upload">Upload a File</a></li>
+      </ul>
+    </nav>
+  </footer>
+  <script src="/js/bundle.js"></script>
