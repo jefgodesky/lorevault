@@ -11,7 +11,7 @@
         <label for="msg">Message</label>
         <input type="text" id="msg" name="msg" placeholder="A short description of the change that you’re making" value="<%= locals.get?.msg ? get.msg : locals.page ? null : 'Initial text' %>" />
         <h2>Secrets</h2>
-        <div class="sortable-list">
+        <div class="secrets sortable-list">
           <% for (let i = 1; i <= numSecrets; i++) { %>
           <div class="secret-form list-group-item">
             <% const existing = locals.secrets && secrets?.length > i - 1 ? secrets[i - 1] : null %>

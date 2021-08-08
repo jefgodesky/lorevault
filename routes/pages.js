@@ -37,7 +37,7 @@ router.get('/', async (req, res, next) => {
 router.get('/create', async (req, res, next) => {
   req.viewOpts.title = 'Create a New Page'
   req.viewOpts.get = req.query
-  req.viewOpts.numSecrets = 3
+  req.viewOpts.numSecrets = req.query.numsecrets || 1
   res.render('create', req.viewOpts)
 })
 
