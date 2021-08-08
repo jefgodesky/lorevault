@@ -5,6 +5,7 @@ const fs = require('fs').promises
 const slugify = require('slugify')
 const Page = require('../models/page')
 const { getSVG } = require('../utils')
+const { rules } = require('../config')
 
 /**
  * Parses a Markdown string to HTML.
@@ -321,6 +322,22 @@ const restoreBlocks = (str, blocks) => {
 }
 
 /**
+ * Apply parser methods for each of the systems listed in the configuration.
+ * @param {string} str - The string being parsed.
+ * @returns {Promise<string>} - A Promise that resolves with the string after
+ *   it has been parsed by the parsers from each of the systems listed in the
+ *   configuration.
+ */
+
+const parseSystems = async str => {
+  for (const system of rules) {
+    const parser = (await import(`../rules/${system}/parse.js`)).default
+    str = parser(str)
+  }
+  return str
+}
+
+/**
  * Parse a string to HTML.
  * @param {string} str - The string to parse.
  * @param {Page?} page - (Optional) The page that you are parsing
@@ -340,7 +357,8 @@ const parse = async (str, page, char) => {
   const markedStr = await markdown(wrappedStr)
   const unwrappedStr = unwrapTags(markedStr)
   const trimmedStr = trimEmptySections(unwrappedStr)
-  return restoreBlocks(trimmedStr, blocks)
+  const systemmedStr = parseSystems(trimmedStr)
+  return restoreBlocks(systemmedStr, blocks)
 }
 
 module.exports = parse

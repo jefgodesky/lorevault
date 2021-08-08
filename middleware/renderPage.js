@@ -15,6 +15,7 @@ const renderPage = async (req, res, next) => {
   if (!page) return next()
 
   const { char, perspective } = req.viewOpts
+  await page.checkSecrets(char)
   req.viewOpts.markup = await parse(page.body, page, perspective === 'character' ? char : perspective)
   const pageIsClaimable = await page.isClaimable()
   req.viewOpts.claimable = req.user?.charClaimMode === true && pageIsClaimable
