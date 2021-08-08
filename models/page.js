@@ -33,6 +33,10 @@ const SecretSchemaDefinition = {
   order: Number,
   section: String,
   text: String,
+  seen: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Character'
+  }],
   knowers: [{
     type: Schema.Types.ObjectId,
     ref: 'Character'
