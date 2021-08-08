@@ -481,6 +481,23 @@ PageSchema.methods.checkSecret = async function (secret, char) {
 }
 
 /**
+ * Run PageSchema.methods.checkSecret on each of the page's secrets.
+ * @param {Character|{ id: string }|string} char - Ether a Character schema
+ *   object, or an object with an `id` property that contains the ID of a
+ *   Character schema object, or a string, which is the ID of a Character
+ *   schema object. This is used to identify the character who has now checked
+ *   the secret.
+ * @returns {Promise<void>} - A Promise that resolves once all of the page's
+ *   secrets have been checked.
+ */
+
+PageSchema.methods.checkSecrets = async char => {
+  for (const secret of this.secrets) {
+    await this.checkSecret(secret, char)
+  }
+}
+
+/**
  * Delete the current page.
  * @returns {Promise<void>} - A Promise that resolves once the page has been
  *   deleted. Before it deletes itself, it checks and removes any dependencies,
