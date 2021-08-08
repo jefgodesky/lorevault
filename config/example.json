@@ -3,6 +3,7 @@
   "home": "Home",
   "db": "mongodb://127.0.0.1/lorevault",
   "secret": "LONG_RANDOM_STRING",
+  "skin": "base",
   "rules": [ "dnd5e" ],
   "loremasters": [
     "LOREMASTER_USER_ID"
