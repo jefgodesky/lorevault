@@ -64,6 +64,7 @@ router.post('/create', upload.single('file'), async (req, res, next) => {
 router.get('/upload', async (req, res, next) => {
   req.viewOpts.title = 'Upload a File'
   req.viewOpts.upload = true
+  req.viewOpts.numSecrets = req.query.numsecrets || 1
   res.render('create', req.viewOpts)
 })
 
