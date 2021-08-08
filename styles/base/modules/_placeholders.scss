@@ -11,7 +11,7 @@
 
 %layout-size {
   margin: 2em;
-  width: 100%;
+  width: calc(100% - 4em);
 
   @media (min-width: 44em) {
     margin: 2em auto;

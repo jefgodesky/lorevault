@@ -2,22 +2,17 @@
 
 header nav {
   margin-top: 0;
+  overflow: auto;
   padding: 0;
-  text-align: right;
 
   ul {
     @extend %unformatted-list;
   }
 
-  li {
-    display: inline-block;
-    margin: 0;
-    vertical-align: middle;
-  }
-
   a,
   .status {
     padding: 1em;
+    margin: 0.25em 0;
   }
 
   a {
@@ -35,12 +30,23 @@ header nav {
       background: rgba(0, 0, 0, 0.1);
     }
   }
+
+  @media (min-width: 35em) {
+    text-align: right;
+
+    ul {
+      margin-right: 0.25em;
+    }
+
+    li {
+      display: inline-block;
+    }
+  }
 }
 
 .pov {
   background: transparent;
   display: block;
-  float: left;
   font-weight: normal;
   padding: 1.25em 1em 1em 1em;
   position: relative;
@@ -60,15 +66,21 @@ header nav {
   &:active {
     background: transparent;
   }
+
+  @media (min-width: 35em) {
+    margin-top: -3em;
+    max-width: 15em;
+  }
 }
 
 header h1 {
   font-size: 2em;
   margin: 2em 2em 0 2em;
-  padding: 0 1em;
+  padding: 0 0;
 
   @media (min-width: 44em) {
     margin: 2em auto 0 auto;
     max-width: 20em;
+    padding: 0 1em;
   }
 }
