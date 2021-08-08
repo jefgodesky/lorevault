@@ -467,7 +467,7 @@ PageSchema.methods.checkSecret = async function (secret, char) {
   if (!s.checked.includes(c._id)) {
     let reveal = false
     for (const system of rules) {
-      const check = (await import(`../rules/${system}/check`)).default
+      const check = (await import(`../rules/${system}/check.js`)).default
       reveal = reveal || check(s.text, c)
     }
     if (reveal) s.knowers = [...new Set([...s.knowers, c._id])]
@@ -491,7 +491,7 @@ PageSchema.methods.checkSecret = async function (secret, char) {
  *   secrets have been checked.
  */
 
-PageSchema.methods.checkSecrets = async char => {
+PageSchema.methods.checkSecrets = async function (char) {
   for (const secret of this.secrets) {
     await this.checkSecret(secret, char)
   }
