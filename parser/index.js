@@ -300,9 +300,15 @@ const unwrapTags = str => {
   return str
 }
 
+/**
+ * Trim any sections that have no content.
+ * @param {string} str - The string to be parsed.
+ * @returns {string} - The string with all empty sections parsed out.
+ */
+
 const trimEmptySections = str => {
   for (let depth = 1; depth < 7; depth++) {
-    const r = new RegExp(`<h${depth}(.*?)>(.*?)<\/h${depth}>`, 'gm')
+    const r = new RegExp(`<h${depth}(\\r|\\n|.)*?>(\\r|\\n|.)*?<\/h${depth}>`, 'gm')
     const matches = str.match(r)
     if (matches) {
       for (let i = 0; i < matches.length; i++) {
