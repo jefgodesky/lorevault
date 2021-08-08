@@ -209,7 +209,7 @@ const parseLinks = async str => {
     if (page) {
       str = str.replace(match, `<a href="/${page.path}" title="${page.title}">${text}</a>`)
     } else {
-      str = str.replace(match, `<a href="/${slugify(parts[0]).toLowerCase()}" class="new">${text}</a>`)
+      str = str.replace(match, `<a href="/create?title=${encodeURIComponent(parts[0])}" class="new">${text}</a>`)
     }
   }
   return str

@@ -54,7 +54,9 @@ router.post('/create', upload.single('file'), async (req, res, next) => {
       editor: req.user?._id
     })
   ]
-  const secrets = req.body.secret.filter(s => s !== '')
+  const secrets = req.body.secret && Array.isArray(req.body.secret) && req.body.secret.length > 1
+    ? req.body.secret.filter(s => s !== '')
+    : req.body.secret ? [req.body.secret] : []
   if (secrets && secrets.length > 0) data.secrets = secrets.map(text => ({ text }))
   const page = await Page.create(data)
   res.redirect(`/${page.path}`)
