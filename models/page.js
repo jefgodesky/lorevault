@@ -261,6 +261,19 @@ PageSchema.methods.parseTemplate = function (params) {
   if (!this.types.includes('Template')) return null
   let str = this.body
 
+  // Render #IF statements
+  const ifs = str.match(/{{#IF\s?\|(.|\n\r)*\s?\|(.|\n\r)*\s?\|(.|\n\r)*\s?}}/gm)
+  for (const i of ifs) {
+    const elems = i.substr(2, i.length - 4).split('|').map(el => el.trim())
+    if (elems.length > 2 && params.named[elems[1]]) {
+      str = str.replace(i, elems[2])
+    } else if (elems.length > 3) {
+      str = str.replace(i, elems[3])
+    } else {
+      str = str.replace(i, '')
+    }
+  }
+
   // Remove noincludes
   const noincludes = str.match(/<noinclude>(\r|\n|.)*?<\/noinclude>/gm)
   if (noincludes) {

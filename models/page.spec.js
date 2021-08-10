@@ -271,6 +271,18 @@ describe('Page', () => {
       const actual = tpl.parseTemplate({ ordered: [], named: { greeting: 'Hello', subject: 'world' } })
       expect(actual).toEqual('<strong>Hello, world!</strong>')
     })
+
+    it('parses #IF statements', async () => {
+      expect.assertions(2)
+      const data = JSON.parse(JSON.stringify(testPageData))
+      data.title = 'Template:Test'
+      data.body = '{{#IF|greeting|<strong>Hello, {{{greeting}}}!</strong>|<strong>Hello, world!</strong>}}'
+      const tpl = await Page.create(data)
+      const t1 = tpl.parseTemplate({ ordered: [], named: { greeting: 'Unit Test'} })
+      const t2 = tpl.parseTemplate({ ordered: [], named: {} })
+      expect(t1).toEqual('<strong>Hello, Unit Test!</strong>')
+      expect(t2).toEqual('<strong>Hello, world!</strong>')
+    })
   })
 
   describe('PageSchema.methods.findMembers', () => {
