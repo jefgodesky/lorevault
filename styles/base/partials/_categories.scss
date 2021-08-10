@@ -4,6 +4,8 @@ ul.categories {
   @extend %unformatted-list;
   @extend %box;
 
+  margin-bottom: 0;
+
   &:before {
     content: 'Categories: ';
     display: inline;
