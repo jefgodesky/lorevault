@@ -263,14 +263,16 @@ PageSchema.methods.parseTemplate = function (params) {
 
   // Render #IF statements
   const ifs = str.match(/{{#IF\s?\|(.|\n\r)*\s?\|(.|\n\r)*\s?\|(.|\n\r)*\s?}}/gm)
-  for (const i of ifs) {
-    const elems = i.substr(2, i.length - 4).split('|').map(el => el.trim())
-    if (elems.length > 2 && params.named[elems[1]]) {
-      str = str.replace(i, elems[2])
-    } else if (elems.length > 3) {
-      str = str.replace(i, elems[3])
-    } else {
-      str = str.replace(i, '')
+  if (ifs) {
+    for (const i of ifs) {
+      const elems = i.substr(2, i.length - 4).split('|').map(el => el.trim())
+      if (elems.length > 2 && params.named[elems[1]]) {
+        str = str.replace(i, elems[2])
+      } else if (elems.length > 3) {
+        str = str.replace(i, elems[3])
+      } else {
+        str = str.replace(i, '')
+      }
     }
   }
 
