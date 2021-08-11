@@ -478,8 +478,7 @@ describe('Page', () => {
       const page = await Page.create(testPageData)
       await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
       await page.updateSecrets([ 'Updated' ], [ page.secrets[0]._id.toString() ])
-      const actual = await Page.findById(page._id)
-      expect(actual.secrets[0].text).toEqual('Updated')
+      expect(page.secrets[0].text).toEqual('Updated')
     })
 
     it('can reorder secrets', async () => {
@@ -638,6 +637,7 @@ describe('Page', () => {
       charData.title = 'Character'
       const charPage = await Page.create(charData)
       const char = await Character.create({ page: charPage, player, dnd5e: { int: 0, arcana: 0, history: 0, nature: 0, religion: 0 } })
+      await page.checkSecrets(char)
 
       const actual = await Page.findByTitle(testPageData.title)
       expect(actual.secrets[0].checked[0].toString()).toEqual(char._id.toString())
