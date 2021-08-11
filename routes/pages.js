@@ -30,7 +30,8 @@ const getFileData = file => {
 // GET /
 router.get('/', async (req, res, next) => {
   const home = await Page.findByTitle(config.home)
-  res.redirect(home.path)
+  const path = home.path || `/create?title=${encodeURIComponent(config.home)}`
+  res.redirect(path)
 })
 
 // GET /create
