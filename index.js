@@ -22,7 +22,9 @@ const pageRouter = require('./routes/pages')
 const server = express()
 
 // Set up database
-mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.set('useFindAndModify', false)
+mongoose.set('useCreateIndex', true)
+mongoose.connect(db, { useNewUrlParser: true })
 
 // View engine setup
 server.set('views', path.join(__dirname, 'views'))
