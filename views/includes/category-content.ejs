@@ -1,0 +1,27 @@
+<% if (locals.elems && Array.isArray(elems) && elems.length > 0) { %>
+  <section class="<%= cls %>">
+    <h2><%- title %></h2>
+    <ul class="category-listing<% if (elems.length > 5) { %> long<% } %>">
+      <% for (const el of elems) { %>
+      <li><a href="/<%= el.path %>"><%= el.title %></a></li>
+      <% } %>
+    </ul>
+  </section>
+<% } else if (locals.elems && Object.keys(elems).length > 0) { %>
+  <section class="<%= cls %>">
+    <h2><%- title %></h2>
+    <% const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('') %>
+    <% for (const letter of alphabet) { %>
+    <% if (Array.isArray(elems[letter]) && elems[letter].length > 0) { %>
+      <section class="<%= cls%>-<%= letter %> category-alphabetized">
+        <h3><%= letter.toUpperCase() %></h3>
+        <ul class="category-listing<% if (elems[letter].length > 5) { %> long<% } %>">
+          <% for (const el of elems[letter]) { %>
+          <li><a href="/<%= el.path %>"><%= el.title %></a></li>
+          <% } %>
+        </ul>
+      </section>
+    <% } %>
+    <% } %>
+  </section>
+<% } %>

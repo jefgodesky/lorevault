@@ -21,26 +21,8 @@
       <% } %>
       <%- include('includes/file', { isImage: page.types.includes('Image file'), title: page.title, url: page.file?.url, mimetype: page.file?.mimetype, size: page.file?.size }) %>
       <%- markup %>
-      <% if (locals.subcategories && subcategories.length > 0) { %>
-      <section class="subcategories">
-        <h2>Subcategories</h2>
-        <ul class="category-listing">
-          <% for (const subcat of subcategories) { %>
-          <li><a href="/<%= subcat.path %>"><%= subcat.title %></a></li>
-          <% } %>
-        </ul>
-      </section>
-      <% } %>
-      <% if (locals.pages && pages.length > 0) { %>
-      <section class="category-pages">
-        <h2>Pages in category &ldquo;<%= page.title %>&rdquo;</h2>
-        <ul class="category-listing">
-          <% for (const p of pages) { %>
-          <li><a href="/<%= p.path %>"><%= p.title %></a></li>
-          <% } %>
-        </ul>
-      </section>
-      <% } %>
+      <%- include('includes/category-content', { elems: locals.subcategories, cls: 'subcategories', title: 'Subcategories' }) %>
+      <%- include('includes/category-content', { elems: locals.pages, cls: 'category-pages', title: `Pages in category &ldquo;${page.title}&rdquo;` }) %>
       <% if (locals.claimable) { %>
       <p>
         <a href="/<%= page.path %>/claim" class="button">Claim <%= page.title %></a>
@@ -48,9 +30,9 @@
       <% } %>
       <% if (page.categories && page.categories.length > 0) { %>
       <ul class="categories">
-        <% for (const category of page.categories) { %>
+        <% for (const cat of page.categories) { %>
         <li>
-          <a href="/<%= category.path %>"><%= category.title %></a>
+          <a href="/<%= cat.category.path %>"><%= cat.category.title %></a>
         </li>
         <% } %>
       </ul>

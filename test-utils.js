@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const { MongoMemoryServer } = require('mongodb-memory-server')
+const { db } = require('./config')
 
 const testPageData = {
   title: 'Test',
@@ -17,6 +18,8 @@ class TestDB {
   async connect () {
     this.server = await MongoMemoryServer.create()
     const uri = this.server.getUri()
+    mongoose.set('useFindAndModify', false)
+    mongoose.set('useCreateIndex', true)
     await mongoose.connect(uri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,

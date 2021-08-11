@@ -24,3 +24,20 @@ ul.categories {
     }
   }
 }
+
+.category-alphabetized h3 {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3333);
+  margin-bottom: 0.5em;
+  padding-bottom: 0.5em;
+}
+
+@supports (display: grid) {
+  .category-listing.long {
+    column-count: 2;
+
+    &:after {
+      content: '';
+      display: inline-block;
+    }
+  }
+}

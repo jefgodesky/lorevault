@@ -14,14 +14,15 @@ describe('parse', () => {
   describe('Markdown', () => {
     it('renders Markdown to HTML', async () => {
       expect.assertions(1)
-      const actual = await parse('## Title\n\n_Hello, world!_')
-      expect(actual).toEqual('<h2 id="heading-title"><a class="header-anchor" id="title" href="#title">#</a>Title</h2>\n<p><em>Hello, world!</em></p>\n')
+      const actual = await parse('_Hello, world!_')
+      expect(actual).toEqual('<p><em>Hello, world!</em></p>\n')
     })
 
     it('provides IDs for headers', async () => {
-      expect.assertions(1)
+      expect.assertions(2)
       const actual = await parse('## Section 1\n\nFirst section.\n\n## Section 2\n\nSecond section.')
-      expect(actual).toEqual('<h2 id="heading-section-1"><a class="header-anchor" id="section-1" href="#section-1">#</a>Section 1</h2>\n<p>First section.</p>\n<h2 id="heading-section-2"><a class="header-anchor" id="section-2" href="#section-2">#</a>Section 2</h2>\n<p>Second section.</p>\n')
+      expect(actual).toContain('<h2 id="heading-section-1">')
+      expect(actual).toContain('<h2 id="heading-section-2">')
     })
   })
 
@@ -58,7 +59,7 @@ describe('parse', () => {
     it('parses links to pages that don\'t exist yet', async () => {
       expect.assertions(1)
       const actual = await parse('This text links to a [[new page]].')
-      expect(actual).toEqual('<p>This text links to a <a href="/new-page" class="new">new page</a>.</p>\n')
+      expect(actual).toEqual('<p>This text links to a <a href="/create?title=new%20page" class="new">new page</a>.</p>\n')
     })
   })
 
@@ -176,7 +177,7 @@ describe('parse', () => {
     it('makes a new link if there is no such image', async () => {
       expect.assertions(1)
       const actual = await parse('[[Image:Test]]')
-      expect(actual).toEqual('<p><a href="/image:test" class="new">Image:Test</a></p>\n')
+      expect(actual).toEqual('<p><a href="/create?title=Image%3ATest" class="new">Image:Test</a></p>\n')
     })
 
     it('adds the requested image', async () => {
@@ -204,7 +205,7 @@ describe('parse', () => {
     it('removes tags from parsed output', async () => {
       expect.assertions(1)
       const actual = await parse('This text has a [[Link]].\n\n[[Type:Test]]\n[[Type:Unit Test]]\n[[Category:Test Category]]\n\nHere\'s a paragraph _after_ the tags. Ah-ha!')
-      expect(actual).toEqual('<p>This text has a <a href="/link" class="new">Link</a>.</p>\n<p>Here’s a paragraph <em>after</em> the tags. Ah-ha!</p>\n')
+      expect(actual).toEqual('<p>This text has a <a href="/create?title=Link" class="new">Link</a>.</p>\n<p>Here’s a paragraph <em>after</em> the tags. Ah-ha!</p>\n')
     })
   })
 })
