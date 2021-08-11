@@ -182,6 +182,10 @@ PageSchema.pre('save', function (next) {
   next()
 })
 
+/**
+ * Make sure that secrets actually are in the order they say they're in.
+ */
+
 PageSchema.pre('save', function (next) {
   this.secrets = this.secrets.sort((a, b) => a.order - b.order)
   for (let i = 0; i < this.secrets.length; i++) this.secrets[i].order = i + 1
