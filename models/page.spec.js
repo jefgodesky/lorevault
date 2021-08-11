@@ -74,7 +74,7 @@ describe('Page', () => {
       pageData.body = '[[Category:Test]]'
       const page = await Page.create(pageData)
 
-      expect(page.categories[0].toString()).toEqual(category._id.toString())
+      expect(page.categories[0].category.toString()).toEqual(category._id.toString())
     })
 
     it('creates new categories', async () => {

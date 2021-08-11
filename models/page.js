@@ -50,8 +50,11 @@ const PageSchema = new Schema(Object.assign({}, CorePageSchemaDefinition, {
   secrets: [SecretSchema],
   types: [String],
   categories: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Page'
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: 'Page'
+    },
+    alias: String
   }],
   path: {
     type: String,
@@ -142,19 +145,27 @@ PageSchema.pre('save', async function (next) {
     ? matches.map(m => m.substr(11, m.length - 13).trim())
     : []
   for (const name of categoryNames) {
-    const existing = await Page.findByTitle(name, 'Category')
-    if (existing && existing._id) { this.categories.push(existing._id); continue }
+    const split = name.split('|').map(el => el.trim())
+    const obj = { alias: split.length > 1 ? split[1] : this.title }
+    const title = split.length > 1 ? split[0] : name
+    const existing = await Page.findByTitle(title, 'Category')
+    if (existing && existing._id) {
+      obj.category = existing._id
+      this.categories.push(obj)
+      continue
+    }
     const category = await Page.create({
-      title: name,
+      title,
       body: '[[Type:Category]]',
       versions: [{
-        title: name,
+        title,
         body: '[[Type:Category]]',
         msg: `Created along with ${this.title}`,
         editor: this.versions[this.versions.length - 1]._id
       }]
     })
-    this.categories.push(category._id)
+    obj.category = category._id
+    this.categories.push(obj)
   }
   next()
 })
@@ -308,7 +319,7 @@ PageSchema.methods.parseTemplate = function (params) {
 
 PageSchema.methods.findMembers = async function () {
   if (!this.types.includes('Category')) return null
-  const all = await this.constructor.find({ categories: this._id })
+  const all = await this.constructor.find({ 'categories.category': this._id }).sort('categories.alias')
   const subcategories = []
   const pages = []
   for (const page of all) {
@@ -534,7 +545,7 @@ PageSchema.methods.delete = async function () {
 PageSchema.statics.findByPath = function (url) {
   const parts = url.split('/')
   const path = parts[0] === '' ? parts[1] : parts[0]
-  return this.findOne({ path }).populate('categories')
+  return this.findOne({ path }).populate('categories.category')
 }
 
 /**
