@@ -147,7 +147,7 @@ PageSchema.pre('save', async function (next) {
   for (const name of categoryNames) {
     const split = name.split('|').map(el => el.trim())
     const obj = { alias: split.length > 1 ? split[1] : this.title }
-    const title = split.length > 1 ? split[0] : name
+    const title = split.length > 1 ? `Category:${split[0]}` : `Category:${name}`
     const existing = await Page.findByTitle(title, 'Category')
     if (existing && existing._id) {
       obj.category = existing._id
