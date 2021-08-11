@@ -5,9 +5,11 @@
     <%- include('includes/header', { isLoggedIn, char, title: `${error.status} ${message}` }) %>
     <main>
       <p><%- resolution %></p>
+      <% if (locals.error?.stack) { %>
       <div class="error-stack">
         <pre><%= error.stack %></pre>
       </div>
+      <% } %>
     </main>
     <%- include('includes/footer') %>
   </body>
