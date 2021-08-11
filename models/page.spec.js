@@ -74,7 +74,7 @@ describe('Page', () => {
       pageData.body = '[[Category:Test]]'
       const page = await Page.create(pageData)
 
-      expect(page.categories[0].toString()).toEqual(category._id.toString())
+      expect(page.categories[0].category.toString()).toEqual(category._id.toString())
     })
 
     it('creates new categories', async () => {
@@ -84,8 +84,19 @@ describe('Page', () => {
       const page = await Page.create(pageData)
       const check = await Page.findByTitle('Test Category', 'Category')
       expect(page.categories).toHaveLength(1)
-      expect(page.categories[0].toString()).toEqual(check._id.toString())
+      expect(page.categories[0].category.toString()).toEqual(check._id.toString())
       expect(page._id.toString()).not.toEqual(check._id.toString())
+    })
+
+    it('parses category sorting alias', async () => {
+      expect.assertions(3)
+      const pageData = JSON.parse(JSON.stringify(testPageData))
+      pageData.body = '[[Category:Test Category|Sorting]]'
+      const page = await Page.create(pageData)
+      const check = await Page.findByTitle('Test Category', 'Category')
+      expect(page.categories).toHaveLength(1)
+      expect(page.categories[0].category.toString()).toEqual(check._id.toString())
+      expect(page.categories[0].alias).toEqual('Sorting')
     })
 
     it('assigns secrets to sections', async () => {
@@ -306,6 +317,30 @@ describe('Page', () => {
       expect(actual.pages.map(p => p._id)).toEqual([ p2._id ])
       expect(actual.subcategories.map(p => p._id)).toEqual([ p3._id ])
     })
+
+    it('sorts by alias', async () => {
+      expect.assertions(1)
+
+      const d1 = JSON.parse(JSON.stringify(testPageData))
+      d1.title = 'Test Category'
+      d1.body = '[[Type:Category]]'
+      const p1 = await Page.create(d1)
+
+      const d2 = JSON.parse(JSON.stringify(testPageData))
+      d2.body = '[[Category:Test Category|Alias]]'
+      const p2 = await Page.create(d2)
+
+      const d3 = JSON.parse(JSON.stringify(testPageData))
+      d3.body = '[[Category:Test Category]]'
+      const p3 = await Page.create(d3)
+
+      const d4 = JSON.parse(JSON.stringify(testPageData))
+      d4.body = '[[Category:Test Category|Second Alias]]'
+      const p4 = await Page.create(d4)
+
+      const actual = await p1.findMembers()
+      expect(actual.pages.map(p => p._id)).toEqual([ p2._id, p4._id, p3._id ])
+    })
   })
 
   describe('PageSchema.methods.isClaimable', () => {
@@ -478,8 +513,7 @@ describe('Page', () => {
       const page = await Page.create(testPageData)
       await page.updateSecrets([ 'Secret 1', 'Secret 2', 'Secret 3' ])
       await page.updateSecrets([ 'Updated' ], [ page.secrets[0]._id.toString() ])
-      const actual = await Page.findById(page._id)
-      expect(actual.secrets[0].text).toEqual('Updated')
+      expect(page.secrets[0].text).toEqual('Updated')
     })
 
     it('can reorder secrets', async () => {
@@ -638,6 +672,7 @@ describe('Page', () => {
       charData.title = 'Character'
       const charPage = await Page.create(charData)
       const char = await Character.create({ page: charPage, player, dnd5e: { int: 0, arcana: 0, history: 0, nature: 0, religion: 0 } })
+      await page.checkSecrets(char)
 
       const actual = await Page.findByTitle(testPageData.title)
       expect(actual.secrets[0].checked[0].toString()).toEqual(char._id.toString())

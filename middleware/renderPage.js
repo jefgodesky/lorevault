@@ -2,6 +2,32 @@ const Page = require('../models/page')
 const parse = require('../parser')
 
 /**
+ * Given an array of elements, each with a `title` property, this method
+ * returns an object with properties named for each of the letters of the
+ * alphabet that any of the titles in the original array begin with. Each
+ * property is an array of the elements with titles that begin with that
+ * letter. This is used to break a category's pages and subcategories into
+ * a series of lists, used to display those members that begin with each
+ * letter.
+ * @param {{title: string}[]} arr - An array of elements, each with a `title`
+ *   property to be sorted by.
+ * @returns {{}} - An object with properties named for each of the letters of
+ *   the alphabet that any of the titles in the original array begin with. Each
+ *   property is an array of the elements from the original array with titles
+ *   that begin with that letter.
+ */
+
+const sortAlphabetically = arr => {
+  const obj = {}
+  const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('')
+  for (const letter of alphabet) {
+    const members = arr.filter(el => el.title.substr(0, 1).toLowerCase() === letter)
+    if (members.length > 0) obj[letter] = members
+  }
+  return obj
+}
+
+/**
  * Express.js middleware that loads a page and then prepares the variables
  * necessary to render it.
  * @param {object} req - The Express.js request object.
@@ -23,8 +49,8 @@ const renderPage = async (req, res, next) => {
   // Add special category data
   if (req.viewOpts.page.types.includes('Category')) {
     const { subcategories, pages } = await Page.findCategoryMembers(req.viewOpts.page.title)
-    req.viewOpts.subcategories = subcategories
-    req.viewOpts.pages = pages
+    req.viewOpts.subcategories = subcategories.length > 25 ? sortAlphabetically(subcategories) : subcategories
+    req.viewOpts.pages = pages.length > 25 ? sortAlphabetically(pages) : pages
   }
 
   // Get secrets
