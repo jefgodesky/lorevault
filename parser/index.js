@@ -171,7 +171,8 @@ const parseImages = async str => {
   for (const match of matches) {
     const elems = match.substr(2, match.length - 4).split('|').map(el => el.trim())
     const name = elems.length > 0 ? elems[0] : null
-    const page = await Page.findByTitle(name, 'Image file')
+    const pages = await Page.findByTitle(name, 'Image file')
+    const page = pages.length > 0 ? pages[0] : pages.file ? pages : null
     if (!page?.file?.url) continue
     const { url } = page.file
     const alt = elems.length > 1 ? elems[1] : name
@@ -359,13 +360,13 @@ const restoreBlocks = (str, blocks) => {
 const parse = async (str, page, char) => {
   let { blockedStr, blocks } = removeBlocks(str)
   const detaggedStr = detag(blockedStr)
-  const imagedStr = await parseImages(detaggedStr)
+  const markedStr = await markdown(detaggedStr)
+  const imagedStr = await parseImages(markedStr)
   const linkedStr = await parseLinks(imagedStr)
   const systemmedStr = await parseSystems(linkedStr)
   const templatedStr = await parseTemplates(systemmedStr, page, char)
   const wrappedStr = wrapLinks(templatedStr)
-  const markedStr = await markdown(wrappedStr)
-  const unwrappedStr = unwrapTags(markedStr)
+  const unwrappedStr = unwrapTags(wrappedStr)
   const trimmedStr = trimEmptySections(unwrappedStr)
   const restoredStr = restoreBlocks(trimmedStr, blocks)
   return restoredStr === str ? str : parse(restoredStr, page, char)
