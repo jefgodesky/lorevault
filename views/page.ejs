@@ -28,11 +28,11 @@
         <a href="/<%= page.path %>/claim" class="button">Claim <%= page.title %></a>
       </p>
       <% } %>
-      <% if (page.categories && page.categories.length > 0) { %>
+      <% if (locals.categories && categories.length > 0) { %>
       <ul class="categories">
-        <% for (const cat of page.categories) { %>
+        <% for (const cat of categories) { %>
         <li>
-          <a href="/<%= cat.category.path %>"><%= cat.category.title %></a>
+          <a href="/<%= cat.path %>"><%= cat.title %></a>
         </li>
         <% } %>
       </ul>
