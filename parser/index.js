@@ -2,7 +2,6 @@ const { Remarkable } = require('remarkable')
 const HeaderIdsPlugin = require('remarkable-header-ids')
 const { render } = require('ejs')
 const fs = require('fs').promises
-const slugify = require('slugify')
 const Page = require('../models/page')
 const { getSVG } = require('../utils')
 const { rules } = require('../config')
@@ -67,18 +66,17 @@ const parseTemplateParam = elems => {
   }
 
   for (const elem of elems) {
-    const pair = elem.split('=')
-    if (pair.length === 1) {
-      params.ordered.push(elem)
-    } else if (pair.length > 1) {
-      const num = parseInt(pair[0])
+    const check = elem.match(/^[a-zA-Z0-9]*\s*?=/)
+    if (check && check.length > 0) {
+      const name = check[0].substring(0, check[0].length - 1).trim()
+      const num = parseInt(name)
       if (isNaN(num)) {
-        params.named[pair[0]] = pair[1]
-      } else if (num > -1) {
-        params.ordered[num - 1] = pair[1]
+        params.named[name] = elem.substring(check[0].length).trim()
       } else {
-        params.ordered.push(pair[1])
+        params.ordered[num - 1] = elem.substring(check[0].length).trim()
       }
+    } else {
+      params.ordered.push(elem)
     }
   }
 
@@ -261,12 +259,13 @@ const wrapLinks = str => {
 
 const removeBlocks = str => {
   let blockedStr = str
-  const b = str.match(/```(\r|\n|.)*?```/gm)
-  const blocks = b ? b.map(b => b.substr(3, b.length - 6)) : []
-  blocks.forEach((block, index) => {
-    const placeholder = `<!-- BLOCK${index} -->`
-    blockedStr = blockedStr.replace(`\`\`\`${block}\`\`\``, placeholder)
-  })
+  const blocks = str.match(/(```|<pre><code>)(\r|\n|.)*?(```|<\/code><\/pre>)/gm)
+  if (blocks && blocks.length > 0) {
+    for (let i = 0; i < blocks.length; i++) {
+      const placeholder = `<!-- BLOCK${i} -->`
+      blockedStr = blockedStr.replace(blocks[i], placeholder)
+    }
+  }
   return { blockedStr, blocks }
 }
 
@@ -336,10 +335,14 @@ const trimEmptySections = str => {
  */
 
 const restoreBlocks = (str, blocks) => {
-  blocks.forEach((block, index) => {
-    const placeholder = `<!-- BLOCK${index} -->`
-    str = str.replace(placeholder, `<pre><code>${block}</code></pre>`)
-  })
+  if (blocks && blocks.length > 0) {
+    for (let i = 0; i < blocks.length; i++) {
+      const match = blocks[i].match(/(```|<pre><code>)((\r|\n|.)*?)(```|<\/code><\/pre>)/)
+      const interior = match && match.length > 2 ? match[2] : null
+      const placeholder = `<!-- BLOCK${i} -->`
+      str = str.replace(placeholder, `<pre><code>${interior}</code></pre>`)
+    }
+  }
   return str
 }
 
@@ -356,15 +359,16 @@ const restoreBlocks = (str, blocks) => {
 const parse = async (str, page, char) => {
   let { blockedStr, blocks } = removeBlocks(str)
   const detaggedStr = detag(blockedStr)
-  const templatedStr = await parseTemplates(detaggedStr, page, char)
-  const imagedStr = await parseImages(templatedStr)
+  const imagedStr = await parseImages(detaggedStr)
   const linkedStr = await parseLinks(imagedStr)
   const systemmedStr = await parseSystems(linkedStr)
-  const wrappedStr = wrapLinks(systemmedStr)
+  const templatedStr = await parseTemplates(systemmedStr, page, char)
+  const wrappedStr = wrapLinks(templatedStr)
   const markedStr = await markdown(wrappedStr)
   const unwrappedStr = unwrapTags(markedStr)
   const trimmedStr = trimEmptySections(unwrappedStr)
-  return restoreBlocks(trimmedStr, blocks)
+  const restoredStr = restoreBlocks(trimmedStr, blocks)
+  return restoredStr === str ? str : parse(restoredStr, page, char)
 }
 
 module.exports = parse

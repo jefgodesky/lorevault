@@ -143,6 +143,16 @@ describe('parse', () => {
       const actual = await parse('{{Template:HelloWorld\n  |greeting=Hello\n  |subject=world\n}}\n\nThis is a test.')
       expect(actual).toEqual('<p>This is a test.</p>\n')
     })
+
+    it('handles links in parameters', async () => {
+      expect.assertions(1)
+      const tplData = JSON.parse(JSON.stringify(testPageData))
+      tplData.title = 'Template:HelloWorld'
+      tplData.body = '{{{greeting}}}, {{{subject}}}!\n\n<noinclude>\n  This should not be included.\n</noinclude>'
+      await Page.create(tplData)
+      const actual = await parse('{{Template:HelloWorld|greeting=Hello|subject=[[Unit Test|Tester]]}}\n\nThis is a test.')
+      expect(actual).toEqual('<p>Hello, <a href="/create?title=Unit%20Test" class="new">Tester</a>!</p>\n<p>This is a test.</p>\n')
+    })
   })
 
   describe('Parsing special templates: Secrets', () => {

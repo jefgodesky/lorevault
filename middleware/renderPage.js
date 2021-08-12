@@ -46,7 +46,13 @@ const renderPage = async (req, res, next) => {
   const pageIsClaimable = await page.isClaimable()
   req.viewOpts.claimable = req.user?.charClaimMode === true && pageIsClaimable
 
-  // Add special category data
+  // Prepare categories for display
+  req.viewOpts.categories = req.viewOpts.page?.categories?.map(cat => {
+    const { title, path } = cat.category
+    return { path, title: title.startsWith('Category:') ? title.substring(9) : title }
+  })
+
+  // Add special data for rendering a category page
   if (req.viewOpts.page.types.includes('Category')) {
     const { subcategories, pages } = await Page.findCategoryMembers(req.viewOpts.page.title)
     req.viewOpts.subcategories = subcategories.length > 25 ? sortAlphabetically(subcategories) : subcategories
