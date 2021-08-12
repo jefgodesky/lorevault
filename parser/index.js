@@ -358,18 +358,20 @@ const restoreBlocks = (str, blocks) => {
  */
 
 const parse = async (str, page, char) => {
+  const orig = str
   let { blockedStr, blocks } = removeBlocks(str)
-  const detaggedStr = detag(blockedStr)
-  const markedStr = await markdown(detaggedStr)
-  const imagedStr = await parseImages(markedStr)
-  const linkedStr = await parseLinks(imagedStr)
-  const systemmedStr = await parseSystems(linkedStr)
-  const templatedStr = await parseTemplates(systemmedStr, page, char)
-  const wrappedStr = wrapLinks(templatedStr)
-  const unwrappedStr = unwrapTags(wrappedStr)
-  const trimmedStr = trimEmptySections(unwrappedStr)
-  const restoredStr = restoreBlocks(trimmedStr, blocks)
-  return restoredStr === str ? str : parse(restoredStr, page, char)
+  str = blockedStr
+  str = detag(str)
+  str = await parseImages(str)
+  str = await parseLinks(str)
+  str = await parseSystems(str)
+  str = await parseTemplates(str, page, char)
+  str = await markdown(str)
+  str = wrapLinks(str)
+  str = unwrapTags(str)
+  str = trimEmptySections(str)
+  str = restoreBlocks(str, blocks)
+  return str === orig ? str : parse(str, page, char)
 }
 
 module.exports = parse
