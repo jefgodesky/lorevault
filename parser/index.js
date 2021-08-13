@@ -43,6 +43,24 @@ const detag = str => {
 }
 
 /**
+ * The <includeonly> tag means that its contents should only be rendered when
+ * it is included as a template, and not when it is rendered as a page. This
+ * method respects that directive by removing any and all <includeonly> tags
+ * and their contents from the string.
+ * @param {string} str - The string to parse.
+ * @returns {string} - The original string, but with any and all <includeonly>
+ *   tags and their contents removed from it.
+ */
+
+const respectIncludeOnly = str => {
+  const matches = str.match(/<includeonly>(\r|\n|.)*?<\/includeonly>/gm)
+  if (matches) {
+    for (const match of matches) str = str.replace(match, '')
+  }
+  return str
+}
+
+/**
  * Parse an array of elements into a readable set of parameters. The simplest
  * way to pass a parameter is as a simple string. These are placed in the
  * `ordered` array in the order that they are given. You can also assign a
@@ -363,6 +381,7 @@ const parse = async (str, page, char) => {
   let { blockedStr, blocks } = removeBlocks(str)
   str = blockedStr
   str = detag(str)
+  str = respectIncludeOnly(str)
   str = await parseImages(str)
   str = await parseLinks(str)
   str = await parseSystems(str)

@@ -153,6 +153,12 @@ describe('parse', () => {
       const actual = await parse('{{Template:HelloWorld|greeting=Hello|subject=[[Unit Test|Tester]]}}\n\nThis is a test.')
       expect(actual).toEqual('<p>Hello, <a href="/create?title=Unit%20Test" class="new">Tester</a>!</p>\n<p>This is a test.</p>\n')
     })
+
+    it('omits <includeonly> tags and their contents', async () => {
+      expect.assertions(1)
+      const actual = await parse('<includeonly><p>Fail!</p></includeonly>\n\nHello, world!')
+      expect(actual).toEqual('<p>Hello, world!</p>\n')
+    })
   })
 
   describe('Parsing special templates: Secrets', () => {
