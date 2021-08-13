@@ -5,6 +5,21 @@ const Character = require('./character')
 const { getS3 } = require('../utils')
 const { formatDate } = require('../views/helpers')
 const { rules, aws } = require('../config')
+const {
+  removeBlocks,
+  detag,
+  respectIncludeOnly,
+  parseImages,
+  parseLinks,
+  parseSystems,
+  parseTemplates,
+  markdown,
+  wrapLinks,
+  unwrapTags,
+  trimEmptySections,
+  restoreBlocks
+} = require('../parser')
+
 const { bucket, domain } = aws
 
 const CorePageSchemaDefinition = {
@@ -140,7 +155,8 @@ PageSchema.pre('save', function (next) {
 PageSchema.pre('save', async function (next) {
   const Page = this.model('Page')
   this.categories = []
-  const matches = this.body.match(/\[\[Category:(.*?)\]\]/gm)
+  const fullBody = await Page.parse(this.body, { page: this, pov: 'public', Page, keepTags: true })
+  const matches = fullBody.match(/\[\[Category:(.*?)\]\]/gm)
   const categoryNames = matches
     ? matches.map(m => m.substr(11, m.length - 13).trim())
     : []
@@ -617,6 +633,41 @@ PageSchema.statics.getFile = async function (title) {
   if (page?.file?.url) return page.file.url
   const withFiles = page.filter(p => p.file.url)
   return withFiles.length > 0 ? withFiles[0].file.url : undefined
+}
+
+/**
+ * Parse a string to HTML.
+ * @param {string} str - The string to parse.
+ * @param {Page?} options.page - (Optional) The page that you are parsing
+ *   (if applicable).
+ * @param {Character|string?} options.pov - (Optional) The character who is
+ *   viewing this content.
+ * @param {boolean=} options.keepTags - (Optional) If set to `true`, tags are
+ *   not removed and links and images are not parsed. This can be useful for
+ *   purposes other than rendering a page to HTML. (Default: `false`)
+ * @returns {Promise<string>} - A Promise that resolves with the parsed HTML.
+ */
+
+PageSchema.statics.parse = async function (str, options) {
+  const { page, pov, keepTags } = options
+  const stripTags = keepTags !== true
+  const orig = str
+
+  let { blockedStr, blocks } = removeBlocks(str)
+  str = blockedStr
+  if (stripTags) str = detag(str)
+  str = respectIncludeOnly(str)
+  if (stripTags) str = await parseImages(str, this)
+  if (stripTags) str = await parseLinks(str, this)
+  str = await parseSystems(str)
+  str = await parseTemplates(str, page, pov, this)
+  str = await markdown(str)
+  str = wrapLinks(str)
+  str = unwrapTags(str)
+  str = trimEmptySections(str)
+  str = restoreBlocks(str, blocks)
+
+  return str === orig ? str : this.parse(str, options)
 }
 
 module.exports = model('Page', PageSchema)

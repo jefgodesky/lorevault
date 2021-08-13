@@ -100,6 +100,27 @@ describe('Page', () => {
       expect(page.categories[0].alias).toEqual('Sorting')
     })
 
+    it('assigns categories from templates', async () => {
+      expect.assertions(1)
+
+      const td1 = JSON.parse(JSON.stringify(testPageData))
+      td1.title = 'Template:Inner'
+      td1.body = '[[Category:Inner template user]]'
+      await Page.create(td1)
+
+      const td2 = JSON.parse(JSON.stringify(testPageData))
+      td2.title = 'Template:Outer'
+      td2.body = '{{Template:Inner}}\n\n[[Category:Outer template user]]'
+      await Page.create(td2)
+
+      const pd = JSON.parse(JSON.stringify(testPageData))
+      pd.title = 'Test Page'
+      pd.body = '{{Template:Outer}}\n\n[[Category:Test]]'
+      const page = await Page.create(pd)
+
+      expect(page.categories).toHaveLength(3)
+    })
+
     it('assigns secrets to sections', async () => {
       expect.assertions(1)
       const pageData = JSON.parse(JSON.stringify(testPageData))
