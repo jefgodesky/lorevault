@@ -283,6 +283,7 @@ const removeBlocks = str => {
 const unwrapTags = str => {
   const tags = [
     /<p><img(\r|\n|.)*?><\/p>/gmi,
+    /<p><svg(\r|\n|.)*?><\/p>/gmi,
     /<p><div(\r|\n|.)*?>(\r|\n|.)*?<\/div><\/p>/gmi,
     /<p><figure(\r|\n|.)*?>(\r|\n|.)*?<\/figure><\/p>/gmi,
     /<p><section(\r|\n|.)*?>(\r|\n|.)*?<\/section><\/p>/gmi,
