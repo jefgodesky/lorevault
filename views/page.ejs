@@ -32,7 +32,7 @@
       <ul class="categories">
         <% for (const cat of categories) { %>
         <li>
-          <a href="/<%= cat.path %>"><%= cat.title %></a>
+          <a href="/<%= cat.path %>"><%- cat.title %></a>
         </li>
         <% } %>
       </ul>
