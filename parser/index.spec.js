@@ -230,5 +230,11 @@ describe('parse', () => {
       const actual = await parse('This text has a [[Link]].\n\n[[Type:Test]]\n[[Type:Unit Test]]\n[[Category:Test Category]]\n\nHere\'s a paragraph _after_ the tags. Ah-ha!')
       expect(actual).toEqual('<p>This text has a <a href="/create?title=Link" class="new">Link</a>.</p>\n<p>Here’s a paragraph <em>after</em> the tags. Ah-ha!</p>\n')
     })
+
+    it('can preserve tags when told to', async () => {
+      expect.assertions(1)
+      const actual = await parse('This text has a [[Link]].\n\n[[Type:Test]]\n[[Type:Unit Test]]\n[[Category:Test Category]]\n\nHere\'s a paragraph _after_ the tags. Ah-ha!', { keepTags: true })
+      expect(actual).toEqual('<p>This text has a [[Link]].</p>\n<p>[[Type:Test]]\n[[Type:Unit Test]]\n[[Category:Test Category]]</p>\n<p>Here’s a paragraph <em>after</em> the tags. Ah-ha!</p>\n')
+    })
   })
 })

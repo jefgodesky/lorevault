@@ -373,19 +373,23 @@ const restoreBlocks = (str, blocks) => {
  *   (if applicable).
  * @param {Character|string?} options.pov - (Optional) The character who is
  *   viewing this content.
+ * @param {boolean=} options.keepTags - (Optional) If set to `true`, tags are
+ *   not removed and links and images are not parsed. This can be useful for
+ *   purposes other than rendering a page to HTML. (Default: `false`)
  * @returns {Promise<string>} - A Promise that resolves with the parsed HTML.
  */
 
 const parse = async (str, options = {}) => {
-  const { page, pov } = options
+  const { page, pov, keepTags } = options
+  const stripTags = keepTags !== true
   const orig = str
 
   let { blockedStr, blocks } = removeBlocks(str)
   str = blockedStr
-  str = detag(str)
+  if (stripTags) str = detag(str)
   str = respectIncludeOnly(str)
-  str = await parseImages(str)
-  str = await parseLinks(str)
+  if (stripTags) str = await parseImages(str)
+  if (stripTags) str = await parseLinks(str)
   str = await parseSystems(str)
   str = await parseTemplates(str, page, pov)
   str = await markdown(str)
