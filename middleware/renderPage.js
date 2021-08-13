@@ -1,5 +1,4 @@
 const Page = require('../models/page')
-const parse = require('../parser')
 
 /**
  * Given an array of elements, each with a `title` property, this method
@@ -42,7 +41,7 @@ const renderPage = async (req, res, next) => {
 
   const { char, perspective } = req.viewOpts
   await page.checkSecrets(char)
-  req.viewOpts.markup = await parse(page.body, page, perspective === 'character' ? char : perspective)
+  req.viewOpts.markup = await Page.parse(page.body, { page, pov: perspective === 'character' ? char : perspective })
   const pageIsClaimable = await page.isClaimable()
   req.viewOpts.claimable = req.user?.charClaimMode === true && pageIsClaimable
 
@@ -63,7 +62,7 @@ const renderPage = async (req, res, next) => {
   const pov = req.viewOpts.perspective === 'character' ? req.viewOpts.char : req.viewOpts.perspective
   req.viewOpts.secrets = await page.getKnownSecrets(pov)
   for (const secret of req.viewOpts.secrets) {
-    secret.markup = await parse(secret.text)
+    secret.markup = await Page.parse(secret.text)
   }
 
   // Carry on to next middleware
