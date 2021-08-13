@@ -209,6 +209,13 @@ describe('parse', () => {
       const actual = await parse('[[Image:Test|Test GIF]]')
       expect(actual).toEqual('<img src="test.gif" alt="Test GIF" />\n')
     })
+
+    it('doesn\'t wreck SVG embeds', async () => {
+      expect.assertions(1)
+      const str = '<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">\n<rect x="50" y="50" width="100" height="100" fill="#fff" />\n</svg>\n'
+      const actual = await parse(str)
+      expect(actual).toEqual(str)
+    })
   })
 
   describe('Removing tags', () => {
