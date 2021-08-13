@@ -369,15 +369,17 @@ const restoreBlocks = (str, blocks) => {
 /**
  * Parse a string to HTML.
  * @param {string} str - The string to parse.
- * @param {Page?} page - (Optional) The page that you are parsing
+ * @param {Page?} options.page - (Optional) The page that you are parsing
  *   (if applicable).
- * @param {Character|string?} pov - (Optional) The character who is viewing
- *   this content.
+ * @param {Character|string?} options.pov - (Optional) The character who is
+ *   viewing this content.
  * @returns {Promise<string>} - A Promise that resolves with the parsed HTML.
  */
 
-const parse = async (str, page, char) => {
+const parse = async (str, options = {}) => {
+  const { page, pov } = options
   const orig = str
+
   let { blockedStr, blocks } = removeBlocks(str)
   str = blockedStr
   str = detag(str)
@@ -385,13 +387,13 @@ const parse = async (str, page, char) => {
   str = await parseImages(str)
   str = await parseLinks(str)
   str = await parseSystems(str)
-  str = await parseTemplates(str, page, char)
+  str = await parseTemplates(str, page, pov)
   str = await markdown(str)
   str = wrapLinks(str)
   str = unwrapTags(str)
   str = trimEmptySections(str)
   str = restoreBlocks(str, blocks)
-  return str === orig ? str : parse(str, page, char)
+  return str === orig ? str : parse(str, options)
 }
 
 module.exports = parse
