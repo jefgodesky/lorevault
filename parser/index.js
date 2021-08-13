@@ -2,7 +2,6 @@ const { Remarkable } = require('remarkable')
 const HeaderIdsPlugin = require('remarkable-header-ids')
 const { render } = require('ejs')
 const fs = require('fs').promises
-const Page = require('../models/page')
 const { getSVG } = require('../utils')
 const { rules } = require('../config')
 
@@ -137,13 +136,14 @@ const parseSecrets = async (str, match, params) => {
  * @param {string} str - The string to be parsed.
  * @param {Page} page - (Optional) The page being parsed.
  * @param {Character} char - (Optional) The character viewing this content.
+ * @param {Schema} Page - The Page schema.
  * @returns {Promise<string>} - A Promise that resolves once all of the
  *   templates invoked by the string have been parsed, with the original
  *   string with all template invocations replaced by their appropriate
  *   content.
  */
 
-const parseTemplates = async (str, page, char) => {
+const parseTemplates = async (str, page, char, Page) => {
   const matches = str.match(/{{((\n|\r|.)*?)}}/gm)
   if (!matches) return str
   for (const match of matches) {
@@ -173,17 +173,18 @@ const parseTemplates = async (str, page, char) => {
       }
     }
   }
-  return parseTemplates(str)
+  return parseTemplates(str, page, char, Page)
 }
 
 /**
  * Parse out image tags and replace them with rendered HTML image tags.
  * @param {string} str - The string to parse.
+ * @param {Schema} Page - The Page schema.
  * @returns {Promise<string>} - A Promise that resolves with the original
  *   string, but with all image tags parsed and rendered to HTML image tags.
  */
 
-const parseImages = async str => {
+const parseImages = async (str, Page) => {
   const matches = str.match(/\[\[(Image|File):((\n|\r|.)*?)\]\]/gm)
   if (!matches) return str
   for (const match of matches) {
@@ -207,11 +208,12 @@ const parseImages = async str => {
 /**
  * Parses wiki links into HTML links going to the appropriate URLs.
  * @param {string} str - The string to be parsed.
+ * @param {Schema} Page - The Page schema.
  * @returns {Promise<string>} - A Promise that resolves once all of the links
  *   in the string have been rendered, and the string parsed.
  */
 
-const parseLinks = async str => {
+const parseLinks = async (str, Page) => {
   const matches = str.match(/\[\[(.*?)\]\]/gm)
   if (!matches) return str
   for (const match of matches) {
@@ -366,38 +368,17 @@ const restoreBlocks = (str, blocks) => {
   return str
 }
 
-/**
- * Parse a string to HTML.
- * @param {string} str - The string to parse.
- * @param {Page?} options.page - (Optional) The page that you are parsing
- *   (if applicable).
- * @param {Character|string?} options.pov - (Optional) The character who is
- *   viewing this content.
- * @param {boolean=} options.keepTags - (Optional) If set to `true`, tags are
- *   not removed and links and images are not parsed. This can be useful for
- *   purposes other than rendering a page to HTML. (Default: `false`)
- * @returns {Promise<string>} - A Promise that resolves with the parsed HTML.
- */
-
-const parse = async (str, options = {}) => {
-  const { page, pov, keepTags } = options
-  const stripTags = keepTags !== true
-  const orig = str
-
-  let { blockedStr, blocks } = removeBlocks(str)
-  str = blockedStr
-  if (stripTags) str = detag(str)
-  str = respectIncludeOnly(str)
-  if (stripTags) str = await parseImages(str)
-  if (stripTags) str = await parseLinks(str)
-  str = await parseSystems(str)
-  str = await parseTemplates(str, page, pov)
-  str = await markdown(str)
-  str = wrapLinks(str)
-  str = unwrapTags(str)
-  str = trimEmptySections(str)
-  str = restoreBlocks(str, blocks)
-  return str === orig ? str : parse(str, options)
+module.exports = {
+  removeBlocks,
+  detag,
+  respectIncludeOnly,
+  parseImages,
+  parseLinks,
+  parseSystems,
+  parseTemplates,
+  markdown,
+  wrapLinks,
+  unwrapTags,
+  trimEmptySections,
+  restoreBlocks
 }
-
-module.exports = parse
