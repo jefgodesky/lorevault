@@ -155,7 +155,8 @@ PageSchema.pre('save', function (next) {
 PageSchema.pre('save', async function (next) {
   const Page = this.model('Page')
   this.categories = []
-  const matches = this.body.match(/\[\[Category:(.*?)\]\]/gm)
+  const fullBody = await Page.parse(this.body, { page: this, pov: 'public', Page, keepTags: true })
+  const matches = fullBody.match(/\[\[Category:(.*?)\]\]/gm)
   const categoryNames = matches
     ? matches.map(m => m.substr(11, m.length - 13).trim())
     : []
