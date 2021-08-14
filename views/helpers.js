@@ -44,7 +44,17 @@ const formatSize = size => {
   }
 }
 
+/**
+ * Strips "Category:" from the start of a string.
+ * @param {string} str - The string that we're looking at.
+ * @returns {string} - The original string, or, if that string began with
+ *   "Category:", the substring following "Category:".
+ */
+
+const removeCategory = str => str.startsWith('Category:') ? str.substr(9).trim() : str
+
 module.exports = {
   formatDate,
-  formatSize
+  formatSize,
+  removeCategory
 }
