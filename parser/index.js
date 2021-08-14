@@ -219,11 +219,12 @@ const parseLinks = async (str, Page) => {
   for (const match of matches) {
     const inside = match.substr(2, match.length - 4)
     const parts = inside.split('|')
-    const res = parts[0].trim().startsWith('/')
-      ? await Page.findByPath(parts[0].trim().substr(1))
-      : await Page.findByTitle(parts[0].trim())
+    const query = parts[0].trim()
+    const path = query.startsWith('/') ? query.substr(1) : null
+    const title = query.startsWith(':') ? query.substr(1) : query
+    const res = path ? await Page.findByPath(path) : await Page.findByTitle(title)
     const page = res._id ? res : res.length > 0 ? res[0] : null
-    const others = parts.length > 1 ? parts.slice(1) : parts
+    const others = parts.length > 1 ? parts.slice(1) : path ? [path] : [title]
     const text = others.join('|').trim()
     if (page) {
       str = str.replace(match, `<a href="/${page.path}" title="${page.title}">${text}</a>`)

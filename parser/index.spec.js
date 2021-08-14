@@ -74,6 +74,16 @@ describe('parseLinks', () => {
     const actual = await parseLinks('[[Test]]', Page)
     expect(actual).toEqual('<a href="/create?title=Test" class="new">Test</a>')
   })
+
+  it('links to categories', async () => {
+    expect.assertions(1)
+    const data = JSON.parse(JSON.stringify(testPageData))
+    data.title = 'Category:Test'
+    await Page.create(data)
+
+    const actual = await parseLinks('[[:Category:Test]]', Page)
+    expect(actual).toEqual('<a href="/category-test" title="Category:Test">Category:Test</a>')
+  })
 })
 
 describe('parseTemplates', () => {
