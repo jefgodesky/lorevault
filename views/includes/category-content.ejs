@@ -3,7 +3,7 @@
     <h2><%- title %></h2>
     <ul class="category-listing<% if (elems.length > 5) { %> long<% } %>">
       <% for (const el of elems) { %>
-      <li><a href="/<%= el.path %>"><%= el.title %></a></li>
+      <li><a href="/<%= el.path %>"><%- removeCategory(el.title) %></a></li>
       <% } %>
     </ul>
   </section>
