@@ -7,7 +7,6 @@ const { getSystemsDisplay } = require('../utils')
 const renderPage = require('../middleware/renderPage')
 const addKnownSecrets = require('../middleware/addKnownSecrets')
 const upload = require('../middleware/upload')
-const parse = require('../parser')
 const router = Router()
 
 /**
@@ -196,7 +195,7 @@ router.get('/*/*', async (req, res, next) => {
   if (!req.viewOpts.page) return res.redirect('/')
   if (parts.length <= 2) return res.redirect(`/${req.viewOpts.page.path}`)
   req.viewOpts.version = req.viewOpts.page.findVersion(parts[2])
-  req.viewOpts.markup = await parse(req.viewOpts.version.body)
+  req.viewOpts.markup = await Page.parse(req.viewOpts.version.body, { pov: 'public' })
   res.render('version', req.viewOpts)
 })
 
