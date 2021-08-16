@@ -288,21 +288,25 @@ PageSchema.methods.rollback = function (id, editor) {
  *   parameters provided, or `null` if the page is not a template.
  */
 
-PageSchema.methods.parseTemplate = function (params) {
+PageSchema.methods.parseTemplate = async function (params) {
   if (!this.types.includes('Template')) return null
+  const Page = this.model('Page')
   let str = this.body
 
   // Render #IF statements
   const ifs = str.match(/{{#IF\s?\|(.|\n\r)*\s?\|(.|\n\r)*\s?\|(.|\n\r)*\s?}}/gm)
   if (ifs) {
-    for (const i of ifs) {
-      const elems = i.substr(2, i.length - 4).split('|').map(el => el.trim())
+    for (const orig of ifs) {
+      let statement = detag(orig)
+      statement = await parseImages(statement, Page)
+      statement = await parseLinks(statement, Page)
+      const elems = statement.substr(2, statement.length - 4).split('|').map(el => el.trim())
       if (elems.length > 2 && params.named[elems[1]]) {
-        str = str.replace(i, elems[2])
+        str = str.replace(orig, elems[2])
       } else if (elems.length > 3) {
-        str = str.replace(i, elems[3])
+        str = str.replace(orig, elems[3])
       } else {
-        str = str.replace(i, '')
+        str = str.replace(orig, '')
       }
     }
   }
