@@ -581,7 +581,7 @@ PageSchema.statics.findByPath = function (url) {
  */
 
 PageSchema.statics.findByTitle = async function (title, type) {
-  const query = { title: { $regex: new RegExp(`^${title}$`, 'i') } }
+  const query = { title: { $regex: new RegExp(`^${title.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')}$`, 'i') } }
   if (type && typeof type === 'string' && type.length > 0) query.types = type
   const docs = await this.find(query)
   return docs?.length === 1 ? docs[0] : docs

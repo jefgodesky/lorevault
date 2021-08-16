@@ -787,6 +787,15 @@ describe('Page', () => {
       const actual = await Page.findByTitle(testPageData.title.toLowerCase(), 'Test Page')
       expect(actual._id).toEqual(p2._id)
     })
+
+    it('can handle characters that would be meaningful in a regex', async () => {
+      expect.assertions(1)
+      const cpy = JSON.parse(JSON.stringify(testPageData))
+      cpy.title = 'Title (Parenthetical) ./$^'
+      const page = await Page.create(cpy)
+      const actual = await Page.findByTitle(cpy.title)
+      expect(actual._id).toEqual(page._id)
+    })
   })
 
   describe('PageSchema.statics.findCategoryMembers', () => {
