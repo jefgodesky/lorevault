@@ -169,7 +169,8 @@ const parseTemplates = async (str, page, char, Page) => {
       if (!tpl || tpl.length === 0) {
         str = str.replace(match, '')
       } else {
-        str = str.replace(match, tpl.parseTemplate(params))
+        const parsed = await tpl.parseTemplate(params)
+        str = str.replace(match, parsed)
       }
     }
   }

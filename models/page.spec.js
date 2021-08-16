@@ -271,7 +271,7 @@ describe('Page', () => {
       data.title = 'TestTemplate'
       data.body = '<strong>Hello, world!</strong>'
       const tpl = await Page.create(data)
-      const actual = tpl.parseTemplate({ ordered: [], named: {} })
+      const actual = await tpl.parseTemplate({ ordered: [], named: {} })
       expect(actual).toEqual(null)
     })
 
@@ -281,7 +281,7 @@ describe('Page', () => {
       data.title = 'Template:Test'
       data.body = '<strong>Hello, world!</strong>'
       const tpl = await Page.create(data)
-      const actual = tpl.parseTemplate({ ordered: [], named: {} })
+      const actual = await tpl.parseTemplate({ ordered: [], named: {} })
       expect(actual).toEqual('<strong>Hello, world!</strong>')
     })
 
@@ -291,7 +291,7 @@ describe('Page', () => {
       data.title = 'Template:Test'
       data.body = '<strong>{{{1}}}, {{{2}}}!</strong>'
       const tpl = await Page.create(data)
-      const actual = tpl.parseTemplate({ ordered: [ 'Hello', 'world' ], named: {} })
+      const actual = await tpl.parseTemplate({ ordered: [ 'Hello', 'world' ], named: {} })
       expect(actual).toEqual('<strong>Hello, world!</strong>')
     })
 
@@ -301,7 +301,7 @@ describe('Page', () => {
       data.title = 'Template:Test'
       data.body = '<strong>{{{greeting}}}, {{{subject}}}!</strong>'
       const tpl = await Page.create(data)
-      const actual = tpl.parseTemplate({ ordered: [], named: { greeting: 'Hello', subject: 'world' } })
+      const actual = await tpl.parseTemplate({ ordered: [], named: { greeting: 'Hello', subject: 'world' } })
       expect(actual).toEqual('<strong>Hello, world!</strong>')
     })
 
@@ -311,8 +311,8 @@ describe('Page', () => {
       data.title = 'Template:Test'
       data.body = '{{#IF|greeting|<strong>Hello, {{{greeting}}}!</strong>|<strong>Hello, world!</strong>}}'
       const tpl = await Page.create(data)
-      const t1 = tpl.parseTemplate({ ordered: [], named: { greeting: 'Unit Test'} })
-      const t2 = tpl.parseTemplate({ ordered: [], named: {} })
+      const t1 = await tpl.parseTemplate({ ordered: [], named: { greeting: 'Unit Test'} })
+      const t2 = await tpl.parseTemplate({ ordered: [], named: {} })
       expect(t1).toEqual('<strong>Hello, Unit Test!</strong>')
       expect(t2).toEqual('<strong>Hello, world!</strong>')
     })

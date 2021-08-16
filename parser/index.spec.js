@@ -81,8 +81,8 @@ describe('parseLinks', () => {
     data.title = 'Category:Test'
     await Page.create(data)
 
-    const actual = await parseLinks('[[:Category:Test]]', Page)
-    expect(actual).toEqual('<a href="/category-test" title="Category:Test">Category:Test</a>')
+    const actual = await parseLinks('[[:Category:Test|Alias]]', Page)
+    expect(actual).toEqual('<a href="/category-test" title="Category:Test">Alias</a>')
   })
 })
 
@@ -168,6 +168,16 @@ describe('parseTemplates', () => {
   })
 
   it('handles links in parameters', async () => {
+    expect.assertions(1)
+    const tplData = JSON.parse(JSON.stringify(testPageData))
+    tplData.title = 'Template:HelloWorld'
+    tplData.body = '{{{greeting}}}, {{{subject}}}!\n\n<noinclude>\n  This should not be included.\n</noinclude>'
+    await Page.create(tplData)
+    const actual = await parseTemplates('{{Template:HelloWorld|greeting=Hello|subject=[[Unit Test|Tester]]}}\n\nThis is a test.', null, null, Page)
+    expect(actual).toEqual('Hello, [[Unit Test!\n\n\n\nThis is a test.')
+  })
+
+  it('handles category links in parameters', async () => {
     expect.assertions(1)
     const tplData = JSON.parse(JSON.stringify(testPageData))
     tplData.title = 'Template:HelloWorld'
