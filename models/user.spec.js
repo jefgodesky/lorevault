@@ -92,7 +92,7 @@ describe('User', () => {
       const times = Math.floor(Math.random() * 3) + 2
       const user = await User.create({ googleID: 'google', discordID: 'discord' })
       const before = user.charClaimMode
-      for (let i = 0; i < times; i++) await user.leaveCharClaimMode()
+      for (let i = 0; i < times; i++) await user.toggleCharClaimMode()
       const expected = times % 2 === 0 ? before : !before
       expect(user.charClaimMode).toEqual(expected)
     })
