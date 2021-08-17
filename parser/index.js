@@ -136,6 +136,9 @@ const parseSecrets = async (str, match, params) => {
  * @param {string} str - The string to be parsed.
  * @param {Page} page - (Optional) The page being parsed.
  * @param {Character} char - (Optional) The character viewing this content.
+ * @param {boolean} keepTags - (Optional) If set to `true`, tags are not
+ *   removed and links and images are not parsed. This can be useful for
+ *   purposes other than rendering a page to HTML. (Default: `false`)
  * @param {Schema} Page - The Page schema.
  * @returns {Promise<string>} - A Promise that resolves once all of the
  *   templates invoked by the string have been parsed, with the original
@@ -143,7 +146,7 @@ const parseSecrets = async (str, match, params) => {
  *   content.
  */
 
-const parseTemplates = async (str, page, char, Page) => {
+const parseTemplates = async (str, page, char, keepTags, Page) => {
   const matches = str.match(/{{((\n|\r|.)*?)}}/gm)
   if (!matches) return str
   for (const match of matches) {
@@ -169,12 +172,12 @@ const parseTemplates = async (str, page, char, Page) => {
       if (!tpl || tpl.length === 0) {
         str = str.replace(match, '')
       } else {
-        const parsed = await tpl.parseTemplate(params)
+        const parsed = await tpl.parseTemplate(params, keepTags)
         str = str.replace(match, parsed)
       }
     }
   }
-  return parseTemplates(str, page, char, Page)
+  return parseTemplates(str, page, char, keepTags, Page)
 }
 
 /**
