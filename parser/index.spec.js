@@ -93,7 +93,7 @@ describe('parseTemplates', () => {
     tplData.title = 'Template:HelloWorld'
     tplData.body = 'Hello, world!\n\n<noinclude>\n  This should not be included.\n</noinclude>'
     await Page.create(tplData)
-    const actual = await parseTemplates('{{Template:HelloWorld}}\n\nThis is a test.', null, null, Page)
+    const actual = await parseTemplates('{{Template:HelloWorld}}\n\nThis is a test.', null, null, false, Page)
     expect(actual).toEqual('Hello, world!\n\n\n\nThis is a test.')
   })
 
@@ -107,7 +107,7 @@ describe('parseTemplates', () => {
     outerData.title = 'Template:Wrapper'
     outerData.body = '{{Template:HelloWorld}}'
     await Page.create(outerData)
-    const actual = await parseTemplates('{{Template:Wrapper}}\n\nThis is a test.', null, null, Page)
+    const actual = await parseTemplates('{{Template:Wrapper}}\n\nThis is a test.', null, null, false, Page)
     expect(actual).toEqual('Hello, world!\n\n\n\nThis is a test.')
   })
 
@@ -117,7 +117,7 @@ describe('parseTemplates', () => {
     tplData.title = 'Template:HelloWorld'
     tplData.body = 'Hello, world!\n\n<noinclude>\n  This should not be included.\n</noinclude>'
     await Page.create(tplData)
-    const actual = await parseTemplates('{{Template:HelloWorld}}\n\n{{Template:HelloWorld}}\n\nThis is a test.', null, null, Page)
+    const actual = await parseTemplates('{{Template:HelloWorld}}\n\n{{Template:HelloWorld}}\n\nThis is a test.', null, null, false, Page)
     expect(actual).toEqual('Hello, world!\n\n\n\nHello, world!\n\n\n\nThis is a test.')
   })
 
@@ -127,7 +127,7 @@ describe('parseTemplates', () => {
     tplData.title = 'Template:HelloWorld'
     tplData.body = '{{{1}}}, {{{2}}}!\n\n<noinclude>\n  This should not be included.\n</noinclude>'
     await Page.create(tplData)
-    const actual = await parseTemplates('{{Template:HelloWorld|Hello|world}}\n\nThis is a test.', null, null, Page)
+    const actual = await parseTemplates('{{Template:HelloWorld|Hello|world}}\n\nThis is a test.', null, null, false, Page)
     expect(actual).toEqual('Hello, world!\n\n\n\nThis is a test.')
   })
 
@@ -137,7 +137,7 @@ describe('parseTemplates', () => {
     tplData.title = 'Template:HelloWorld'
     tplData.body = '{{{1}}}, {{{2}}}!\n\n<noinclude>\n  This should not be included.\n</noinclude>'
     await Page.create(tplData)
-    const actual = await parseTemplates('{{Template:HelloWorld|2=world|1=Hello}}\n\nThis is a test.', null, null, Page)
+    const actual = await parseTemplates('{{Template:HelloWorld|2=world|1=Hello}}\n\nThis is a test.', null, null, false, Page)
     expect(actual).toEqual('Hello, world!\n\n\n\nThis is a test.')
   })
 
@@ -147,7 +147,7 @@ describe('parseTemplates', () => {
     tplData.title = 'Template:HelloWorld'
     tplData.body = '{{{greeting}}}, {{{subject}}}!\n\n<noinclude>\n  This should not be included.\n</noinclude>'
     await Page.create(tplData)
-    const actual = await parseTemplates('{{Template:HelloWorld|greeting=Hello|subject=world}}\n\nThis is a test.', null, null, Page)
+    const actual = await parseTemplates('{{Template:HelloWorld|greeting=Hello|subject=world}}\n\nThis is a test.', null, null, false, Page)
     expect(actual).toEqual('Hello, world!\n\n\n\nThis is a test.')
   })
 
@@ -157,13 +157,13 @@ describe('parseTemplates', () => {
     tplData.title = 'Template:HelloWorld'
     tplData.body = '{{{greeting}}}, {{{subject}}}!\n\n<noinclude>\n  This should not be included.\n</noinclude>'
     await Page.create(tplData)
-    const actual = await parseTemplates('{{Template:HelloWorld\n  |greeting=Hello\n  |subject=world\n}}\n\nThis is a test.', null, null, Page)
+    const actual = await parseTemplates('{{Template:HelloWorld\n  |greeting=Hello\n  |subject=world\n}}\n\nThis is a test.', null, null, false, Page)
     expect(actual).toEqual('Hello, world!\n\n\n\nThis is a test.')
   })
 
   it('ignores templates that don\'t exist', async () => {
     expect.assertions(1)
-    const actual = await parseTemplates('{{Template:HelloWorld\n  |greeting=Hello\n  |subject=world\n}}\n\nThis is a test.', null, null, Page)
+    const actual = await parseTemplates('{{Template:HelloWorld\n  |greeting=Hello\n  |subject=world\n}}\n\nThis is a test.', null, null, false, Page)
     expect(actual).toEqual('\n\nThis is a test.')
   })
 
@@ -173,7 +173,7 @@ describe('parseTemplates', () => {
     tplData.title = 'Template:HelloWorld'
     tplData.body = '{{{greeting}}}, {{{subject}}}!\n\n<noinclude>\n  This should not be included.\n</noinclude>'
     await Page.create(tplData)
-    const actual = await parseTemplates('{{Template:HelloWorld|greeting=Hello|subject=[[Unit Test|Tester]]}}\n\nThis is a test.', null, null, Page)
+    const actual = await parseTemplates('{{Template:HelloWorld|greeting=Hello|subject=[[Unit Test|Tester]]}}\n\nThis is a test.', null, null, false, Page)
     expect(actual).toEqual('Hello, [[Unit Test!\n\n\n\nThis is a test.')
   })
 
@@ -183,7 +183,7 @@ describe('parseTemplates', () => {
     tplData.title = 'Template:HelloWorld'
     tplData.body = '{{{greeting}}}, {{{subject}}}!\n\n<noinclude>\n  This should not be included.\n</noinclude>'
     await Page.create(tplData)
-    const actual = await parseTemplates('{{Template:HelloWorld|greeting=Hello|subject=[[Unit Test|Tester]]}}\n\nThis is a test.', null, null, Page)
+    const actual = await parseTemplates('{{Template:HelloWorld|greeting=Hello|subject=[[Unit Test|Tester]]}}\n\nThis is a test.', null, null, false, Page)
     expect(actual).toEqual('Hello, [[Unit Test!\n\n\n\nThis is a test.')
   })
 })

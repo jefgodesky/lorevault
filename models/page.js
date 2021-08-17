@@ -284,22 +284,29 @@ PageSchema.methods.rollback = function (id, editor) {
  *   parameters. The `ordered` array presents the ordered array of parameters
  *   received, while the `named` object presents a dictionary of the key/value
  *   pairs that were passed as parameters.
+ * @param {boolean} keepTags - (Optional) If set to `true`, tags are not
+ *   removed and links and images are not parsed. This can be useful for
+ *   purposes other than rendering a page to HTML. (Default: `false`)
  * @returns {string|null} - The body of the page parsed as a template using the
  *   parameters provided, or `null` if the page is not a template.
  */
 
-PageSchema.methods.parseTemplate = async function (params) {
+PageSchema.methods.parseTemplate = async function (params, keepTags) {
   if (!this.types.includes('Template')) return null
   const Page = this.model('Page')
   let str = this.body
+
+  // Substitute parameters
+  for (const key of Object.keys(params.named)) str = str.replaceAll(`{{{${key}}}}`, params.named[key])
+  for (const index in params.ordered) str = str.replaceAll(`{{{${parseInt(index) + 1}}}}`, params.ordered[index])
 
   // Render #IF statements
   const ifs = str.match(/{{#IF\s?\|(.|\n\r)*\s?\|(.|\n\r)*\s?\|(.|\n\r)*\s?}}/gm)
   if (ifs) {
     for (const orig of ifs) {
-      let statement = detag(orig)
-      statement = await parseImages(statement, Page)
-      statement = await parseLinks(statement, Page)
+      let statement = keepTags ? orig : detag(orig)
+      statement = keepTags ? statement : await parseImages(statement, Page)
+      statement = keepTags ? statement : await parseLinks(statement, Page)
       const elems = statement.substr(2, statement.length - 4).split('|').map(el => el.trim())
       if (elems.length > 2 && params.named[elems[1]]) {
         str = str.replace(orig, elems[2])
@@ -326,10 +333,6 @@ PageSchema.methods.parseTemplate = async function (params) {
       str = str.replace(includeonly, includeonly.substr(13, includeonly.length - 27).trim())
     }
   }
-
-  // Substitute parameters
-  for (const key of Object.keys(params.named)) str = str.replaceAll(`{{{${key}}}}`, params.named[key])
-  for (const index in params.ordered) str = str.replaceAll(`{{{${parseInt(index) + 1}}}}`, params.ordered[index])
 
   return str
 }
@@ -664,7 +667,7 @@ PageSchema.statics.parse = async function (str, options) {
   if (stripTags) str = await parseImages(str, this)
   if (stripTags) str = await parseLinks(str, this)
   str = await parseSystems(str)
-  str = await parseTemplates(str, page, pov, this)
+  str = await parseTemplates(str, page, pov, keepTags, this)
   str = await markdown(str)
   str = wrapLinks(str)
   str = unwrapTags(str)
