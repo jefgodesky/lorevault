@@ -107,12 +107,13 @@ const parseTemplateParam = elems => {
  * @param {{ordered: *[], named: {}, page: Page, char: Character}} params -
  *   Template parameters as parsed by `parseTemplateParam`, with optional
  *   parameters `page` and `char` that may be added.
+ * @param {Schema} Page - The Page schema.
  * @returns {Promise<string>} - A Promise that resolves with the new string
  *   once the given instance of the special {{Secrets}} template has been
  *   correctly parsed.
  */
 
-const parseSecrets = async (str, match, params) => {
+const parseSecrets = async (str, match, params, Page) => {
   const { ordered, page, char } = params
   if (!page || !char) return str
   const template = await fs.readFile('views/partials/secret.ejs', 'utf8')
@@ -124,7 +125,7 @@ const parseSecrets = async (str, match, params) => {
     const text = match && match.length > 0
       ? secret.text.substr(match[0].length).trim()
       : secret.text.trim()
-    secret.markup = await parse(text)
+    secret.markup = await Page.parse(text, { page, pov: char })
   }
 
   const markup = secrets.map(secret => render(template, Object.assign({}, secret, { action: `/${page.path}/reveal/${secret._id}` })))
@@ -163,9 +164,9 @@ const parseTemplates = async (str, page, char, keepTags, Page) => {
 
     if (Object.keys(special).includes(name)) {
       if (special[name].async) {
-        str = await special[name].fn(str, match, params)
+        str = await special[name].fn(str, match, params, Page)
       } else {
-        str = special[name].fn(str, match, params)
+        str = special[name].fn(str, match, params, Page)
       }
     } else {
       const tpl = await Page.findByTitle(name, 'Template')
