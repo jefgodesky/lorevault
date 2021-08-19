@@ -509,7 +509,7 @@ PageSchema.methods.checkSecret = async function (secret, char) {
   if (!s) return
   const c = char?.constructor?.name === 'Character'
     ? char
-    : char.id
+    : char?.id
       ? await Character.findById(char.id)
       : await Character.findById(char)
   if (!c) return
