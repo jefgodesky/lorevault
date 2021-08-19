@@ -41,6 +41,7 @@ const renderPage = async (req, res, next) => {
 
   const { char, perspective } = req.viewOpts
   await page.checkSecrets(char)
+  await Page.populate(page, 'categories.category')
   const parseOptions = { page, pov: perspective === 'character' ? char : perspective }
   req.viewOpts.markup = await Page.parse(page.body, parseOptions)
   const pageIsClaimable = await page.isClaimable()
