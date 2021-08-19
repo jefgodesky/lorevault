@@ -41,7 +41,9 @@ const renderPage = async (req, res, next) => {
 
   const { char, perspective } = req.viewOpts
   await page.checkSecrets(char)
-  req.viewOpts.markup = await Page.parse(page.body, { page, pov: perspective === 'character' ? char : perspective })
+  await Page.populate(page, 'categories.category')
+  const parseOptions = { page, pov: perspective === 'character' ? char : perspective }
+  req.viewOpts.markup = await Page.parse(page.body, parseOptions)
   const pageIsClaimable = await page.isClaimable()
   req.viewOpts.claimable = req.user?.charClaimMode === true && pageIsClaimable
 
@@ -56,7 +58,7 @@ const renderPage = async (req, res, next) => {
   const pov = req.viewOpts.perspective === 'character' ? req.viewOpts.char : req.viewOpts.perspective
   req.viewOpts.secrets = await page.getKnownSecrets(pov)
   for (const secret of req.viewOpts.secrets) {
-    secret.markup = await Page.parse(secret.text)
+    secret.markup = await Page.parse(secret.text, parseOptions)
   }
 
   // Carry on to next middleware
