@@ -17,7 +17,9 @@
     "email": "jefgodesky@gmail.com"
   },
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test": "mocha"
+  },
   "dependencies": {
     "mongoose": "^6.0.3"
   },
