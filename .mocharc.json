@@ -1,0 +1,5 @@
+{
+  "recursive": true,
+  "require": "./test-hooks.js",
+  "spec": "./**/*.spec.js"
+}
