@@ -9,6 +9,6 @@ describe('pickRandomNum', () => {
 
   it('returns a number greater than or equal to the minimum provided', () => {
     const rnd = pickRandomNum(1, 6)
-    expect(rnd).to.be.most(1)
+    expect(rnd).to.be.least(1)
   })
 })
