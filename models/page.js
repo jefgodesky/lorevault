@@ -28,8 +28,17 @@ const PageSchema = new Schema({
   modified: {
     type: Date,
     default: Date.now
-  }
+  },
   versions: [VersionSchema]
+})
+
+/**
+ * Update the modified date each time the page is saved.
+ */
+
+PageSchema.pre('save', function (next) {
+  this.modified = Date.now()
+  next()
 })
 
 export default model('Page', PageSchema)
