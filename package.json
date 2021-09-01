@@ -21,6 +21,7 @@
     "test": "mocha"
   },
   "dependencies": {
+    "deepmerge": "^4.2.2",
     "mongoose": "^6.0.3",
     "rehype-autolink-headings": "^6.1.0",
     "rehype-format": "^4.0.0",
