@@ -1,6 +1,7 @@
 import { unified } from 'unified'
 import markdown from 'remark-parse'
 import gfm from 'remark-gfm'
+import sectionize from 'remark-sectionize'
 import remark2rehype from 'remark-rehype'
 import rehypeStringify from 'rehype-stringify'
 import prettify from 'rehype-format'
@@ -15,6 +16,7 @@ const renderMarkup = async str => {
   const render = await unified()
     .use(markdown)
     .use(gfm)
+    .use(sectionize)
     .use(remark2rehype)
     .use(prettify)
     .use(rehypeStringify)
