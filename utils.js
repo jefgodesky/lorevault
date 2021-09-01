@@ -12,6 +12,15 @@ const pickRandomNum = (...numbers) => {
   return Math.floor(Math.random() * max) + min
 }
 
+/**
+ * Return a random element from an array.
+ * @param {*[]} arr - An array of elements.
+ * @returns {*} - A random element from the array given.
+ */
+
+const pickRandom = arr => arr[pickRandomNum(0, arr.length - 1)]
+
 export {
-  pickRandomNum
+  pickRandomNum,
+  pickRandom
 }
