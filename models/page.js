@@ -21,6 +21,14 @@ const VersionSchema = new Schema(Object.assign({}, ContentSchema, {
 const PageSchema = new Schema({
   title: String,
   path: String,
+  created: {
+    type: Date,
+    default: Date.now
+  },
+  modified: {
+    type: Date,
+    default: Date.now
+  }
   versions: [VersionSchema]
 })
 
