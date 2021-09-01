@@ -3,6 +3,7 @@ import markdown from 'remark-parse'
 import gfm from 'remark-gfm'
 import sectionize from 'remark-sectionize'
 import remark2rehype from 'remark-rehype'
+import raw from 'rehype-raw'
 import slugger from 'rehype-slug'
 import linkHeadings from 'rehype-autolink-headings'
 import prettify from 'rehype-format'
@@ -19,7 +20,8 @@ const renderMarkup = async str => {
     .use(markdown)
     .use(gfm)
     .use(sectionize)
-    .use(remark2rehype)
+    .use(remark2rehype, { allowDangerousHtml: true })
+    .use(raw)
     .use(slugger)
     .use(linkHeadings)
     .use(prettify)
