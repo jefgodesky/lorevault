@@ -19,6 +19,15 @@ const VersionSchema = new Schema(Object.assign({}, ContentSchema, {
   }
 }))
 
+const SecretSchema = new Schema({
+  codename: String,
+  content: String,
+  knowers: [{
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }]
+})
+
 const PageSchema = new Schema({
   title: String,
   path: String,
@@ -29,6 +38,17 @@ const PageSchema = new Schema({
   modified: {
     type: Date,
     default: Date.now
+  },
+  secrets: {
+    existence: {
+      type: Boolean,
+      default: false
+    },
+    knowers: [{
+      type: Schema.Types.ObjectId,
+      ref: 'User'
+    }],
+    list: [SecretSchema]
   },
   versions: [VersionSchema]
 })
