@@ -3,8 +3,9 @@ import markdown from 'remark-parse'
 import gfm from 'remark-gfm'
 import sectionize from 'remark-sectionize'
 import remark2rehype from 'remark-rehype'
-import rehypeStringify from 'rehype-stringify'
+import slugger from 'rehype-slug'
 import prettify from 'rehype-format'
+import rehypeStringify from 'rehype-stringify'
 
 /**
  * Render Markdown to HTML.
@@ -18,6 +19,7 @@ const renderMarkup = async str => {
     .use(gfm)
     .use(sectionize)
     .use(remark2rehype)
+    .use(slugger)
     .use(prettify)
     .use(rehypeStringify)
     .process(str)

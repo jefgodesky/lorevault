@@ -14,6 +14,6 @@ describe('renderMarkup', () => {
 
   it('creates sections', async () => {
     const actual = await renderMarkup('## Test\n\nHello, world!')
-    expect(actual).to.be.equal('\n<section>\n  <h2>Test</h2>\n  <p>Hello, world!</p>\n</section>\n')
+    expect(actual).to.be.equal('\n<section>\n  <h2 id="test">Test</h2>\n  <p>Hello, world!</p>\n</section>\n')
   })
 })
