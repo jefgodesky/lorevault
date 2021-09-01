@@ -4,6 +4,7 @@ import gfm from 'remark-gfm'
 import sectionize from 'remark-sectionize'
 import remark2rehype from 'remark-rehype'
 import slugger from 'rehype-slug'
+import linkHeadings from 'rehype-autolink-headings'
 import prettify from 'rehype-format'
 import rehypeStringify from 'rehype-stringify'
 
@@ -20,6 +21,7 @@ const renderMarkup = async str => {
     .use(sectionize)
     .use(remark2rehype)
     .use(slugger)
+    .use(linkHeadings)
     .use(prettify)
     .use(rehypeStringify)
     .process(str)
