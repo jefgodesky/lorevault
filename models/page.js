@@ -48,10 +48,12 @@ PageSchema.pre('save', function (next) {
  *   the new version.
  * @param {string} content.title - The title of the new page document version.
  * @param {string} content.body - The body of the new page document version.
+ * @param {string} [content.msg] - (Optional) If provided, adds a commit
+ *   message to the version created for this update.
  * @param {User|Schema.Types.ObjectID|string} editor - Either a User document,
  *   or the ID of a user. This is the person making the update.
- * @returns {Promise<void>} - A Promise that resolves once the update has been
- *   made and the Page document saved to the database.
+ * @returns {Promise<Page>} - A Promise that resolves with the updated page
+ *   once the update has been made and the Page document saved to the database.
  */
 
 PageSchema.methods.update = async function (content, editor) {
@@ -60,6 +62,29 @@ PageSchema.methods.update = async function (content, editor) {
   this.title = content.title
   this.versions.push(Object.assign({}, content, { editor: editor._id }))
   await this.save()
+  return this
+}
+
+/**
+ * Create a new page.
+ * @param {object} content - An object containing the content to be added as
+ *   the new version.
+ * @param {string} content.title - The title of the new page.
+ * @param {string} content.body - The initial body of the new page.
+ * @param {string} [content.msg] - (Optional) If provided, adds a commit
+ *   message to the version created for this update. (Default: `Initial text`)
+ * @param {User|Schema.Types.ObjectID|string} editor - Either a User document,
+ *   or the ID of a user. This is the person creating the page.
+ * @returns {Promise<Page>} - A Promise that resolves once the update has been
+ *   made and the Page document saved to the database.
+ */
+
+PageSchema.statics.create = async function (content, editor) {
+  const Page = this.model('Page')
+  const page = new Page()
+  if (!content.msg) content.msg = 'Initial text'
+  await page.update(content, editor)
+  return page
 }
 
 export default model('Page', PageSchema)
