@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { info } from './dnd5e.js'
+import { info, roll } from './dnd5e.js'
 
 describe('dnd5e', () => {
   describe('info', () => {
@@ -38,6 +38,26 @@ describe('dnd5e', () => {
     it('exports default values', () => {
       const { sheet } = info
       expect(sheet.map(s => s.default)).to.be.eql([0, 0, 0, 0, 0])
+    })
+  })
+
+  describe('roll', () => {
+    it('rolls 1d20', () => {
+      const res = roll()
+      expect(res).to.be.least(1)
+      expect(res).to.be.most(20)
+    })
+
+    it('adds a modifier', () => {
+      const res = roll({ modifier: 3 })
+      expect(res).to.be.least(4)
+      expect(res).to.be.most(23)
+    })
+
+    it('can set a floor', () => {
+      const res = roll({ floor: 10 })
+      expect(res).to.be.least(10)
+      expect(res).to.be.most(20)
     })
   })
 })
