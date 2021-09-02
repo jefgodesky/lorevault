@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { pickRandomNum, pickRandom, union, intersection } from './utils.js'
+import { pickRandomNum, pickRandom, union, intersection, findOne } from './utils.js'
 
 describe('pickRandomNum', () => {
   it('returns a number less than or equal to the maximum provided', () => {
@@ -59,5 +59,17 @@ describe('intersection', () => {
 
   it('returns an empty array when given no arguments', () => {
     expect(intersection()).to.be.empty
+  })
+})
+
+describe('findOne', () => {
+  it('returns the first element that matches', () => {
+    const arr = [{ code: 'blue', num: 1 }, { code: 'red', num: 2 }, { code: 'red', num: 3 }]
+    expect(findOne(arr, el => el.code === 'red').num).to.be.equal(2)
+  })
+
+  it('returns null if nothing matches', () => {
+    const arr = [{ code: 'blue', num: 1 }, { code: 'red', num: 2 }, { code: 'red', num: 3 }]
+    expect(findOne(arr, el => el.code === 'yellow')).to.be.null
   })
 })

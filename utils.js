@@ -52,9 +52,25 @@ const intersection = (...arr) => {
   return intersection
 }
 
+/**
+ * If one or more elements in the array meet the criteria set by the filtering
+ * function `fn`, return the first element in the array that does so.
+ * @param {*[]} arr - An array in which we want to find the first element that
+ *   meets the criteria set by the filtering function `fn`.
+ * @param {function} fn - The filtering function for the element.
+ * @returns {*|null} - The first element in the array that meets the criteria
+ *   set by the filtering function `fn`, if one exists; otherwise, `null`.
+ */
+
+const findOne = (arr, fn) => {
+  const filtered = arr.filter(fn)
+  return filtered.length > 0 ? filtered[0] : null
+}
+
 export {
   pickRandomNum,
   pickRandom,
   union,
-  intersection
+  intersection,
+  findOne
 }
