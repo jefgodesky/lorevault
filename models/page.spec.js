@@ -45,6 +45,18 @@ describe('Page', () => {
       })
     })
 
+    describe('findSecret', () => {
+      it('returns the secret with that codename', async () => {
+        const { page } = await createTestDocs(model, '||::Wombat:: This is the secret.||')
+        expect(page.findSecret('Wombat').content).to.be.equal('This is the secret.')
+      })
+
+      it('returns null if the page doesn\'t have any secret with that codename', async () => {
+        const { page } = await createTestDocs(model)
+        expect(page.findSecret('Wombat')).to.be.null
+      })
+    })
+
     describe('processSecrets', () => {
       it('adds new secrets', async () => {
         const { page, user } = await createTestDocs(model)

@@ -1,7 +1,7 @@
 import smartquotes from 'smartquotes'
 
 import assignCodenames from '../transformers/assignCodenames.js'
-import { pickRandom, union } from '../utils.js'
+import { pickRandom, union, findOne } from '../utils.js'
 
 import config from '../config/index.js'
 
@@ -84,6 +84,19 @@ PageSchema.methods.findCodename = function () {
     if (!used.includes(key)) return key
     num++
   }
+}
+
+/**
+ * Find a secret with the given codename.
+ * @param {string} codename - The codename of the secret that we want to find.
+ * @returns {{ codename: string, content: string,
+ *   knowers: [Schema.Types.ObjectId] }|null} - The secret with the given
+ *   codename if the page has a secret with that codename, or `null` if it
+ *   does not.
+ */
+
+PageSchema.methods.findSecret = function (codename) {
+  return findOne(this.secrets.list, s => s.codename === codename)
 }
 
 /**
