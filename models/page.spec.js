@@ -3,6 +3,7 @@ import { expect } from 'chai'
 import mongoose from 'mongoose'
 const { model } = mongoose
 
+import { pickRandomNum } from '../utils.js'
 import { createTestDocs } from '../test-utils.js'
 import Page from './page.js'
 import User from './user.js'
@@ -29,6 +30,22 @@ describe('Page', () => {
   })
 
   describe('methods', () => {
+    describe('findCodename', () => {
+      it('returns a random codename', async () => {
+        const { page } = await createTestDocs(model)
+        expect(page.findCodename()).to.be.a('string')
+      })
+
+      it('can produce 200 codenames', async () => {
+        const { page } = await createTestDocs(model)
+        for (let i = 0; i < 200; i++) {
+          const codename = page.findCodename()
+          page.secrets.list.push({ codename, content: 'Test', knowers: [] })
+        }
+        expect(page.secrets.list).to.have.lengthOf(200)
+      })
+    })
+
     describe('update', () => {
       it('returns a page', async () => {
         const { page, user } = await createTestDocs(model)

@@ -1,4 +1,9 @@
 import smartquotes from 'smartquotes'
+
+import { pickRandom } from '../utils.js'
+
+import config from '../config/index.js'
+
 import mongoose from 'mongoose'
 const { Schema, model } = mongoose
 
@@ -61,6 +66,24 @@ PageSchema.pre('save', function (next) {
   this.modified = Date.now()
   next()
 })
+
+/**
+ * Finds an acceptable new codename.
+ * @returns {string} - A string that has not yet been used as a codename for
+ *   any of the secrets for this page.
+ */
+
+PageSchema.methods.findCodename = function () {
+  const used = this.secrets.list.map(s => s.codename)
+  const unused = config.codenames.filter(c => !used.includes(c))
+  if (unused.length > 0) return pickRandom(config.codenames.filter(c => !used.includes(c)))
+  let num = 1
+  while (true) {
+    let key = `Secret${num.toString().padStart(4, '0')}`
+    if (!used.includes(key)) return key
+    num++
+  }
+}
 
 /**
  * Add a content update to the page's versions and then save the page.
