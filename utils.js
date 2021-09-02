@@ -20,7 +20,21 @@ const pickRandomNum = (...numbers) => {
 
 const pickRandom = arr => arr[pickRandomNum(0, arr.length - 1)]
 
+/**
+ * Returns the union of several arrays.
+ * @param {...*[]} arr - One of the arrays to create a union from.
+ * @returns {*[]} - An array that is the union of all arrays passed to the
+ *   method as parameters.
+ */
+
+const union = (...arr) => {
+  let all = []
+  for (let i = 0; i < arr.length; i++) all = [...all, ...arr[i]]
+  return [...new Set(all)]
+}
+
 export {
   pickRandomNum,
-  pickRandom
+  pickRandom,
+  union
 }

@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { pickRandomNum, pickRandom } from './utils.js'
+import { pickRandomNum, pickRandom, union } from './utils.js'
 
 describe('pickRandomNum', () => {
   it('returns a number less than or equal to the maximum provided', () => {
@@ -19,5 +19,25 @@ describe('pickRandom', () => {
     const arr = []
     for (let i = 1; i < len; i++) arr.push(i)
     expect(arr).to.include(pickRandom(arr))
+  })
+})
+
+describe('union', () => {
+  it('returns the union of several arrays', () => {
+    const a = [1, 2, 3]
+    const b = [4, 5, 6]
+    const c = [7, 8, 9]
+    expect(union(a, b, c).join(' ')).to.be.equal('1 2 3 4 5 6 7 8 9')
+  })
+
+  it('removes duplicates', () => {
+    const a = [1, 2, 3]
+    const b = [3, 4, 5]
+    const c = [5, 6, 7]
+    expect(union(a, b, c).join(' ')).to.be.equal('1 2 3 4 5 6 7')
+  })
+
+  it('returns an empty array when given no arguments', () => {
+    expect(union()).to.be.empty
   })
 })
