@@ -33,8 +33,28 @@ const union = (...arr) => {
   return [...new Set(all)]
 }
 
+/**
+ * Returns the intersection of several arrays.
+ * @param {...*[]} arr - One of the arrays to create an intersection from.
+ * @returns {*[]} - An array that is the intersection of all arrays passed to
+ *   the method as parameters.
+ */
+
+const intersection = (...arr) => {
+  let intersection = []
+  for (let i = 0; i < arr.length; i++) {
+    if (i === 0) {
+      intersection = arr[i]
+    } else {
+      intersection = intersection.filter(el => arr[i].includes(el))
+    }
+  }
+  return intersection
+}
+
 export {
   pickRandomNum,
   pickRandom,
-  union
+  union,
+  intersection
 }

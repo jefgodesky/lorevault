@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { pickRandomNum, pickRandom, union } from './utils.js'
+import { pickRandomNum, pickRandom, union, intersection } from './utils.js'
 
 describe('pickRandomNum', () => {
   it('returns a number less than or equal to the maximum provided', () => {
@@ -39,5 +39,25 @@ describe('union', () => {
 
   it('returns an empty array when given no arguments', () => {
     expect(union()).to.be.empty
+  })
+})
+
+describe('intersection', () => {
+  it('returns the intersection of several arrays', () => {
+    const a = [1, 2, 3]
+    const b = [2, 3, 4]
+    const c = [3, 4, 5]
+    expect(intersection(a, b, c).join(' ')).to.be.equal('3')
+  })
+
+  it('returns an empty array when there is no intersection', () => {
+    const a = [1, 2, 3]
+    const b = [3, 4, 5]
+    const c = [5, 6, 7]
+    expect(intersection(a, b, c)).to.be.empty
+  })
+
+  it('returns an empty array when given no arguments', () => {
+    expect(intersection()).to.be.empty
   })
 })
