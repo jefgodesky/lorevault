@@ -34,6 +34,16 @@ describe('createTestDocs', () => {
     const { page } = await createTestDocs(model)
     expect(page.versions).to.have.lengthOf(1)
   })
+
+  it('sets the test page\'s initial text', async () => {
+    const { page } = await createTestDocs(model, 'This is a test page.')
+    expect(page.versions[0].body).to.be.equal('This is a test page.')
+  })
+
+  it('can set a default page text', async () => {
+    const { page } = await createTestDocs(model)
+    expect(page.versions[0].body).to.be.equal('This is the original text.')
+  })
 })
 
 describe('codenamer', () => {

@@ -1,16 +1,18 @@
 /**
  * Set up standard test documents in the database.
  * @param {function} model - The Mongoose model function.
+ * @param {string} [body='This is the original text.'] - The content that the
+ *   page will be created with.
  * @returns {Promise<{user: User, other: User, page: Page}>} - A Promise that
  *   resolves with test documents that have been created in the database.
  */
 
-const createTestDocs = async model => {
+const createTestDocs = async (model, body = 'This is the original text.') => {
   const Page = model('Page')
   const User = model('User')
   const user = await User.create({ name: 'Tester 1' })
   const other = await User.create({ name: 'Tester 2' })
-  const page = await Page.create({ title: 'Test Page', body: 'This is the original text.' }, user)
+  const page = await Page.create({ title: 'Test Page', body }, user)
   return { user, other, page }
 }
 
