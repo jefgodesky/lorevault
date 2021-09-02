@@ -3,7 +3,6 @@ import { expect } from 'chai'
 import mongoose from 'mongoose'
 const { model } = mongoose
 
-import { pickRandomNum } from '../utils.js'
 import { createTestDocs } from '../test-utils.js'
 import Page from './page.js'
 import User from './user.js'
