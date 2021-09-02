@@ -1,6 +1,7 @@
 import smartquotes from 'smartquotes'
 
 import { pickRandom } from '../utils.js'
+import { pickRandom, union } from '../utils.js'
 
 import config from '../config/index.js'
 
@@ -82,6 +83,38 @@ PageSchema.methods.findCodename = function () {
     let key = `Secret${num.toString().padStart(4, '0')}`
     if (!used.includes(key)) return key
     num++
+  }
+}
+
+/**
+ * Process new secrets provided to the page in an update.
+ * @param {{}} secrets - An object in which each property is named with a
+ *   codename that will be used to identify the secret. Each property should be
+ *   an object with a `content` property of its own, providing a string that is
+ *   the content of the secret.
+ * @param {User} editor - The person making this update.
+ */
+
+PageSchema.methods.processSecrets = function (secrets, editor) {
+  const { list } = this.secrets
+  const updatedCodenames = Object.keys(secrets)
+  const codenames = union(list.map(s => s.codename), updatedCodenames)
+  for (const codename of codenames) {
+    const filtered = list.filter(s => s.codename === codename)
+    const existing = filtered.length > 0 ? filtered[0] : null
+    const inUpdate = updatedCodenames.includes(codename)
+    const editorKnows = (existing && existing.knowers.includes(editor._id)) || !existing
+    if (existing && inUpdate && editorKnows) {
+      existing.content = secrets[codename].content
+    } else if (existing && !inUpdate && editorKnows) {
+      list.pull({ _id: existing._id })
+    } else if (!existing) {
+      list.addToSet({
+        codename,
+        content: secrets[codename].content,
+        knowers: [editor._id]
+      })
+    }
   }
 }
 
