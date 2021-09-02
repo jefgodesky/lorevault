@@ -35,13 +35,13 @@ describe('Page', () => {
         expect(page.findCodename()).to.be.a('string')
       })
 
-      it('can produce 200 codenames', async () => {
+      it('can produce 110 codenames', async () => {
         const { page } = await createTestDocs(model)
-        for (let i = 0; i < 200; i++) {
+        for (let i = 0; i < 110; i++) {
           const codename = page.findCodename()
           page.secrets.list.push({ codename, content: 'Test', knowers: [] })
         }
-        expect(page.secrets.list).to.have.lengthOf(200)
+        expect(page.secrets.list).to.have.lengthOf(110)
       })
     })
 
