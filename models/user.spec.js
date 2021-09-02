@@ -1,5 +1,11 @@
 import { expect } from 'chai'
+
+import mongoose from 'mongoose'
+const { model } = mongoose
+
+import { createTestDocs } from '../test-utils.js'
 import User from './user.js'
+import Page from './page.js'
 
 describe('User', () => {
   describe('methods', () => {
@@ -29,6 +35,62 @@ describe('User', () => {
         expect(actual).to.be.true
         expect(user.login.google).to.be.undefined
         expect(user.login.discord).not.to.be.undefined
+      })
+    })
+
+    describe('claim', () => {
+      it('claims a character', async () => {
+        const { page, user } = await createTestDocs(model)
+        await user.claim(page)
+        expect(user.characters.list).to.have.lengthOf(1)
+      })
+
+      it('makes it the active character if you didn\'t have one before', async () => {
+        const { page, user } = await createTestDocs(model)
+        await user.claim(page)
+        expect(user.characters.active._id).to.be.equal(user.characters.list[0]._id)
+      })
+
+      it('leaves your active character alone if you have one', async () => {
+        const { page, user } = await createTestDocs(model)
+        await user.claim(page)
+        const charPage = await Page.create({ title: 'Character Page', body: 'Hello, world!' }, user)
+        await user.claim(charPage)
+        expect(user.characters.active._id).to.be.equal(user.characters.list[0]._id)
+      })
+
+      it('sets your POV if you were previously anonymous', async () => {
+        const { page, user } = await createTestDocs(model)
+        await user.claim(page)
+        expect(user.pov).to.be.equal('Character')
+      })
+
+      it('won\'t let you claim someone else\'s character', async () => {
+        const { page, user, other } = await createTestDocs(model)
+        await user.claim(page)
+        await other.claim(page)
+        expect(other.characters.list).to.have.lengthOf(0)
+      })
+
+      it('returns false if someone else has already claimed this character', async () => {
+        const { page, user, other } = await createTestDocs(model)
+        await user.claim(page)
+        const res = await other.claim(page)
+        expect(res).to.be.false
+      })
+
+      it('leaves your active character alone if you failed to claim the character', async () => {
+        const { page, user, other } = await createTestDocs(model)
+        await user.claim(page)
+        await other.claim(page)
+        expect(other.characters.active).to.be.undefined
+      })
+
+      it('leaves your POV alone if you failed to claim the character', async () => {
+        const { page, user, other } = await createTestDocs(model)
+        await user.claim(page)
+        await other.claim(page)
+        expect(other.pov).to.be.equal('Anonymous')
       })
     })
   })
