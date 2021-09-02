@@ -23,6 +23,25 @@ const roll = (params = {}) => {
   return !isNaN(floor) ? Math.max(natural, floor) + modifier : natural + modifier
 }
 
+/**
+ * Make a roll and see if it is greater than or equal to the dificulty class
+ * (DC) specified.
+ * @param {number} dc - The difficulty class for the check.
+ * @param {{}} params - Parameters for the roll.
+ * @param {number} modifier - The modifier to add to the roll.
+ * @param {number} floor - If you have a special ability that provides a
+ *   minimum value that you can roll, provide that value here.
+ * @param {boolean} adv - If you have advantage on this roll, provide `true`
+ *   to this parameter.
+ * @param {boolean} dis - If you have disadvantage on this roll, provide `true`
+ *   to this parameter.
+ * @returns {number} - The result of your roll.
+ */
+
+const check = (dc, params) => {
+  return roll(params) >= dc
+}
+
 const info = {
   id: 'dnd5e',
   name: 'Dungeons & Dragons',
@@ -68,5 +87,6 @@ const info = {
 
 export {
   info,
-  roll
+  roll,
+  check
 }

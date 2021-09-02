@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { info, roll } from './dnd5e.js'
+import { info, roll, check } from './dnd5e.js'
 
 describe('dnd5e', () => {
   describe('info', () => {
@@ -58,6 +58,16 @@ describe('dnd5e', () => {
       const res = roll({ floor: 10 })
       expect(res).to.be.least(10)
       expect(res).to.be.most(20)
+    })
+  })
+
+  describe('check', () => {
+    it('returns true if you roll higher than or equal to the DC', () => {
+      expect(check(1)).to.be.true
+    })
+
+    it('returns false if you roll lower than the DC', () => {
+      expect(check(21)).to.be.false
     })
   })
 })
