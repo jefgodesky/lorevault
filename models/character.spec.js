@@ -43,6 +43,21 @@ describe('Character', () => {
   })
 
   describe('statics', () => {
+    describe('isClaimed', () => {
+      it('returns the character\'s player if there is a character', async () => {
+        const { page, user } = await createTestDocs(model)
+        await Character.create(page, user)
+        const check = await Character.isClaimed(page)
+        expect(check._id).to.be.eql(user._id)
+      })
+
+      it('returns false if the page is not connected to a character', async () => {
+        const { page, user } = await createTestDocs(model)
+        const check = await Character.isClaimed(page)
+        expect(check).to.be.false
+      })
+    })
+
     describe('create', () => {
       it('it creates a new character', async () => {
         const char = await Character.create()

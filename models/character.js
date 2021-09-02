@@ -70,6 +70,26 @@ CharacterSchema.methods.update = async function (page, player, stats) {
 }
 
 /**
+ * Checks to see if the given page belongs to a character. If so, the method
+ * returns the user who has claimed that character. If no one has claimed any
+ * character associated with this page, the method returns `false`.
+ * @param {Page|Schema.Types.ObjectId|string} page - The page for which you'd
+ *   like to check for any characters (or its ID, or the string representation
+ *   of its ID).
+ * @returns {Promise<User|boolean>} - The User who has claimed the character
+ *   associated with the given page, or `false` if no such user exists.
+ */
+
+CharacterSchema.statics.isClaimed = async function (page) {
+  const Character = model('Character')
+  const id = page?._id || page
+  if (!id) return false
+  const char = await Character.findOne({ page: id }).populate('player')
+  if (char) return char.player
+  return false
+}
+
+/**
  * Create a new character.
  * @param {Page|Schema.Types.ObjectId|string} page - The character's page
  *   document (or its ID, or the string representation of its ID).
