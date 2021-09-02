@@ -6,6 +6,16 @@ const UserSchema = new Schema({
   login: {
     google: String,
     discord: String
+  },
+  characters: {
+    active: {
+      type: Schema.Types.ObjectId,
+      ref: 'Character'
+    },
+    list: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Character'
+    }]
   }
 })
 
