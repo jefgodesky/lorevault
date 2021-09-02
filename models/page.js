@@ -1,4 +1,10 @@
 import smartquotes from 'smartquotes'
+
+import assignCodenames from '../transformers/assignCodenames.js'
+import { pickRandom, union, findOne } from '../utils.js'
+
+import config from '../config/index.js'
+
 import mongoose from 'mongoose'
 const { Schema, model } = mongoose
 
@@ -19,6 +25,15 @@ const VersionSchema = new Schema(Object.assign({}, ContentSchema, {
   }
 }))
 
+const SecretSchema = new Schema({
+  codename: String,
+  content: String,
+  knowers: [{
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }]
+})
+
 const PageSchema = new Schema({
   title: String,
   path: String,
@@ -29,6 +44,17 @@ const PageSchema = new Schema({
   modified: {
     type: Date,
     default: Date.now
+  },
+  secrets: {
+    existence: {
+      type: Boolean,
+      default: false
+    },
+    knowers: [{
+      type: Schema.Types.ObjectId,
+      ref: 'User'
+    }],
+    list: [SecretSchema]
   },
   versions: [VersionSchema]
 })
@@ -41,6 +67,64 @@ PageSchema.pre('save', function (next) {
   this.modified = Date.now()
   next()
 })
+
+/**
+ * Finds an acceptable new codename.
+ * @returns {string} - A string that has not yet been used as a codename for
+ *   any of the secrets for this page.
+ */
+
+PageSchema.methods.findCodename = function () {
+  const used = this.secrets.list.map(s => s.codename)
+  const unused = config.codenames.filter(c => !used.includes(c))
+  if (unused.length > 0) return pickRandom(config.codenames.filter(c => !used.includes(c)))
+  let num = 1
+  while (true) {
+    let key = `Secret${num.toString().padStart(4, '0')}`
+    if (!used.includes(key)) return key
+    num++
+  }
+}
+
+/**
+ * Find a secret with the given codename.
+ * @param {string} codename - The codename of the secret that we want to find.
+ * @returns {{ codename: string, content: string,
+ *   knowers: [Schema.Types.ObjectId] }|null} - The secret with the given
+ *   codename if the page has a secret with that codename, or `null` if it
+ *   does not.
+ */
+
+PageSchema.methods.findSecret = function (codename) {
+  return findOne(this.secrets.list, s => s.codename === codename)
+}
+
+/**
+ * Process new secrets provided to the page in an update.
+ * @param {{}} secrets - An object in which each property is named with a
+ *   codename that will be used to identify the secret. Each property should be
+ *   an object with a `content` property of its own, providing a string that is
+ *   the content of the secret.
+ * @param {User} editor - The person making this update.
+ */
+
+PageSchema.methods.processSecrets = function (secrets, editor) {
+  const { list } = this.secrets
+  const updatedCodenames = Object.keys(secrets)
+  const codenames = union(list.map(s => s.codename), updatedCodenames)
+  for (const codename of codenames) {
+    const existing = this.findSecret(codename)
+    const inUpdate = updatedCodenames.includes(codename)
+    const editorKnows = (existing && existing.knowers.includes(editor._id)) || !existing
+    if (existing && inUpdate && editorKnows) {
+      existing.content = secrets[codename].content
+    } else if (existing && !inUpdate && editorKnows) {
+      list.pull({ _id: existing._id })
+    } else if (!existing) {
+      list.addToSet({ codename, content: secrets[codename].content, knowers: [editor._id] })
+    }
+  }
+}
 
 /**
  * Add a content update to the page's versions and then save the page.
@@ -57,8 +141,11 @@ PageSchema.pre('save', function (next) {
  */
 
 PageSchema.methods.update = async function (content, editor) {
+  const codenamer = this.findCodename.bind(this)
+  const { str, secrets } = assignCodenames(smartquotes(content.body), codenamer)
+  this.processSecrets(secrets, editor)
   content.title = smartquotes(content.title)
-  content.body = smartquotes(content.body)
+  content.body = str
   this.title = content.title
   this.versions.push(Object.assign({}, content, { editor: editor._id }))
   await this.save()
