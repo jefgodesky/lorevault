@@ -113,8 +113,7 @@ PageSchema.methods.processSecrets = function (secrets, editor) {
   const updatedCodenames = Object.keys(secrets)
   const codenames = union(list.map(s => s.codename), updatedCodenames)
   for (const codename of codenames) {
-    const filtered = list.filter(s => s.codename === codename)
-    const existing = filtered.length > 0 ? filtered[0] : null
+    const existing = this.findSecret(codename)
     const inUpdate = updatedCodenames.includes(codename)
     const editorKnows = (existing && existing.knowers.includes(editor._id)) || !existing
     if (existing && inUpdate && editorKnows) {
@@ -122,11 +121,7 @@ PageSchema.methods.processSecrets = function (secrets, editor) {
     } else if (existing && !inUpdate && editorKnows) {
       list.pull({ _id: existing._id })
     } else if (!existing) {
-      list.addToSet({
-        codename,
-        content: secrets[codename].content,
-        knowers: [editor._id]
-      })
+      list.addToSet({ codename, content: secrets[codename].content, knowers: [editor._id] })
     }
   }
 }
