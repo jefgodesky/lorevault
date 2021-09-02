@@ -1,6 +1,6 @@
 import smartquotes from 'smartquotes'
 
-import { pickRandom } from '../utils.js'
+import assignCodenames from '../transformers/assignCodenames.js'
 import { pickRandom, union } from '../utils.js'
 
 import config from '../config/index.js'
@@ -133,8 +133,11 @@ PageSchema.methods.processSecrets = function (secrets, editor) {
  */
 
 PageSchema.methods.update = async function (content, editor) {
+  const codenamer = this.findCodename.bind(this)
+  const { str, secrets } = assignCodenames(smartquotes(content.body), codenamer)
+  this.processSecrets(secrets, editor)
   content.title = smartquotes(content.title)
-  content.body = smartquotes(content.body)
+  content.body = str
   this.title = content.title
   this.versions.push(Object.assign({}, content, { editor: editor._id }))
   await this.save()

@@ -142,6 +142,18 @@ describe('Page', () => {
         const actual = await page.update({ title: 'After', body: 'This is the updated text.' }, user)
         expect(actual.versions[1].timestamp).to.be.least(start)
       })
+
+      it('assigns codenames to secrets', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = await page.update({ title: page.title, body: '||This is a secret.||' }, user)
+        expect(actual.versions[1].body.match(/||::.*?::|| This is a secret\.||/)).not.to.be.undefined
+      })
+
+      it('records secrets', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = await page.update({ title: page.title, body: '||This is a secret.||' }, user)
+        expect(actual.versions[1].body.match(/||::.*?::|| This is a secret\.||/)).not.to.be.undefined
+      })
     })
   })
 
