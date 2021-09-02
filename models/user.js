@@ -7,6 +7,11 @@ const UserSchema = new Schema({
     google: String,
     discord: String
   },
+  pov: {
+    type: String,
+    enum: ['Anonymous', 'Character', 'Loremaster'],
+    default: 'Anonymous'
+  },
   characters: {
     active: {
       type: Schema.Types.ObjectId,
