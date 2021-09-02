@@ -19,8 +19,9 @@ const assignCodenames = (str, codenamer) => {
     const codenameMatch = inside.match(/::(.*?)::/)
     const codename = codenameMatch && codenameMatch.length > 1 ? codenameMatch[1] : codenamer(secrets)
     const content = inside.replace(/::.*?::/, '').trim()
+    const newInside = String(`::${codename}:: ${content}`).trim()
     secrets[codename] = { content }
-    str = str.replace(match, `||::${codename}:: ${content}||`)
+    str = str.replace(match, `||${newInside}||`)
   }
   return { str, secrets }
 }
