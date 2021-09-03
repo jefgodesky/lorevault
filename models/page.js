@@ -170,9 +170,8 @@ PageSchema.methods.reveal = async function (char, codename = null) {
 PageSchema.methods.knows = function (char, codename) {
   const secret = this.findSecret(codename)
   if (!secret) return true
-  const { knowers } = this.findSecret(codename)
   const id = char?._id || char
-  return knowers.includes(id)
+  return secret.knowers.includes(id)
 }
 
 /**
