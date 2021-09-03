@@ -111,6 +111,33 @@ describe('Page', () => {
       })
     })
 
+    describe('reveal', () => {
+      it('reveals a secret to a character', async () => {
+        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        await page.reveal(user.characters.active, 'Wombat')
+        expect(page.secrets.list[0].knowers).to.include(user.characters.active._id)
+      })
+
+      it('returns true when the secret is revealed', async () => {
+        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const res = await page.reveal(user.characters.active, 'Wombat')
+        expect(res).to.be.true
+      })
+
+      it('can reveal the page', async () => {
+        const { page, user } = await createTestDocs(model)
+        page.secrets.existence = true
+        await page.reveal(user.characters.active)
+        expect(page.secrets.knowers).to.include(user.characters.active._id)
+      })
+
+      it('returns false when there\'s no such secret to reveal', async () => {
+        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const res = await page.reveal(user.characters.active, 'Aardvark')
+        expect(res).to.be.false
+      })
+    })
+
     describe('update', () => {
       it('returns a page', async () => {
         const { page, user } = await createTestDocs(model)

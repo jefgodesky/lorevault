@@ -127,6 +127,31 @@ PageSchema.methods.processSecrets = function (secrets, editor) {
 }
 
 /**
+ * Reveal a secret to a character.
+ * @param {Character|Schema.Types.ObjectId|string} char - The character that
+ *   you would like to reveal the secret to (or hens ID, or the string
+ *   representation of hens ID).
+ * @param {string} [codename = null] - The codename of the secret that you
+ *   would like to reveal to the character `char`. If the page itself is a
+ *   secret, and you set this argument to a falsy value (`false`, `null`, etc.)
+ *   then the secret to reveal is the existence of the page.
+ * @returns {Promise<boolean>} - A Promise that resolves with `true` once the
+ *   character has been added to the list of those who know the secret
+ *   indicated, or `false` if there is no such secret to reveal.
+ */
+
+PageSchema.methods.reveal = async function (char, codename = null) {
+  const { existence } = this.secrets
+  const id = char?._id || char
+  const secret = codename ? this.findSecret(codename) : null
+  const knowers = secret ? secret.knowers : existence && !codename ? this.secrets.knowers : false
+  if (!knowers) return false
+  knowers.addToSet(id)
+  await this.save()
+  return true
+}
+
+/**
  * Add a content update to the page's versions and then save the page.
  * @param {object} content - An object containing the content to be added as
  *   the new version.
