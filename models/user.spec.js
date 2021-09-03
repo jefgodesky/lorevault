@@ -95,6 +95,23 @@ describe('User', () => {
       })
     })
 
+    describe('getPOV', () => {
+      it('returns "Anonymous" if that\'s your POV', async () => {
+        const { other } = await createTestDocs(model)
+        expect(other.getPOV()).to.be.equal('Anonymous')
+      })
+
+      it('returns the user\'s active character if hens POV is "Character"', async () => {
+        const { user } = await createTestDocs(model)
+        expect(user.getPOV()).to.be.equal(user.characters.active)
+      })
+
+      it('returns "Loremaster" if that\'s your POV', async () => {
+        const { loremaster } = await createTestDocs(model)
+        expect(loremaster.getPOV()).to.be.equal('Loremaster')
+      })
+    })
+
     describe('release', () => {
       it('releases a character you claimed', async () => {
         const { page, user } = await createTestDocs(model)

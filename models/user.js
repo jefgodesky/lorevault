@@ -83,6 +83,19 @@ UserSchema.methods.claim = async function (page, stats) {
 }
 
 /**
+ * Returns the user's current point of view (POV).
+ * @returns {Character|string} - The string `Anonymous` if that's the user's
+ *   current point of view, or the string `Loremaster` if that is, or the
+ *   user's active character, if hens current point of view is "Character."
+ */
+
+UserSchema.methods.getPOV = function () {
+  const selfDescriptive = [ 'Anonymous', 'Loremaster' ]
+  if (selfDescriptive.includes(this.pov)) return this.pov
+  return this.characters.active
+}
+
+/**
  * Release your claim on a character.
  * @param {Character|Schema.Types.ObjectId|string} char - The character that
  *   you would like to release (or its ID, or the string representation of
