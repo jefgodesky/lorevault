@@ -82,4 +82,32 @@ UserSchema.methods.claim = async function (page, stats) {
   return true
 }
 
+/**
+ * Release your claim on a character.
+ * @param {Character|Schema.Types.ObjectId|string} char - The character that
+ *   you would like to release (or its ID, or the string representation of
+ *   its ID).
+ * @returns {Promise<boolean>} - A Promise that resolves with your account once
+ *   the character record has been deleted, removed from your account, and all
+ *   changes have been saved to the database.
+ */
+
+UserSchema.methods.release = async function (char) {
+  const _id = char?._id || char
+  if (this.characters.active._id.toString() === _id.toString()) this.characters.active = undefined
+  this.characters.list.pull({ _id })
+
+  const inactive = this.characters.active === undefined
+  const noCharacters = this.characters.list.length < 1
+  const hasCharacterPOV = this.pov === 'Character'
+  if (inactive && !noCharacters) this.characters.active = this.characters.list[0]
+  if (inactive && noCharacters && hasCharacterPOV) this.pov = 'Anonymous'
+
+  const Character = model('Character')
+  await Character.deleteOne(_id)
+
+  await this.save()
+  return this
+}
+
 export default model('User', UserSchema)

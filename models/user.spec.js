@@ -6,6 +6,7 @@ const { model } = mongoose
 import { createTestDocs } from '../test-utils.js'
 import User from './user.js'
 import Page from './page.js'
+import Character from './character.js'
 
 describe('User', () => {
   describe('methods', () => {
@@ -91,6 +92,63 @@ describe('User', () => {
         await user.claim(page)
         await other.claim(page)
         expect(other.pov).to.be.equal('Anonymous')
+      })
+    })
+
+    describe('release', () => {
+      it('releases a character you claimed', async () => {
+        const { page, user } = await createTestDocs(model)
+        await user.claim(page)
+        await user.release(user.characters.list[0])
+        expect(user.characters.list).to.be.empty
+      })
+
+      it('can release your active character', async () => {
+        const { page, user } = await createTestDocs(model)
+        await user.claim(page)
+        await user.release(user.characters.list[0])
+        expect(user.characters.active).to.be.undefined
+      })
+
+      it('sets your active character to the first one remaining in your list', async () => {
+        const { page, user } = await createTestDocs(model)
+        await user.claim(page)
+        const charPage = await Page.create({ title: 'Character Page', body: 'Hello, world!' }, user)
+        await user.claim(charPage)
+        await user.release(user.characters.list[0])
+        expect(user.characters.active._id).to.be.equal(user.characters.list[0]._id)
+      })
+
+      it('shifts your POV to anonymous if it was "Character" and you just released your last one', async () => {
+        const { page, user } = await createTestDocs(model)
+        await user.claim(page)
+        await user.release(user.characters.list[0])
+        expect(user.pov).to.be.equal('Anonymous')
+      })
+
+      it('doesn\'t touch your POV if it\'s "Loremaster"', async () => {
+        const { page, user } = await createTestDocs(model)
+        await user.claim(page)
+        user.pov = 'Loremaster'
+        expect(user.pov).to.be.equal('Loremaster')
+      })
+
+      it('doesn\'t touch your POV if you still have characters', async () => {
+        const { page, user } = await createTestDocs(model)
+        await user.claim(page)
+        const charPage = await Page.create({ title: 'Character Page', body: 'Hello, world!' }, user)
+        await user.claim(charPage)
+        await user.release(user.characters.list[0])
+        expect(user.pov).to.be.equal('Character')
+      })
+
+      it('deletes the character from the database', async () => {
+        const { page, user } = await createTestDocs(model)
+        await user.claim(page)
+        const id = user.characters.active._id
+        await user.release(user.characters.list[0])
+        const check = await Character.findById(id)
+        expect(check).to.be.null
       })
     })
   })
