@@ -42,6 +42,11 @@ const PageSchema = new Schema({
     slug: 'title',
     unique: true
   },
+  categories: [{
+    name: String,
+    sort: String,
+    secret: String
+  }],
   created: {
     type: Date,
     default: Date.now
