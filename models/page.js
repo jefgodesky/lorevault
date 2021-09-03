@@ -78,6 +78,18 @@ PageSchema.methods.getCurr = function () {
 }
 
 /**
+ * Return the version of the page with the matching ID.
+ * @param {Schema.Types.ObjectID|string} id - The ID of the version you want to
+ *   find, or a string representation of it.
+ * @returns {Version|null} - The version with the given ID if it exists, or
+ *   `null` if it does not.
+ */
+
+PageSchema.methods.getVersion = function (id) {
+  return findOne(this.versions, v => v._id === id)
+}
+
+/**
  * Finds an acceptable new codename.
  * @returns {string} - A string that has not yet been used as a codename for
  *   any of the secrets for this page.

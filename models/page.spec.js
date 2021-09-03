@@ -37,6 +37,14 @@ describe('Page', () => {
       })
     })
 
+    describe('getVersion', () => {
+      it('returns specified version of the page', async () => {
+        const { page, user } = await createTestDocs(model)
+        await page.update({ title: 'Test Page', body: 'This is an updated page.' }, user)
+        expect(page.getVersion(page.versions[0]._id).body).to.be.equal(page.versions[0].body)
+      })
+    })
+
     describe('findCodename', () => {
       it('returns a random codename', async () => {
         const { page } = await createTestDocs(model)
