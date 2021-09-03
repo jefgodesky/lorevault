@@ -55,6 +55,17 @@ describe('Page', () => {
         const { page } = await createTestDocs(model)
         expect(page.findSecret('Wombat')).to.be.null
       })
+
+      it('returns who knows about the page if it\'s a secret and you provide a falsy codename', async () => {
+        const { page } = await createTestDocs(model)
+        page.secrets.existence = true
+        expect(page.findSecret().knowers).to.be.eql([])
+      })
+
+      it('returns null if you provide a falsy codename but the page isn\'t a secret', async () => {
+        const { page } = await createTestDocs(model)
+        expect(page.findSecret()).to.be.null
+      })
     })
 
     describe('processSecrets', () => {
