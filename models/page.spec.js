@@ -385,6 +385,34 @@ describe('Page', () => {
         const actual = await page.update({ title: page.title, body: '||This is a secret.||' }, user)
         expect(actual.versions[1].body.match(/||::.*?::|| This is a secret\.||/)).not.to.be.undefined
       })
+
+      it('lets you delete secrets if you know them', async () => {
+        const { page, user } = await createTestDocs(model)
+        await page.update({ title: page.title, body: '||This is a secret.||' }, user)
+        await page.update({ title: page.title, body: 'This is some updated text.' }, user)
+        expect(page.secrets.list).to.be.empty
+      })
+
+      it('lets you delete secrets from the text if you know them', async () => {
+        const { page, user } = await createTestDocs(model)
+        await page.update({ title: page.title, body: '||This is a secret.||' }, user)
+        await page.update({ title: page.title, body: 'This is some updated text.' }, user)
+        expect(page.getCurr().body).to.be.equal('This is some updated text.')
+      })
+
+      it('won\'t let you delete secrets that you don\'t know', async () => {
+        const { page, user, other } = await createTestDocs(model)
+        await page.update({ title: page.title, body: '||This is a secret.||' }, user)
+        await page.update({ title: page.title, body: 'This is some updated text.' }, other)
+        expect(page.secrets.list).to.have.lengthOf(1)
+      })
+
+      it('won\'t let you delete secrets that you don\'t know from the text', async () => {
+        const { page, user, other } = await createTestDocs(model)
+        await page.update({ title: page.title, body: '||::Wombat:: This is a secret.||' }, user)
+        await page.update({ title: page.title, body: 'This is some updated text.' }, other)
+        expect(page.getCurr().body).to.be.equal('This is some updated text.\n\n||::Wombat:: This is a secret.||')
+      })
     })
   })
 

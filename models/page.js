@@ -293,7 +293,7 @@ PageSchema.methods.update = async function (content, editor) {
   const { str, secrets } = assignCodenames(smartquotes(content.body), codenamer)
   this.processSecrets(secrets, editor)
   content.title = smartquotes(content.title)
-  content.body = str
+  content.body = this.write({ str, pov: editor.getPOV(), mode: 'full' })
   this.title = content.title
   this.versions.push(Object.assign({}, content, { editor: editor._id }))
   await this.save()
