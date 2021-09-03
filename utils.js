@@ -67,10 +67,32 @@ const findOne = (arr, fn) => {
   return filtered.length > 0 ? filtered[0] : null
 }
 
+/**
+ * Wrap a Mongoose query on the Page model in typical safeguards to protect
+ * secret pages. For an anonymous searcher, show only pages that aren't secret
+ * at all. For searchers seeing the wiki from a character's point of view, show
+ * only those pages that aren't a secret at all, or that the POV character
+ * knows about. For loremasters, show everything.
+ * @param {{}} orig - The Mongoose query object.
+ * @param {User} searcher - The User who's conducting the search.
+ * @returns {{}} - A modified Mongoose query object that takes Page secrecy and
+ *   the user's point of view into account.
+ */
+
+const makeDiscreteQuery = (orig, searcher) => {
+  const pov = searcher.getPOV()
+  return pov === 'Loremaster'
+    ? orig
+    : pov === 'Anonymous'
+      ? { $and: [orig, { 'secrets.existence': false }] }
+      : { $and: [orig, { $or: [{ 'secrets.existence': false }, { 'secrets.knowers': pov._id }] }] }
+}
+
 export {
   pickRandomNum,
   pickRandom,
   union,
   intersection,
-  findOne
+  findOne,
+  makeDiscreteQuery
 }
