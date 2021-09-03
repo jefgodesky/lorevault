@@ -1,5 +1,15 @@
 import { expect } from 'chai'
-import { pickRandomNum, pickRandom, union, intersection, findOne } from './utils.js'
+import mongoose from 'mongoose'
+const { model } = mongoose
+import { createTestDocs } from './test-utils.js'
+import {
+  pickRandomNum,
+  pickRandom,
+  union,
+  intersection,
+  findOne,
+  makeDiscreteQuery
+} from './utils.js'
 
 describe('pickRandomNum', () => {
   it('returns a number less than or equal to the maximum provided', () => {
@@ -71,5 +81,23 @@ describe('findOne', () => {
   it('returns null if nothing matches', () => {
     const arr = [{ code: 'blue', num: 1 }, { code: 'red', num: 2 }, { code: 'red', num: 3 }]
     expect(findOne(arr, el => el.code === 'yellow')).to.be.null
+  })
+})
+
+describe('makeDiscreteQuery', () => {
+  it('returns the search object for a loremaster', async () => {
+    const { loremaster } = await createTestDocs(model)
+    expect(makeDiscreteQuery({ test: 42 }, loremaster)).to.be.eql({ test: 42 })
+  })
+
+  it('adds that the page can\'t be a secret if you\'re anonymous', async () => {
+    const { other } = await createTestDocs(model)
+    expect(JSON.stringify(makeDiscreteQuery({ test: 42 }, other))).to.be.eql('{"$and":[{"test":42},{"secrets.existence":false}]}')
+  })
+
+  it('adds conditions if your character is your POV', async () => {
+    const { user } = await createTestDocs(model)
+    const { _id } = user.characters.active
+    expect(JSON.stringify(makeDiscreteQuery({ test: 42 }, user))).to.be.eql(`{"$and":[{"test":42},{"$or":[{"secrets.existence":false},{"secrets.knowers":"${_id}"}]}]}`)
   })
 })

@@ -10,9 +10,31 @@ describe('createTestDocs', () => {
     expect(user.constructor.modelName).to.be.equal('User')
   })
 
+  it('gives the user two character', async () => {
+    const { user } = await createTestDocs(model)
+    expect(user.characters.list).to.have.lengthOf(2)
+  })
+
+  it('gives the user an active character', async () => {
+    const { user } = await createTestDocs(model)
+    const { active, list } = user.characters
+    expect(active._id).to.be.eql(list[0]._id)
+  })
+
+  it('gives the user\'s POV to "Character"', async () => {
+    const { user } = await createTestDocs(model)
+    expect(user.pov).to.be.equal('Character')
+  })
+
   it('creates a second user', async () => {
     const { other } = await createTestDocs(model)
     expect(other.constructor.modelName).to.be.equal('User')
+  })
+
+  it('creates a loremaster', async () => {
+    const { loremaster } = await createTestDocs(model)
+    const actual = `${loremaster.pov} ${loremaster.constructor.modelName}`
+    expect(actual).to.be.equal('Loremaster User')
   })
 
   it('creates two distinct users', async () => {
