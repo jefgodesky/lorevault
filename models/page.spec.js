@@ -9,6 +9,19 @@ import User from './user.js'
 
 describe('Page', () => {
   describe('Presave', () => {
+    describe('Paths', () => {
+      it('creates a slug from the page\'s title', async () => {
+        const { page } = await createTestDocs(model)
+        expect(page.path).to.be.equal('test-page')
+      })
+
+      it('adds a random suffix to make each path unique', async () => {
+        const { user } = await createTestDocs(model)
+        const page = await Page.create({ title: 'Test Page', body: 'This is the second page called Test Page.' }, user)
+        expect(page.path.startsWith('test-page-')).to.be.true
+      })
+    })
+
     describe('Created', () => {
       it('sets the created timestamp to the time when it is created', async () => {
         const start = new Date()

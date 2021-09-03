@@ -6,6 +6,7 @@ import { pickRandom, union, findOne } from '../utils.js'
 import config from '../config/index.js'
 
 import mongoose from 'mongoose'
+import slugger from 'mongoose-slug-generator'
 const { Schema, model } = mongoose
 
 const ContentSchema = {
@@ -36,7 +37,11 @@ const SecretSchema = new Schema({
 
 const PageSchema = new Schema({
   title: String,
-  path: String,
+  path: {
+    type: String,
+    slug: 'title',
+    unique: true
+  },
   created: {
     type: Date,
     default: Date.now
@@ -58,6 +63,8 @@ const PageSchema = new Schema({
   },
   versions: [VersionSchema]
 })
+
+PageSchema.plugin(slugger)
 
 /**
  * Update the modified date each time the page is saved.
