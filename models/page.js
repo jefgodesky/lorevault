@@ -69,6 +69,15 @@ PageSchema.pre('save', function (next) {
 })
 
 /**
+ * Return the most recent version of the page.
+ * @returns {Version} - The most recent version of the page.
+ */
+
+PageSchema.methods.getCurr = function () {
+  return this.versions[this.versions.length - 1]
+}
+
+/**
  * Finds an acceptable new codename.
  * @returns {string} - A string that has not yet been used as a codename for
  *   any of the secrets for this page.

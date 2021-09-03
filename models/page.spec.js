@@ -29,6 +29,14 @@ describe('Page', () => {
   })
 
   describe('methods', () => {
+    describe('getCurr', () => {
+      it('returns the most recent version of the page', async () => {
+        const { page, user } = await createTestDocs(model)
+        await page.update({ title: 'Test Page', body: 'This is an updated page.' }, user)
+        expect(page.getCurr().body).to.be.equal('This is an updated page.')
+      })
+    })
+
     describe('findCodename', () => {
       it('returns a random codename', async () => {
         const { page } = await createTestDocs(model)
