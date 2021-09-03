@@ -138,6 +138,52 @@ describe('Page', () => {
       })
     })
 
+    describe('getSecrets', () => {
+      it('returns an object for each secret', async () => {
+        const { page } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const actual = page.getSecrets()
+        expect(actual).to.have.lengthOf(1)
+      })
+
+      it('provides the codenames for each secret', async () => {
+        const { page } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const actual = page.getSecrets()
+        expect(actual.map(s => s.codename)).to.be.eql(['Wombat'])
+      })
+
+      it('provides the contents of each secret', async () => {
+        const { page } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const actual = page.getSecrets('Anonymous')
+        expect(actual.map(s => s.content)).to.be.eql(['This is a secret.'])
+      })
+
+      it('indicates that anonymous doesn\'t know any secrets', async () => {
+        const { page } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const actual = page.getSecrets('Anonymous')
+        expect(actual[0].known).to.be.false
+      })
+
+      it('shows all secrets to a loremaster', async () => {
+        const { page } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const actual = page.getSecrets('Loremaster')
+        expect(actual[0].known).to.be.true
+      })
+
+      it('says if you don\'t know a secret', async () => {
+        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const actual = page.getSecrets(user.getPOV())
+        expect(actual[0].known).to.be.false
+      })
+
+      it('says if you know a secret', async () => {
+        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const pov = user.getPOV()
+        await page.reveal(pov, 'Wombat')
+        const actual = page.getSecrets(user.getPOV())
+        expect(actual[0].known).to.be.true
+      })
+    })
+
     describe('reveal', () => {
       it('reveals a secret to a character', async () => {
         const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')

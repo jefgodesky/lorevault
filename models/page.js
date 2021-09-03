@@ -150,6 +150,30 @@ PageSchema.methods.processSecrets = function (secrets, editor) {
 }
 
 /**
+ * Return a mapping of all of the page's secrets. Each object has a `codename`
+ * property, but it will only have a `content` property if the point of view
+ * (`pov`) provided is one that knows the secret.
+ * @param {Character|string} [pov = 'Anonymous'] - The point of view of the
+ *   person asking for the secrets. If given the string `Loremaster`, you'll
+ *   know all of the secrets. If given the string `Anonymous`, you won't know
+ *   any of them. Given a Character object, whether or not you know the secret
+ *   will depend on whether or not the given character is on the list of people
+ *   who know this secret.
+ * @returns {{codename: string, content: string, known: boolean}[]} - An array
+ *   of the page's secrets. The `codename` proeprty provides the codename used
+ *   to identify the string. The `content` property provides the actual text of
+ *   the secret. The `known` property is a boolean, which is `true` if the POV
+ *   provided knows this secret, or `false` if hen does not.
+ */
+
+PageSchema.methods.getSecrets = function (pov = 'Anonymous') {
+  return this.secrets.list.map(secret => {
+    const { codename, content, knowers } = secret
+    return { codename, content, known: pov === 'Loremaster' || knowers.includes(pov?._id) }
+  })
+}
+
+/**
  * Reveal a secret to a character.
  * @param {Character|Schema.Types.ObjectId|string} char - The character that
  *   you would like to reveal the secret to (or hens ID, or the string
