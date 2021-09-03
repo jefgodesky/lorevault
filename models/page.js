@@ -154,6 +154,28 @@ PageSchema.methods.reveal = async function (char, codename = null) {
 }
 
 /**
+ * Reports on whether the character `char` knows the secret identified by the
+ * given `codename`.
+ * @param {Character|Schema.Types.ObjectId|string} char - The character who
+ *   might (or might not) know the secret (or hens ID, or the string
+ *   representation of hens ID).
+ * @param {string} codename - The codename identifying the secret. If you
+ *   provide a falsy value (e.g., `false` or `null`) and the page itself is a
+ *   secret, then the secret the method reports on is the existence of the page
+ *   itself.
+ * @returns {boolean} - `true` if the character `char` knows the secret
+ *   identified by the given `codename`, or `false` if hen does not.
+ */
+
+PageSchema.methods.knows = function (char, codename) {
+  const secret = this.findSecret(codename)
+  if (!secret) return true
+  const { knowers } = this.findSecret(codename)
+  const id = char?._id || char
+  return knowers.includes(id)
+}
+
+/**
  * Add a content update to the page's versions and then save the page.
  * @param {object} content - An object containing the content to be added as
  *   the new version.

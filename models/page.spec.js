@@ -149,6 +149,41 @@ describe('Page', () => {
       })
     })
 
+    describe('knows', () => {
+      it('returns true if the character knows the secret', async () => {
+        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        expect(page.knows(user, 'Wombat')).to.be.true
+      })
+
+      it('returns true if there is no such secret secret', async () => {
+        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        expect(page.knows(user, 'Aardvark')).to.be.true
+      })
+
+      it('returns false if the character doesn\'t know the secret', async () => {
+        const { page, other } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        expect(page.knows(other, 'Wombat')).to.be.false
+      })
+
+      it('returns true if the character knows about the page and the page is a secret', async () => {
+        const { page, user } = await createTestDocs(model)
+        page.secrets.existence = true
+        page.secrets.knowers.addToSet(user._id)
+        expect(page.knows(user)).to.be.true
+      })
+
+      it('returns false if the character doesn\'t know about the page and the page is a secret', async () => {
+        const { page, user } = await createTestDocs(model)
+        page.secrets.existence = true
+        expect(page.knows(user)).to.be.false
+      })
+
+      it('returns true if the page isn\'t a secret', async () => {
+        const { page, user } = await createTestDocs(model)
+        expect(page.knows(user)).to.be.true
+      })
+    })
+
     describe('update', () => {
       it('returns a page', async () => {
         const { page, user } = await createTestDocs(model)
