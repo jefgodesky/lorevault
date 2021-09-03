@@ -3,8 +3,9 @@
  * @param {function} model - The Mongoose model function.
  * @param {string} [body='This is the original text.'] - The content that the
  *   page will be created with.
- * @returns {Promise<{user: User, other: User, page: Page}>} - A Promise that
- *   resolves with test documents that have been created in the database.
+ * @returns {Promise<{user: User, other: User, loremaster: User page: Page}>} -
+ *   A Promise that resolves with test documents that have been created in
+ *   the database.
  */
 
 const createTestDocs = async (model, body = 'This is the original text.') => {
@@ -12,12 +13,13 @@ const createTestDocs = async (model, body = 'This is the original text.') => {
   const User = model('User')
   const user = await User.create({ name: 'Tester 1' })
   const other = await User.create({ name: 'Tester 2' })
+  const loremaster = await User.create({ name: 'Loremaster', pov: 'Loremaster' })
   const page = await Page.create({ title: 'Test Page', body }, user)
   const char1 = await Page.create({ title: 'Character 1', body: 'This is about Character 1.' }, user)
   const char2 = await Page.create({ title: 'Character 2', body: 'This is about Character 2.' }, user)
   await user.claim(char1)
   await user.claim(char2)
-  return { user, other, page }
+  return { user, other, loremaster, page }
 }
 
 /**

@@ -31,6 +31,12 @@ describe('createTestDocs', () => {
     expect(other.constructor.modelName).to.be.equal('User')
   })
 
+  it('creates a loremaster', async () => {
+    const { loremaster } = await createTestDocs(model)
+    const actual = `${loremaster.pov} ${loremaster.constructor.modelName}`
+    expect(actual).to.be.equal('Loremaster User')
+  })
+
   it('creates two distinct users', async () => {
     const { user, other } = await createTestDocs(model)
     expect(user._id).not.to.be.equal(other._id)
