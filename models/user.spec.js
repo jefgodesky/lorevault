@@ -41,9 +41,9 @@ describe('User', () => {
 
     describe('claim', () => {
       it('claims a character', async () => {
-        const { page, user } = await createTestDocs(model)
-        await user.claim(page)
-        expect(user.characters.list).to.have.lengthOf(1)
+        const { page, other } = await createTestDocs(model)
+        await other.claim(page)
+        expect(other.characters.list).to.have.lengthOf(1)
       })
 
       it('makes it the active character if you didn\'t have one before', async () => {
@@ -114,17 +114,17 @@ describe('User', () => {
 
     describe('release', () => {
       it('releases a character you claimed', async () => {
-        const { page, user } = await createTestDocs(model)
-        await user.claim(page)
-        await user.release(user.characters.list[0])
-        expect(user.characters.list).to.be.empty
+        const { page, other } = await createTestDocs(model)
+        await other.claim(page)
+        await other.release(other.characters.list[0])
+        expect(other.characters.list).to.be.empty
       })
 
       it('can release your active character', async () => {
-        const { page, user } = await createTestDocs(model)
-        await user.claim(page)
-        await user.release(user.characters.list[0])
-        expect(user.characters.active).to.be.undefined
+        const { page, other } = await createTestDocs(model)
+        await other.claim(page)
+        await other.release(other.characters.list[0])
+        expect(other.characters.active).to.be.undefined
       })
 
       it('sets your active character to the first one remaining in your list', async () => {
@@ -137,10 +137,10 @@ describe('User', () => {
       })
 
       it('shifts your POV to anonymous if it was "Character" and you just released your last one', async () => {
-        const { page, user } = await createTestDocs(model)
-        await user.claim(page)
-        await user.release(user.characters.list[0])
-        expect(user.pov).to.be.equal('Anonymous')
+        const { page, other } = await createTestDocs(model)
+        await other.claim(page)
+        await other.release(other.characters.list[0])
+        expect(other.pov).to.be.equal('Anonymous')
       })
 
       it('doesn\'t touch your POV if it\'s "Loremaster"', async () => {
