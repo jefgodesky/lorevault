@@ -1,3 +1,6 @@
+import aws from 'aws-sdk'
+import config from './config/index.js'
+
 /**
  * Return a random number from an inclusive range.
  * @param {...number} numbers - Two or more numbers. A minimum and maximum are
@@ -157,6 +160,18 @@ const alphabetize = (arr, fn = el => el.toString()) => {
   })
 }
 
+/**
+ * Instantiate an S3 object, ready to handle interactions with the appropriate
+ * S3 bucket.
+ * @returns {S3} - An instantiated S3 object.
+ */
+
+const getS3 = () => {
+  const { endpoint, key, secret } = config.aws
+  aws.config.update({ endpoint, accessKeyId: key, secretAccessKey: secret })
+  return new aws.S3()
+}
+
 export {
   pickRandomNum,
   pickRandom,
@@ -166,5 +181,6 @@ export {
   makeDiscreteQuery,
   match,
   isInSecret,
-  alphabetize
+  alphabetize,
+  getS3
 }

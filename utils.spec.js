@@ -11,7 +11,8 @@ import {
   makeDiscreteQuery,
   match,
   isInSecret,
-  alphabetize
+  alphabetize,
+  getS3
 } from './utils.js'
 
 describe('pickRandomNum', () => {
@@ -152,5 +153,12 @@ describe('alphabetize', () => {
   it('can take a function to determine what to use for the strings', () => {
     const arr = [{ name: 'Boar' }, { name: 'Deer' }, { name: 'Coyote' }, { name: 'Ape' }]
     expect(alphabetize(arr, el => el.name)).to.be.eql([{ name: 'Ape' }, { name: 'Boar' }, { name: 'Coyote' }, { name: 'Deer' }])
+  })
+})
+
+describe('getS3', () => {
+  it('returns an S3 object', () => {
+    const actual = getS3()
+    expect(typeof actual.deleteObject).to.be.equal('function')
   })
 })
