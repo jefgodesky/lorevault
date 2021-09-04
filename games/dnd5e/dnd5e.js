@@ -35,11 +35,31 @@ const roll = (params = {}) => {
  *   to this parameter.
  * @param {boolean} dis - If you have disadvantage on this roll, provide `true`
  *   to this parameter.
- * @returns {number} - The result of your roll.
+ * @returns {boolean} - `true` if you roll higher than or equal to the
+ *   difficulty class (`dc`), or `false` if you don't.
  */
 
 const check = (dc, params) => {
   return roll(params) >= dc
+}
+
+/**
+ * Check if a secret should be revealed to the character.
+ * @param {object} stat - The statistic matched from the secret. This will be
+ *   one of the objects from `info.sheet` below.
+ * @param {string[]} match - The product of running `.match` on the secret with
+ *   the stat's `regex` property. This method is only called when a match is
+ *   found.
+ * @param {Character} char - The character that's checking.
+ * @returns {boolean} - `true` if the secret should be revealed to the
+ *   character (`char`), or `false` if hen failed the check.
+ */
+
+const checkSecret = (stat, match, char) => {
+  const modifier = char.dnd5e[stat.id]
+  const dc = match.length > 1 ? parseInt(match[1]) : null
+  if (isNaN(dc) || isNaN(modifier)) return false
+  return check(dc, { modifier })
 }
 
 const info = {
@@ -93,5 +113,6 @@ const info = {
 export {
   info,
   roll,
-  check
+  check,
+  checkSecret
 }

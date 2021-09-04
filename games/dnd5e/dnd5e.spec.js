@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { info, roll, check } from './dnd5e.js'
+import {info, roll, check, checkSecret} from './dnd5e.js'
 
 describe('dnd5e', () => {
   describe('info', () => {
@@ -68,6 +68,22 @@ describe('dnd5e', () => {
 
     it('returns false if you roll lower than the DC', () => {
       expect(check(21)).to.be.false
+    })
+  })
+
+  describe('checkSecret', () => {
+    it('returns true if you should learn the secret', () => {
+      const char = { dnd5e: { int: 3 } }
+      const secret = '[Intelligence DC 3]'
+      const match = secret.match(info.sheet[0].regex)
+      expect(checkSecret(info.sheet[0], match, char)).to.be.true
+    })
+
+    it('returns false if you should not learn the secret', () => {
+      const char = { dnd5e: { int: 3 } }
+      const secret = '[Intelligence DC 24]'
+      const match = secret.match(info.sheet[0].regex)
+      expect(checkSecret(info.sheet[0], match, char)).to.be.false
     })
   })
 })
