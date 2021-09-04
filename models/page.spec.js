@@ -3,6 +3,9 @@ import { expect } from 'chai'
 import mongoose from 'mongoose'
 const { model } = mongoose
 
+import config from '../config/index.js'
+
+import { pickRandom } from '../utils.js'
 import { createTestDocs } from '../test-utils.js'
 import Page from './page.js'
 import User from './user.js'
@@ -119,6 +122,57 @@ describe('Page', () => {
         const { page, user } = await createTestDocs(model, '||[[Category:Test]]||')
         const actual = page.getCategorization('Test', user)
         expect(actual.name).to.be.equal('Test')
+      })
+    })
+
+    describe('getFile', () => {
+      it('returns null if the page doesn\'t have a file', async () => {
+        const { page } = await createTestDocs(model)
+        const file = page.getFile()
+        expect(file).to.be.null
+      })
+
+      it('returns null if the page\'s file doesn\'t have a URL', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { size: 42 }
+        const file = page.getFile()
+        expect(file).to.be.null
+      })
+
+      it('returns the page\'s URL', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://cdn.com/test', mimetype: 'text/plain', size: 42 }
+        const file = page.getFile()
+        expect(file.url).to.be.equal('https://cdn.com/test')
+      })
+
+      it('returns the page\'s MIME type', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://cdn.com/test', mimetype: 'text/plain', size: 42 }
+        const file = page.getFile()
+        expect(file.mimetype).to.be.equal('text/plain')
+      })
+
+      it('returns the page\'s size', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://cdn.com/test', mimetype: 'text/plain', size: 42 }
+        const file = page.getFile()
+        expect(file.size).to.be.equal(42)
+      })
+
+      it('indicates the display indicated in the configuration', async () => {
+        const { page } = await createTestDocs(model)
+        const mimetype = pickRandom(Object.keys(config.fileDisplay))
+        page.file = { url: 'https://cdn.com/test', mimetype, size: 42 }
+        const file = page.getFile()
+        expect(file.display).to.be.equal(config.fileDisplay[mimetype])
+      })
+
+      it('indicates a download display if given a mimetype not in the configuration', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://cdn.com/test', mimetype: 'nope/lol', size: 42 }
+        const file = page.getFile()
+        expect(file.display).to.be.equal('Download')
       })
     })
 

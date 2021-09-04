@@ -154,6 +154,25 @@ PageSchema.methods.getCategorization = function (name, searcher) {
 }
 
 /**
+ * Return an object with information about the page's file.
+ * @returns {{url: string, mimetype: string, display: string,
+ *   size: number}|null} - An object that describes the page's file. This
+ *   object includes the following properties:
+ *     `url`        The URL where the file can be found.
+ *     `mimetype`   The file's MIME type.
+ *     `display`    A string indicating how the file should be displayed
+ *                  (e.g., as an image, an SVG, an audio file, a video, or as
+ *                  a file for download).
+ *     `size`       The size of the file in bytes.
+ */
+
+PageSchema.methods.getFile = function () {
+  if (!this.file || !this.file.url) return null
+  const display = config.fileDisplay[this.file.mimetype] || 'Download'
+  return Object.assign({}, this.file, { display })
+}
+
+/**
  * Finds an acceptable new codename.
  * @returns {string} - A string that has not yet been used as a codename for
  *   any of the secrets for this page.
