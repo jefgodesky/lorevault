@@ -1,7 +1,7 @@
 import smartquotes from 'smartquotes'
 
 import assignCodenames from '../transformers/assignCodenames.js'
-import { pickRandom, union, findOne, match, isInSecret, makeDiscreteQuery, alphabetize } from '../utils.js'
+import { pickRandom, union, findOne, match, isInSecret, makeDiscreteQuery, alphabetize, getS3 } from '../utils.js'
 
 import config from '../config/index.js'
 
@@ -408,6 +408,19 @@ PageSchema.methods.update = async function (content, editor) {
   this.versions.push(Object.assign({}, content, { editor: editor._id }))
   await this.save()
   return this
+}
+
+/**
+ * Delete the file associated with the page.
+ * @returns {Promise<void>} - A Promise that resolves once the page's file has
+ *   been deleted from the CDN. If the page has no file, nothing happens.
+ */
+
+PageSchema.methods.deleteFile = async function () {
+  const { bucket, domain } = config.aws
+  if (!this.file?.url) return
+  const s3 = getS3()
+  await s3.deleteObject({ Bucket: bucket, Key: this.file.url.substr(domain.length + 1) }).promise()
 }
 
 /**
