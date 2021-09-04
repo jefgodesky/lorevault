@@ -66,7 +66,7 @@ const PageSchema = new Schema({
     },
     knowers: [{
       type: Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'Character'
     }],
     list: [SecretSchema]
   },
