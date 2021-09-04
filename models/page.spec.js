@@ -154,10 +154,10 @@ describe('Page', () => {
         expect(page.secrets.list[0].content).to.be.equal('This is a new secret.')
       })
 
-      it('starts off a new secret with the person who wrote it knowing it', async () => {
+      it('starts off a new secret with the POV character of the person who wrote it knowing it', async () => {
         const { page, user } = await createTestDocs(model)
         await page.processSecrets({ Wombat: { content: 'This is a new secret.' } }, user)
-        expect(page.secrets.list[0].knowers.join(' ')).to.be.equal(user._id.toString())
+        expect(page.secrets.list[0].knowers.join(' ')).to.be.equal(user.getPOV()._id.toString())
       })
 
       it('updates the content of a secret if the editor knows the secret', async () => {
@@ -221,15 +221,13 @@ describe('Page', () => {
       })
 
       it('says if you don\'t know a secret', async () => {
-        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
-        const actual = page.getSecrets(user.getPOV())
+        const { page, other } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const actual = page.getSecrets(other.getPOV())
         expect(actual[0].known).to.be.false
       })
 
       it('says if you know a secret', async () => {
         const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
-        const pov = user.getPOV()
-        await page.reveal(pov, 'Wombat')
         const actual = page.getSecrets(user.getPOV())
         expect(actual[0].known).to.be.true
       })
@@ -265,35 +263,35 @@ describe('Page', () => {
     describe('knows', () => {
       it('returns true if the character knows the secret', async () => {
         const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
-        expect(page.knows(user, 'Wombat')).to.be.true
+        expect(page.knows(user.getPOV(), 'Wombat')).to.be.true
       })
 
       it('returns true if there is no such secret secret', async () => {
         const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
-        expect(page.knows(user, 'Aardvark')).to.be.true
+        expect(page.knows(user.getPOV(), 'Aardvark')).to.be.true
       })
 
       it('returns false if the character doesn\'t know the secret', async () => {
         const { page, other } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
-        expect(page.knows(other, 'Wombat')).to.be.false
+        expect(page.knows(other.getPOV(), 'Wombat')).to.be.false
       })
 
       it('returns true if the character knows about the page and the page is a secret', async () => {
         const { page, user } = await createTestDocs(model)
         page.secrets.existence = true
-        page.secrets.knowers.addToSet(user._id)
-        expect(page.knows(user)).to.be.true
+        page.secrets.knowers.addToSet(user.getPOV()._id)
+        expect(page.knows(user.getPOV())).to.be.true
       })
 
       it('returns false if the character doesn\'t know about the page and the page is a secret', async () => {
         const { page, user } = await createTestDocs(model)
         page.secrets.existence = true
-        expect(page.knows(user)).to.be.false
+        expect(page.knows(user.getPOV())).to.be.false
       })
 
       it('returns true if the page isn\'t a secret', async () => {
         const { page, user } = await createTestDocs(model)
-        expect(page.knows(user)).to.be.true
+        expect(page.knows(user.getPOV())).to.be.true
       })
     })
 
@@ -329,9 +327,9 @@ describe('Page', () => {
       })
 
       it('hides secrets from characters who don\'t know them', async () => {
-        const { page, user } = await createTestDocs(model)
+        const { page, user, other } = await createTestDocs(model)
         await page.update({ title: 'Test Page', body: 'This is the updated text. ||This is a secret.||' }, user)
-        expect(page.write({ pov: user.getPOV() })).to.be.equal('This is the updated text.')
+        expect(page.write({ pov: other.getPOV() })).to.be.equal('This is the updated text.')
       })
 
       it('reveals secrets to characters who know them', async () => {
@@ -343,9 +341,9 @@ describe('Page', () => {
       })
 
       it('leaves a placeholder for secrets hidden from characters who don\'t know them in editing mode', async () => {
-        const { page, user } = await createTestDocs(model)
+        const { page, user, other } = await createTestDocs(model)
         await page.update({ title: 'Test Page', body: 'This is the updated text. ||::Wombat:: This is a secret.||' }, user)
-        expect(page.write({ pov: user.getPOV(), mode: 'editing' })).to.be.equal('This is the updated text. ||::Wombat::||')
+        expect(page.write({ pov: other.getPOV(), mode: 'editing' })).to.be.equal('This is the updated text. ||::Wombat::||')
       })
 
       it('reveals secrets to characters who know them in editing mode', async () => {

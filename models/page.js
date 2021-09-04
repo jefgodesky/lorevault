@@ -171,13 +171,15 @@ PageSchema.methods.processSecrets = function (secrets, editor) {
   for (const codename of codenames) {
     const existing = this.findSecret(codename)
     const inUpdate = updatedCodenames.includes(codename)
-    const editorKnows = (existing && existing.knowers.includes(editor._id)) || !existing
+    const editorKnows = existing && (existing.knowers.includes(editor._id) || existing.knowers.includes(editor.getPOV()._id) )
     if (existing && inUpdate && editorKnows) {
       existing.content = secrets[codename].content
     } else if (existing && !inUpdate && editorKnows) {
       list.pull({ _id: existing._id })
     } else if (!existing) {
-      list.addToSet({ codename, content: secrets[codename].content, knowers: [editor._id] })
+      const pov = editor.getPOV()
+      const knowers = pov === 'Loremaster' ? [editor._id] : pov._id ? [pov._id] : []
+      list.addToSet({ codename, content: secrets[codename].content, knowers })
     }
   }
 }
