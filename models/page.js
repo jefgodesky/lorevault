@@ -31,7 +31,7 @@ const SecretSchema = new Schema({
   content: String,
   knowers: [{
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'Character'
   }]
 })
 
