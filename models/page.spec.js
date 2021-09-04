@@ -259,6 +259,35 @@ describe('Page', () => {
       })
     })
 
+    describe('checkSecrets', () => {
+      it('reveals secrets to characters according to rules set by game modules', async () => {
+        const { page, other } = await createTestDocs(model, '||::Wombat:: [Intelligence DC 1] This is a secret.||')
+        const charPage = await Page.create({ title: 'New Character', body: 'This is about New Character.' }, other)
+        await other.claim(charPage)
+        const { active } = other.characters
+        await page.checkSecrets(active)
+        expect(page.secrets.list[0].knowers).to.include(active._id)
+      })
+
+      it('doesn\'t reveal secrets to characters according to rules set by game modules', async () => {
+        const { page, other } = await createTestDocs(model, '||::Wombat:: [Intelligence DC 21] This is a secret.||')
+        const charPage = await Page.create({ title: 'New Character', body: 'This is about New Character.' }, other)
+        await other.claim(charPage)
+        const { active } = other.characters
+        await page.checkSecrets(active)
+        expect(page.secrets.list[0].knowers).not.to.include(active._id)
+      })
+
+      it('adds the character to the checked list regardless', async () => {
+        const { page, other } = await createTestDocs(model, '||::Wombat:: [Intelligence DC 10] This is a secret.||')
+        const charPage = await Page.create({ title: 'New Character', body: 'This is about New Character.' }, other)
+        await other.claim(charPage)
+        const { active } = other.characters
+        await page.checkSecrets(active)
+        expect(page.secrets.list[0].checked).to.include(active._id)
+      })
+    })
+
     describe('reveal', () => {
       it('reveals a secret to a character', async () => {
         const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
