@@ -88,11 +88,36 @@ const makeDiscreteQuery = (orig, searcher) => {
       : { $and: [orig, { $or: [{ 'secrets.existence': false }, { 'secrets.knowers': pov._id }] }] }
 }
 
+/**
+ * This method allows us to do a global regular expression search over an
+ * entire string, and still get the index for each instance.
+ * @param {string} str - The string to search.
+ * @param {RegExp} regex - The regular expression to use.
+ * @returns {{str: string, index: number}[]} - An array of objects representing
+ *   the matches found. Each object has the following properties:
+ *     `str`    The string that was matched.
+ *     `index`  The index at which this instance was found.
+ */
+
+const match = (str, regex) => {
+  const matches = []
+  let index = 0
+  while (index !== null && index < str.length) {
+    const match = str.substring(index).match(regex)
+    if (!match) { index = null; continue }
+    index += match.index
+    matches.push({ str: match[0], index })
+    index += match[0].length
+  }
+  return matches
+}
+
 export {
   pickRandomNum,
   pickRandom,
   union,
   intersection,
   findOne,
-  makeDiscreteQuery
+  makeDiscreteQuery,
+  match
 }

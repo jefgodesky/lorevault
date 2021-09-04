@@ -8,7 +8,8 @@ import {
   union,
   intersection,
   findOne,
-  makeDiscreteQuery
+  makeDiscreteQuery,
+  match
 } from './utils.js'
 
 describe('pickRandomNum', () => {
@@ -99,5 +100,29 @@ describe('makeDiscreteQuery', () => {
     const { user } = await createTestDocs(model)
     const { _id } = user.characters.active
     expect(JSON.stringify(makeDiscreteQuery({ test: 42 }, user))).to.be.eql(`{"$and":[{"test":42},{"$or":[{"secrets.existence":false},{"secrets.knowers":"${_id}"}]}]}`)
+  })
+})
+
+describe('match', () => {
+  it('returns an empty array if there are no matches', () => {
+    const str = 'This is a Test. We are Testing. Test'
+    expect(match(str, /^lol/m)).to.be.eql([])
+  })
+
+  it('returns an array of matches', () => {
+    const str = 'This is a Test. We are Testing. Test'
+    expect(match(str, /Test/m)).to.have.lengthOf(3)
+  })
+
+  it('reports the text for each match', () => {
+    const str = 'This is a Test. We are Testing. Test'
+    const actual = match(str, /Test/m)
+    expect(actual.map(m => m.str)).to.be.eql(['Test', 'Test', 'Test'])
+  })
+
+  it('reports the index for each match', () => {
+    const str = 'This is a Test. We are Testing. Test'
+    const actual = match(str, /Test/m)
+    expect(actual.map(m => m.index)).to.be.eql([10, 23, 32])
   })
 })
