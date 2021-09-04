@@ -123,6 +123,22 @@ PageSchema.methods.getVersion = function (id) {
 }
 
 /**
+ * Return the page's categorization object for the given category.
+ * @param {string} name - The name of the category.
+ * @param {User} searcher - The user asking for the categorization
+ * @returns {{name: string, sort: string, secret: string}|false} - The page's
+ *   categorization object for the category requested, or `false` if it cannot
+ *   be returned (e.g., the page isn't in that category, or it is, but it's a
+ *   secret that the searcher's POV doesn't know about).
+ */
+
+PageSchema.methods.getCategorization = function (name, searcher) {
+  const cat = findOne(this.categories, c => c.name === name)
+  if (!cat || (cat.secret && !this.knows(searcher.getPOV(), cat.secret))) return false
+  return cat
+}
+
+/**
  * Finds an acceptable new codename.
  * @returns {string} - A string that has not yet been used as a codename for
  *   any of the secrets for this page.

@@ -96,6 +96,32 @@ describe('Page', () => {
       })
     })
 
+    describe('getCategorization', () => {
+      it('returns false if the page isn\'t in that category', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = page.getCategorization('Test', user)
+        expect(actual).to.be.false
+      })
+
+      it('returns false if the page\'s membership in that category is a secret to you', async () => {
+        const { page, other } = await createTestDocs(model, '||[[Category:Test]]||')
+        const actual = page.getCategorization('Test', other)
+        expect(actual).to.be.false
+      })
+
+      it('returns the category object', async () => {
+        const { page, user } = await createTestDocs(model, '[[Category:Test]]')
+        const actual = page.getCategorization('Test', user)
+        expect(actual.name).to.be.equal('Test')
+      })
+
+      it('returns the category object when it\'s a secret you know', async () => {
+        const { page, user } = await createTestDocs(model, '||[[Category:Test]]||')
+        const actual = page.getCategorization('Test', user)
+        expect(actual.name).to.be.equal('Test')
+      })
+    })
+
     describe('findCodename', () => {
       it('returns a random codename', async () => {
         const { page } = await createTestDocs(model)
