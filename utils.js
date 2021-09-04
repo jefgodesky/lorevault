@@ -139,6 +139,24 @@ const isInSecret = (subj, body) => {
   return false
 }
 
+/**
+ * Sort the items in an array in alphabetical order.
+ * @param {*[]} arr - The array to be sorted into alphabetical order.
+ * @param {function} fn - This function takes an element from the array as a
+ *   parameter, and returns the string that should be used to alphabetically
+ *   sort that element. The default function just applies the `.toString`
+ *   method to the element.
+ * @returns {*[]} - The original array, sorted into alphabetical order.
+ */
+
+const alphabetize = (arr, fn = el => el.toString()) => {
+  return arr.sort((a, b) => {
+    const astr = fn(a)
+    const bstr = fn(b)
+    return astr < bstr ? -1 : astr > bstr ? 1 : 0
+  })
+}
+
 export {
   pickRandomNum,
   pickRandom,
@@ -147,5 +165,6 @@ export {
   findOne,
   makeDiscreteQuery,
   match,
-  isInSecret
+  isInSecret,
+  alphabetize
 }

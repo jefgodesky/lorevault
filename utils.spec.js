@@ -10,7 +10,8 @@ import {
   findOne,
   makeDiscreteQuery,
   match,
-  isInSecret
+  isInSecret,
+  alphabetize
 } from './utils.js'
 
 describe('pickRandomNum', () => {
@@ -139,5 +140,17 @@ describe('isInSecret', () => {
     const str = '||::Wombat:: This is a test.||'
     const actual = isInSecret(match(str, /test/)[0], str)
     expect(actual).to.be.equal('Wombat')
+  })
+})
+
+describe('alphabetize', () => {
+  it('sorts an array into alphabetical order', () => {
+    const arr = ['Boar', 'Deer', 'Coyote', 'Ape']
+    expect(alphabetize(arr)).to.be.eql(['Ape', 'Boar', 'Coyote', 'Deer'])
+  })
+
+  it('can take a function to determine what to use for the strings', () => {
+    const arr = [{ name: 'Boar' }, { name: 'Deer' }, { name: 'Coyote' }, { name: 'Ape' }]
+    expect(alphabetize(arr, el => el.name)).to.be.eql([{ name: 'Ape' }, { name: 'Boar' }, { name: 'Coyote' }, { name: 'Deer' }])
   })
 })
