@@ -31,7 +31,11 @@ const SecretSchema = new Schema({
   content: String,
   knowers: [{
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'Character'
+  }],
+  checked: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Character'
   }]
 })
 
@@ -62,7 +66,7 @@ const PageSchema = new Schema({
     },
     knowers: [{
       type: Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'Character'
     }],
     list: [SecretSchema]
   },
@@ -222,6 +226,31 @@ PageSchema.methods.getSecrets = function (pov = 'Anonymous') {
     const { codename, content, knowers } = secret
     return { codename, content, known: pov === 'Loremaster' || knowers.includes(pov?._id) }
   })
+}
+
+/**
+ * Use game modules to determine if any secrets should be revealed to this
+ * character. Each character only has one chance to check each secret.
+ * @param {Character} char - The character being checked.
+ * @returns {Promise<void>} - A Promise that resolves once all checks have been
+ *   made and recorded, and the document has been saved to the database.
+ */
+
+PageSchema.methods.checkSecrets = async function (char) {
+  for (const secret of this.secrets.list) {
+    if (secret.checked.includes(char._id)) continue
+    for (const game of config.games) {
+      const { info, checkSecret } = await import(`../games/${game}/${game}.js`)
+      for (const stat of info.sheet) {
+        const match = secret.content.match(stat.regex)
+        if (match && checkSecret(stat, match, char)) {
+          await this.reveal(char, secret.codename)
+        }
+      }
+    }
+    secret.checked.addToSet(char._id)
+  }
+  await this.save()
 }
 
 /**
