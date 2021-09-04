@@ -1,7 +1,7 @@
 import smartquotes from 'smartquotes'
 
 import assignCodenames from '../transformers/assignCodenames.js'
-import { pickRandom, union, findOne, match, isInSecret, makeDiscreteQuery, alphabetize } from '../utils.js'
+import { pickRandom, union, findOne, match, isInSecret, makeDiscreteQuery, alphabetize, getS3 } from '../utils.js'
 
 import config from '../config/index.js'
 
@@ -69,6 +69,11 @@ const PageSchema = new Schema({
       ref: 'Character'
     }],
     list: [SecretSchema]
+  },
+  file: {
+    url: String,
+    mimetype: String,
+    size: Number
   },
   versions: [VersionSchema]
 }, {
@@ -146,6 +151,25 @@ PageSchema.methods.getCategorization = function (name, searcher) {
   const cat = findOne(this.categories, c => c.name === name)
   if (!cat || (cat.secret && !this.knows(searcher.getPOV(), cat.secret))) return false
   return cat
+}
+
+/**
+ * Return an object with information about the page's file.
+ * @returns {{url: string, mimetype: string, display: string,
+ *   size: number}|null} - An object that describes the page's file. This
+ *   object includes the following properties:
+ *     `url`        The URL where the file can be found.
+ *     `mimetype`   The file's MIME type.
+ *     `display`    A string indicating how the file should be displayed
+ *                  (e.g., as an image, an SVG, an audio file, a video, or as
+ *                  a file for download).
+ *     `size`       The size of the file in bytes.
+ */
+
+PageSchema.methods.getFile = function () {
+  if (!this.file || !this.file.url) return null
+  const display = config.fileDisplay[this.file.mimetype] || 'Download'
+  return Object.assign({}, this.file, { display })
 }
 
 /**
@@ -384,6 +408,19 @@ PageSchema.methods.update = async function (content, editor) {
   this.versions.push(Object.assign({}, content, { editor: editor._id }))
   await this.save()
   return this
+}
+
+/**
+ * Delete the file associated with the page.
+ * @returns {Promise<void>} - A Promise that resolves once the page's file has
+ *   been deleted from the CDN. If the page has no file, nothing happens.
+ */
+
+PageSchema.methods.deleteFile = async function () {
+  const { bucket, domain } = config.aws
+  if (!this.file?.url) return
+  const s3 = getS3()
+  await s3.deleteObject({ Bucket: bucket, Key: this.file.url.substr(domain.length + 1) }).promise()
 }
 
 /**
