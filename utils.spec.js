@@ -9,7 +9,8 @@ import {
   intersection,
   findOne,
   makeDiscreteQuery,
-  match
+  match,
+  isInSecret
 } from './utils.js'
 
 describe('pickRandomNum', () => {
@@ -124,5 +125,19 @@ describe('match', () => {
     const str = 'This is a Test. We are Testing. Test'
     const actual = match(str, /Test/m)
     expect(actual.map(m => m.index)).to.be.eql([10, 23, 32])
+  })
+})
+
+describe('isInSecret', () => {
+  it('returns false if the match is not in any secret', () => {
+    const str = 'This is a test.'
+    const actual = isInSecret(match(str, /test/)[0], str)
+    expect(actual).to.be.false
+  })
+
+  it('returns the codename of the secret that the match is in', () => {
+    const str = '||::Wombat:: This is a test.||'
+    const actual = isInSecret(match(str, /test/)[0], str)
+    expect(actual).to.be.equal('Wombat')
   })
 })

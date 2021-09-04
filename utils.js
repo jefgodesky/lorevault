@@ -112,6 +112,33 @@ const match = (str, regex) => {
   return matches
 }
 
+/**
+ * Checks to see if the subject (`subj`) appears within any of the secrets in
+ * the string provided (`body`).
+ * @param {object} subj - An object that provides data on the string we're
+ *   looking for. An object like this is provided by the `match` method.
+ * @param {number} subj.index - The index in the `body` string at which this
+ *   substring begins.
+ * @param {string} subj.str - The substring of `body` that this object provides
+ *   data on.
+ * @param {string} body - The entire body string.
+ * @returns {string|boolean} - The codename of the secret that `subj` appears
+ *   in, if appears in any secret at all, or `false` if it does not.
+ */
+
+const isInSecret = (subj, body) => {
+  const start = subj.index
+  const end = start + subj.str.length
+  const secrets = match(body, /\|\|::.*?::\s*?.*?\|\|/m)
+  for (const secret of secrets) {
+    if (secret.index <= start && secret.index + secret.str.length >= end) {
+      const codenameMatch = secret.str.match(/::(.*?)::/)
+      return codenameMatch && codenameMatch.length > 1 ? codenameMatch[1] : secret.str
+    }
+  }
+  return false
+}
+
 export {
   pickRandomNum,
   pickRandom,
@@ -119,5 +146,6 @@ export {
   intersection,
   findOne,
   makeDiscreteQuery,
-  match
+  match,
+  isInSecret
 }
