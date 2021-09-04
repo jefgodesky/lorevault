@@ -519,6 +519,24 @@ describe('Page', () => {
         const actual = await Page.findMembers('Tests', other)
         expect(actual.pages).to.be.empty
       })
+
+      it('sorts pages by their sort strings', async () => {
+        const { user } = await createTestDocs(model)
+        await Page.create({ title: 'Test 1', body: '[[Category:Tests|Badger]]' }, user)
+        await Page.create({ title: 'Test 2', body: '[[Category:Tests|Coelacanth]]' }, user)
+        await Page.create({ title: 'Test 3', body: '[[Category:Tests|Aardvark]]' }, user)
+        const actual = await Page.findMembers('Tests', user)
+        expect(actual.pages.map(m => m.page.title)).to.be.eql(['Test 3', 'Test 1', 'Test 2'])
+      })
+
+      it('sorts subcategories by their sort strings', async () => {
+        const { user } = await createTestDocs(model)
+        await Page.create({ title: 'Category:Type 1 Tests', body: '[[Category:Tests|Badger]]' }, user)
+        await Page.create({ title: 'Category:Type 2 Tests', body: '[[Category:Tests|Coelacanth]]' }, user)
+        await Page.create({ title: 'Category:Type 3 Tests', body: '[[Category:Tests|Aardvark]]' }, user)
+        const actual = await Page.findMembers('Tests', user)
+        expect(actual.subcategories.map(m => m.page.title.substr(14, 1))).to.be.eql(['3', '1', '2'])
+      })
     })
 
     describe('create', () => {
