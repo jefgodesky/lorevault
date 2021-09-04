@@ -51,6 +51,7 @@ const info = {
       id: 'int',
       label: 'Intelligence',
       detail: 'Intelligence Ability Modifier',
+      regex: /\[Intelligence DC (\d+)]/im,
       type: Number,
       default: 0
     },
@@ -58,6 +59,7 @@ const info = {
       id: 'arcana',
       label: 'Arcana',
       detail: 'Intelligence (Arcana) Modifier',
+      regex: /\[Intelligence \(Arcana\) DC (\d+)]/im,
       type: Number,
       default: 0
     },
@@ -65,6 +67,7 @@ const info = {
       id: 'history',
       label: 'History',
       detail: 'Intelligence (History) Modifier',
+      regex: /\[Intelligence \(History\) DC (\d+)]/im,
       type: Number,
       default: 0
     },
@@ -72,6 +75,7 @@ const info = {
       id: 'nature',
       label: 'Nature',
       detail: 'Intelligence (Nature) Modifier',
+      regex: /\[Intelligence \(Nature\) DC (\d+)]/im,
       type: Number,
       default: 0
     },
@@ -79,6 +83,7 @@ const info = {
       id: 'religion',
       label: 'Religion',
       detail: 'Intelligence (Religion) Modifier',
+      regex: /\[Intelligence \(Religion\) DC (\d+)]/im,
       type: Number,
       default: 0
     }
