@@ -70,6 +70,11 @@ const PageSchema = new Schema({
     }],
     list: [SecretSchema]
   },
+  file: {
+    url: String,
+    mimetype: String,
+    size: Number
+  },
   versions: [VersionSchema]
 }, {
   collation: {
