@@ -1,7 +1,7 @@
 import smartquotes from 'smartquotes'
 
 import assignCodenames from '../transformers/assignCodenames.js'
-import { pickRandom, union, findOne } from '../utils.js'
+import { pickRandom, union, findOne, match, isInSecret } from '../utils.js'
 
 import config from '../config/index.js'
 
@@ -77,6 +77,27 @@ PageSchema.plugin(slugger)
 
 PageSchema.pre('save', function (next) {
   this.modified = Date.now()
+  next()
+})
+
+/**
+ * Pull categories from text each time the page is saved.
+ */
+
+PageSchema.pre('save', function (next) {
+  const { body } = this.getCurr()
+  const regex = /\[\[Category:(.*?)(\|(.*?))?]]/im
+  this.categories = match(body, regex).map(category => {
+    const regexMatch = category.str.match(regex)
+    const name = regexMatch && regexMatch[1] ? regexMatch[1].trim() : null
+    const sort = regexMatch && regexMatch[3] ? regexMatch[3].trim() : this.title
+    const secret = isInSecret(category, body)
+    if (!name) return false
+    const obj = { name }
+    if (sort) obj.sort = sort
+    if (secret) obj.secret = secret
+    return obj
+  }).filter(cat => cat !== false)
   next()
 })
 

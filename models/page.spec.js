@@ -22,6 +22,44 @@ describe('Page', () => {
       })
     })
 
+    describe('Categories', () => {
+      it('saves the tagged categories', async () => {
+        const { page } = await createTestDocs(model, '[[Category:Tests]]')
+        expect(page.categories).to.have.lengthOf(1)
+      })
+
+      it('saves the names of the tagged categories', async () => {
+        const { page } = await createTestDocs(model, '[[Category:Tests]]')
+        expect(page.categories.map(c => c.name)).to.be.eql(['Tests'])
+      })
+
+      it('defaults sort to the title of the page', async () => {
+        const { page } = await createTestDocs(model, '[[Category:Tests]]')
+        expect(page.categories.map(c => c.sort)).to.be.eql(['Test Page'])
+      })
+
+      it('can take a sort string from the category tag', async () => {
+        const { page } = await createTestDocs(model, '[[Category:Tests|Alias]]')
+        expect(page.categories.map(c => c.sort)).to.be.eql(['Alias'])
+      })
+
+      it('handles weird spacing', async () => {
+        const { page } = await createTestDocs(model, '[[Category:   Tests  |    Alias      ]]')
+        const { name, sort } = page.categories[0]
+        expect(`${name} ${sort}`).to.be.eql('Tests Alias')
+      })
+
+      it('has no secret property if it isn\'t a secret', async () => {
+        const { page } = await createTestDocs(model, '[[Category:Tests]]')
+        expect(page.categories[0].secret).to.be.undefined
+      })
+
+      it('records the codename if it\'s a secret.', async () => {
+        const { page } = await createTestDocs(model, '||::Wombat:: [[Category:Tests]]||')
+        expect(page.categories[0].secret).to.be.eql('Wombat')
+      })
+    })
+
     describe('Created', () => {
       it('sets the created timestamp to the time when it is created', async () => {
         const start = new Date()
