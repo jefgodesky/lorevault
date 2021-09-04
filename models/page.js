@@ -1,7 +1,7 @@
 import smartquotes from 'smartquotes'
 
 import assignCodenames from '../transformers/assignCodenames.js'
-import { pickRandom, union, findOne, match, isInSecret } from '../utils.js'
+import { pickRandom, union, findOne, match, isInSecret, makeDiscreteQuery, alphabetize } from '../utils.js'
 
 import config from '../config/index.js'
 
@@ -349,6 +349,36 @@ PageSchema.methods.update = async function (content, editor) {
   this.versions.push(Object.assign({}, content, { editor: editor._id }))
   await this.save()
   return this
+}
+
+/**
+ * Find all of the members of a category (that the searcher knows about).
+ * @param {string} category - The name of the category that the searcher would
+ *   like to find the members to.
+ * @param {User} searcher - The user who would like to find all of the members
+ *   of the category.
+ * @returns {Promise<{pages: *[], subcategories: *[]}>} - A Promise that
+ *   resolves with an object with the following properties:
+ *     `subcategories`   The members of the category that are categories
+ *                       themselves.
+ *     `pages`           The other pages that are members of the category, that
+ *                       are not categories themselves.
+ */
+
+PageSchema.statics.findMembers = async function (category, searcher) {
+  const Page = this.model('Page')
+  const pages = await Page.find(makeDiscreteQuery({ 'categories.name': category }, searcher))
+  const members = { subcategories: [], pages: [] }
+  for (const page of pages) {
+    const cat = page.getCategorization(category, searcher)
+    if (!cat) continue
+    const { sort } = cat
+    const arr = page.title.startsWith('Category:') ? members.subcategories : members.pages
+    arr.push({ page, sort })
+  }
+  members.subcategories = alphabetize(members.subcategories, el => el.sort)
+  members.page = alphabetize(members.pages, el => el.sort)
+  return members
 }
 
 /**

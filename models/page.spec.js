@@ -492,6 +492,35 @@ describe('Page', () => {
   })
 
   describe('statics', () => {
+    describe('findMembers', () => {
+      it('returns the pages that belong to a category', async () => {
+        const { page, user } = await createTestDocs(model, '[[Category:Tests]]')
+        const actual = await Page.findMembers('Tests', user)
+        expect(actual.pages[0].page._id).to.be.eql(page._id)
+      })
+
+      it('returns the subcategories', async () => {
+        const { user } = await createTestDocs(model, '[[Category:Tests]]')
+        const page = await Page.create({ title: 'Category:Unit Tests', body: '[[Category:Tests]]' }, user)
+        const actual = await Page.findMembers('Tests', user)
+        expect(actual.subcategories[0].page._id).to.be.eql(page._id)
+      })
+
+      it('won\'t return pages that are secrets that you don\'t know', async () => {
+        const { page, other } = await createTestDocs(model, '[[Category:Tests]]')
+        page.secrets.existence = true
+        await page.save()
+        const actual = await Page.findMembers('Tests', other)
+        expect(actual.pages).to.be.empty
+      })
+
+      it('won\'t return pages whose membership is a secret that you don\'t know', async () => {
+        const { other } = await createTestDocs(model, '||[[Category:Tests]]||')
+        const actual = await Page.findMembers('Tests', other)
+        expect(actual.pages).to.be.empty
+      })
+    })
+
     describe('create', () => {
       it('creates a new page', async () => {
         const { page } = await createTestDocs(model)
