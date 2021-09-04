@@ -32,6 +32,10 @@ const SecretSchema = new Schema({
   knowers: [{
     type: Schema.Types.ObjectId,
     ref: 'Character'
+  }],
+  checked: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Character'
   }]
 })
 
