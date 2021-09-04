@@ -71,6 +71,12 @@ const PageSchema = new Schema({
     list: [SecretSchema]
   },
   versions: [VersionSchema]
+}, {
+  collation: {
+    locale: 'en',
+    strength: 1,
+    numericOrdering: true
+  }
 })
 
 PageSchema.plugin(slugger)
