@@ -1,7 +1,7 @@
 import smartquotes from 'smartquotes'
 
 import assignCodenames from '../transformers/assignCodenames.js'
-import { pickRandom, union, findOne } from '../utils.js'
+import { pickRandom, union, findOne, match, isInSecret, makeDiscreteQuery, alphabetize } from '../utils.js'
 
 import config from '../config/index.js'
 
@@ -42,6 +42,11 @@ const PageSchema = new Schema({
     slug: 'title',
     unique: true
   },
+  categories: [{
+    name: String,
+    sort: String,
+    secret: String
+  }],
   created: {
     type: Date,
     default: Date.now
@@ -76,6 +81,27 @@ PageSchema.pre('save', function (next) {
 })
 
 /**
+ * Pull categories from text each time the page is saved.
+ */
+
+PageSchema.pre('save', function (next) {
+  const { body } = this.getCurr()
+  const regex = /\[\[Category:(.*?)(\|(.*?))?]]/im
+  this.categories = match(body, regex).map(category => {
+    const regexMatch = category.str.match(regex)
+    const name = regexMatch && regexMatch[1] ? regexMatch[1].trim() : null
+    const sort = regexMatch && regexMatch[3] ? regexMatch[3].trim() : this.title
+    const secret = isInSecret(category, body)
+    if (!name) return false
+    const obj = { name }
+    if (sort) obj.sort = sort
+    if (secret) obj.secret = secret
+    return obj
+  }).filter(cat => cat !== false)
+  next()
+})
+
+/**
  * Return the most recent version of the page.
  * @returns {Version} - The most recent version of the page.
  */
@@ -94,6 +120,22 @@ PageSchema.methods.getCurr = function () {
 
 PageSchema.methods.getVersion = function (id) {
   return findOne(this.versions, v => v._id === id)
+}
+
+/**
+ * Return the page's categorization object for the given category.
+ * @param {string} name - The name of the category.
+ * @param {User} searcher - The user asking for the categorization
+ * @returns {{name: string, sort: string, secret: string}|false} - The page's
+ *   categorization object for the category requested, or `false` if it cannot
+ *   be returned (e.g., the page isn't in that category, or it is, but it's a
+ *   secret that the searcher's POV doesn't know about).
+ */
+
+PageSchema.methods.getCategorization = function (name, searcher) {
+  const cat = findOne(this.categories, c => c.name === name)
+  if (!cat || (cat.secret && !this.knows(searcher.getPOV(), cat.secret))) return false
+  return cat
 }
 
 /**
@@ -145,13 +187,15 @@ PageSchema.methods.processSecrets = function (secrets, editor) {
   for (const codename of codenames) {
     const existing = this.findSecret(codename)
     const inUpdate = updatedCodenames.includes(codename)
-    const editorKnows = (existing && existing.knowers.includes(editor._id)) || !existing
+    const editorKnows = existing && (existing.knowers.includes(editor._id) || existing.knowers.includes(editor.getPOV()._id) )
     if (existing && inUpdate && editorKnows) {
       existing.content = secrets[codename].content
     } else if (existing && !inUpdate && editorKnows) {
       list.pull({ _id: existing._id })
     } else if (!existing) {
-      list.addToSet({ codename, content: secrets[codename].content, knowers: [editor._id] })
+      const pov = editor.getPOV()
+      const knowers = pov === 'Loremaster' ? [editor._id] : pov._id ? [pov._id] : []
+      list.addToSet({ codename, content: secrets[codename].content, knowers })
     }
   }
 }
@@ -305,6 +349,36 @@ PageSchema.methods.update = async function (content, editor) {
   this.versions.push(Object.assign({}, content, { editor: editor._id }))
   await this.save()
   return this
+}
+
+/**
+ * Find all of the members of a category (that the searcher knows about).
+ * @param {string} category - The name of the category that the searcher would
+ *   like to find the members to.
+ * @param {User} searcher - The user who would like to find all of the members
+ *   of the category.
+ * @returns {Promise<{pages: *[], subcategories: *[]}>} - A Promise that
+ *   resolves with an object with the following properties:
+ *     `subcategories`   The members of the category that are categories
+ *                       themselves.
+ *     `pages`           The other pages that are members of the category, that
+ *                       are not categories themselves.
+ */
+
+PageSchema.statics.findMembers = async function (category, searcher) {
+  const Page = this.model('Page')
+  const pages = await Page.find(makeDiscreteQuery({ 'categories.name': category }, searcher))
+  const members = { subcategories: [], pages: [] }
+  for (const page of pages) {
+    const cat = page.getCategorization(category, searcher)
+    if (!cat) continue
+    const { sort } = cat
+    const arr = page.title.startsWith('Category:') ? members.subcategories : members.pages
+    arr.push({ page, sort })
+  }
+  members.subcategories = alphabetize(members.subcategories, el => el.sort)
+  members.page = alphabetize(members.pages, el => el.sort)
+  return members
 }
 
 /**

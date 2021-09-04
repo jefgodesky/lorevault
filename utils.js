@@ -88,11 +88,83 @@ const makeDiscreteQuery = (orig, searcher) => {
       : { $and: [orig, { $or: [{ 'secrets.existence': false }, { 'secrets.knowers': pov._id }] }] }
 }
 
+/**
+ * This method allows us to do a global regular expression search over an
+ * entire string, and still get the index for each instance.
+ * @param {string} str - The string to search.
+ * @param {RegExp} regex - The regular expression to use.
+ * @returns {{str: string, index: number}[]} - An array of objects representing
+ *   the matches found. Each object has the following properties:
+ *     `str`    The string that was matched.
+ *     `index`  The index at which this instance was found.
+ */
+
+const match = (str, regex) => {
+  const matches = []
+  let index = 0
+  while (index !== null && index < str.length) {
+    const match = str.substring(index).match(regex)
+    if (!match) { index = null; continue }
+    index += match.index
+    matches.push({ str: match[0], index })
+    index += match[0].length
+  }
+  return matches
+}
+
+/**
+ * Checks to see if the subject (`subj`) appears within any of the secrets in
+ * the string provided (`body`).
+ * @param {object} subj - An object that provides data on the string we're
+ *   looking for. An object like this is provided by the `match` method.
+ * @param {number} subj.index - The index in the `body` string at which this
+ *   substring begins.
+ * @param {string} subj.str - The substring of `body` that this object provides
+ *   data on.
+ * @param {string} body - The entire body string.
+ * @returns {string|boolean} - The codename of the secret that `subj` appears
+ *   in, if appears in any secret at all, or `false` if it does not.
+ */
+
+const isInSecret = (subj, body) => {
+  const start = subj.index
+  const end = start + subj.str.length
+  const secrets = match(body, /\|\|::.*?::\s*?.*?\|\|/m)
+  for (const secret of secrets) {
+    if (secret.index <= start && secret.index + secret.str.length >= end) {
+      const codenameMatch = secret.str.match(/::(.*?)::/)
+      return codenameMatch && codenameMatch.length > 1 ? codenameMatch[1] : secret.str
+    }
+  }
+  return false
+}
+
+/**
+ * Sort the items in an array in alphabetical order.
+ * @param {*[]} arr - The array to be sorted into alphabetical order.
+ * @param {function} fn - This function takes an element from the array as a
+ *   parameter, and returns the string that should be used to alphabetically
+ *   sort that element. The default function just applies the `.toString`
+ *   method to the element.
+ * @returns {*[]} - The original array, sorted into alphabetical order.
+ */
+
+const alphabetize = (arr, fn = el => el.toString()) => {
+  return arr.sort((a, b) => {
+    const astr = fn(a)
+    const bstr = fn(b)
+    return astr < bstr ? -1 : astr > bstr ? 1 : 0
+  })
+}
+
 export {
   pickRandomNum,
   pickRandom,
   union,
   intersection,
   findOne,
-  makeDiscreteQuery
+  makeDiscreteQuery,
+  match,
+  isInSecret,
+  alphabetize
 }

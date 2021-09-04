@@ -62,9 +62,9 @@ describe('createTestDocs', () => {
     expect(page.versions[0].body).to.be.equal('This is a test page.')
   })
 
-  it('can set a default page text', async () => {
-    const { page } = await createTestDocs(model)
-    expect(page.versions[0].body).to.be.equal('This is the original text.')
+  it('lets the user\'s POV character in on any initial secret', async () => {
+    const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+    expect(page.knows(user.getPOV(), 'Wombat')).to.be.true
   })
 })
 

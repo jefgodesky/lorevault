@@ -8,7 +8,10 @@ import {
   union,
   intersection,
   findOne,
-  makeDiscreteQuery
+  makeDiscreteQuery,
+  match,
+  isInSecret,
+  alphabetize
 } from './utils.js'
 
 describe('pickRandomNum', () => {
@@ -99,5 +102,55 @@ describe('makeDiscreteQuery', () => {
     const { user } = await createTestDocs(model)
     const { _id } = user.characters.active
     expect(JSON.stringify(makeDiscreteQuery({ test: 42 }, user))).to.be.eql(`{"$and":[{"test":42},{"$or":[{"secrets.existence":false},{"secrets.knowers":"${_id}"}]}]}`)
+  })
+})
+
+describe('match', () => {
+  it('returns an empty array if there are no matches', () => {
+    const str = 'This is a Test. We are Testing. Test'
+    expect(match(str, /^lol/m)).to.be.eql([])
+  })
+
+  it('returns an array of matches', () => {
+    const str = 'This is a Test. We are Testing. Test'
+    expect(match(str, /Test/m)).to.have.lengthOf(3)
+  })
+
+  it('reports the text for each match', () => {
+    const str = 'This is a Test. We are Testing. Test'
+    const actual = match(str, /Test/m)
+    expect(actual.map(m => m.str)).to.be.eql(['Test', 'Test', 'Test'])
+  })
+
+  it('reports the index for each match', () => {
+    const str = 'This is a Test. We are Testing. Test'
+    const actual = match(str, /Test/m)
+    expect(actual.map(m => m.index)).to.be.eql([10, 23, 32])
+  })
+})
+
+describe('isInSecret', () => {
+  it('returns false if the match is not in any secret', () => {
+    const str = 'This is a test.'
+    const actual = isInSecret(match(str, /test/)[0], str)
+    expect(actual).to.be.false
+  })
+
+  it('returns the codename of the secret that the match is in', () => {
+    const str = '||::Wombat:: This is a test.||'
+    const actual = isInSecret(match(str, /test/)[0], str)
+    expect(actual).to.be.equal('Wombat')
+  })
+})
+
+describe('alphabetize', () => {
+  it('sorts an array into alphabetical order', () => {
+    const arr = ['Boar', 'Deer', 'Coyote', 'Ape']
+    expect(alphabetize(arr)).to.be.eql(['Ape', 'Boar', 'Coyote', 'Deer'])
+  })
+
+  it('can take a function to determine what to use for the strings', () => {
+    const arr = [{ name: 'Boar' }, { name: 'Deer' }, { name: 'Coyote' }, { name: 'Ape' }]
+    expect(alphabetize(arr, el => el.name)).to.be.eql([{ name: 'Ape' }, { name: 'Boar' }, { name: 'Coyote' }, { name: 'Deer' }])
   })
 })

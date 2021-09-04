@@ -22,6 +22,44 @@ describe('Page', () => {
       })
     })
 
+    describe('Categories', () => {
+      it('saves the tagged categories', async () => {
+        const { page } = await createTestDocs(model, '[[Category:Tests]]')
+        expect(page.categories).to.have.lengthOf(1)
+      })
+
+      it('saves the names of the tagged categories', async () => {
+        const { page } = await createTestDocs(model, '[[Category:Tests]]')
+        expect(page.categories.map(c => c.name)).to.be.eql(['Tests'])
+      })
+
+      it('defaults sort to the title of the page', async () => {
+        const { page } = await createTestDocs(model, '[[Category:Tests]]')
+        expect(page.categories.map(c => c.sort)).to.be.eql(['Test Page'])
+      })
+
+      it('can take a sort string from the category tag', async () => {
+        const { page } = await createTestDocs(model, '[[Category:Tests|Alias]]')
+        expect(page.categories.map(c => c.sort)).to.be.eql(['Alias'])
+      })
+
+      it('handles weird spacing', async () => {
+        const { page } = await createTestDocs(model, '[[Category:   Tests  |    Alias      ]]')
+        const { name, sort } = page.categories[0]
+        expect(`${name} ${sort}`).to.be.eql('Tests Alias')
+      })
+
+      it('has no secret property if it isn\'t a secret', async () => {
+        const { page } = await createTestDocs(model, '[[Category:Tests]]')
+        expect(page.categories[0].secret).to.be.undefined
+      })
+
+      it('records the codename if it\'s a secret.', async () => {
+        const { page } = await createTestDocs(model, '||::Wombat:: [[Category:Tests]]||')
+        expect(page.categories[0].secret).to.be.eql('Wombat')
+      })
+    })
+
     describe('Created', () => {
       it('sets the created timestamp to the time when it is created', async () => {
         const start = new Date()
@@ -55,6 +93,32 @@ describe('Page', () => {
         const { page, user } = await createTestDocs(model)
         await page.update({ title: 'Test Page', body: 'This is an updated page.' }, user)
         expect(page.getVersion(page.versions[0]._id).body).to.be.equal(page.versions[0].body)
+      })
+    })
+
+    describe('getCategorization', () => {
+      it('returns false if the page isn\'t in that category', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = page.getCategorization('Test', user)
+        expect(actual).to.be.false
+      })
+
+      it('returns false if the page\'s membership in that category is a secret to you', async () => {
+        const { page, other } = await createTestDocs(model, '||[[Category:Test]]||')
+        const actual = page.getCategorization('Test', other)
+        expect(actual).to.be.false
+      })
+
+      it('returns the category object', async () => {
+        const { page, user } = await createTestDocs(model, '[[Category:Test]]')
+        const actual = page.getCategorization('Test', user)
+        expect(actual.name).to.be.equal('Test')
+      })
+
+      it('returns the category object when it\'s a secret you know', async () => {
+        const { page, user } = await createTestDocs(model, '||[[Category:Test]]||')
+        const actual = page.getCategorization('Test', user)
+        expect(actual.name).to.be.equal('Test')
       })
     })
 
@@ -116,10 +180,10 @@ describe('Page', () => {
         expect(page.secrets.list[0].content).to.be.equal('This is a new secret.')
       })
 
-      it('starts off a new secret with the person who wrote it knowing it', async () => {
+      it('starts off a new secret with the POV character of the person who wrote it knowing it', async () => {
         const { page, user } = await createTestDocs(model)
         await page.processSecrets({ Wombat: { content: 'This is a new secret.' } }, user)
-        expect(page.secrets.list[0].knowers.join(' ')).to.be.equal(user._id.toString())
+        expect(page.secrets.list[0].knowers.join(' ')).to.be.equal(user.getPOV()._id.toString())
       })
 
       it('updates the content of a secret if the editor knows the secret', async () => {
@@ -183,15 +247,13 @@ describe('Page', () => {
       })
 
       it('says if you don\'t know a secret', async () => {
-        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
-        const actual = page.getSecrets(user.getPOV())
+        const { page, other } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const actual = page.getSecrets(other.getPOV())
         expect(actual[0].known).to.be.false
       })
 
       it('says if you know a secret', async () => {
         const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
-        const pov = user.getPOV()
-        await page.reveal(pov, 'Wombat')
         const actual = page.getSecrets(user.getPOV())
         expect(actual[0].known).to.be.true
       })
@@ -227,35 +289,35 @@ describe('Page', () => {
     describe('knows', () => {
       it('returns true if the character knows the secret', async () => {
         const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
-        expect(page.knows(user, 'Wombat')).to.be.true
+        expect(page.knows(user.getPOV(), 'Wombat')).to.be.true
       })
 
       it('returns true if there is no such secret secret', async () => {
         const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
-        expect(page.knows(user, 'Aardvark')).to.be.true
+        expect(page.knows(user.getPOV(), 'Aardvark')).to.be.true
       })
 
       it('returns false if the character doesn\'t know the secret', async () => {
         const { page, other } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
-        expect(page.knows(other, 'Wombat')).to.be.false
+        expect(page.knows(other.getPOV(), 'Wombat')).to.be.false
       })
 
       it('returns true if the character knows about the page and the page is a secret', async () => {
         const { page, user } = await createTestDocs(model)
         page.secrets.existence = true
-        page.secrets.knowers.addToSet(user._id)
-        expect(page.knows(user)).to.be.true
+        page.secrets.knowers.addToSet(user.getPOV()._id)
+        expect(page.knows(user.getPOV())).to.be.true
       })
 
       it('returns false if the character doesn\'t know about the page and the page is a secret', async () => {
         const { page, user } = await createTestDocs(model)
         page.secrets.existence = true
-        expect(page.knows(user)).to.be.false
+        expect(page.knows(user.getPOV())).to.be.false
       })
 
       it('returns true if the page isn\'t a secret', async () => {
         const { page, user } = await createTestDocs(model)
-        expect(page.knows(user)).to.be.true
+        expect(page.knows(user.getPOV())).to.be.true
       })
     })
 
@@ -291,9 +353,9 @@ describe('Page', () => {
       })
 
       it('hides secrets from characters who don\'t know them', async () => {
-        const { page, user } = await createTestDocs(model)
+        const { page, user, other } = await createTestDocs(model)
         await page.update({ title: 'Test Page', body: 'This is the updated text. ||This is a secret.||' }, user)
-        expect(page.write({ pov: user.getPOV() })).to.be.equal('This is the updated text.')
+        expect(page.write({ pov: other.getPOV() })).to.be.equal('This is the updated text.')
       })
 
       it('reveals secrets to characters who know them', async () => {
@@ -305,9 +367,9 @@ describe('Page', () => {
       })
 
       it('leaves a placeholder for secrets hidden from characters who don\'t know them in editing mode', async () => {
-        const { page, user } = await createTestDocs(model)
+        const { page, user, other } = await createTestDocs(model)
         await page.update({ title: 'Test Page', body: 'This is the updated text. ||::Wombat:: This is a secret.||' }, user)
-        expect(page.write({ pov: user.getPOV(), mode: 'editing' })).to.be.equal('This is the updated text. ||::Wombat::||')
+        expect(page.write({ pov: other.getPOV(), mode: 'editing' })).to.be.equal('This is the updated text. ||::Wombat::||')
       })
 
       it('reveals secrets to characters who know them in editing mode', async () => {
@@ -430,6 +492,53 @@ describe('Page', () => {
   })
 
   describe('statics', () => {
+    describe('findMembers', () => {
+      it('returns the pages that belong to a category', async () => {
+        const { page, user } = await createTestDocs(model, '[[Category:Tests]]')
+        const actual = await Page.findMembers('Tests', user)
+        expect(actual.pages[0].page._id).to.be.eql(page._id)
+      })
+
+      it('returns the subcategories', async () => {
+        const { user } = await createTestDocs(model, '[[Category:Tests]]')
+        const page = await Page.create({ title: 'Category:Unit Tests', body: '[[Category:Tests]]' }, user)
+        const actual = await Page.findMembers('Tests', user)
+        expect(actual.subcategories[0].page._id).to.be.eql(page._id)
+      })
+
+      it('won\'t return pages that are secrets that you don\'t know', async () => {
+        const { page, other } = await createTestDocs(model, '[[Category:Tests]]')
+        page.secrets.existence = true
+        await page.save()
+        const actual = await Page.findMembers('Tests', other)
+        expect(actual.pages).to.be.empty
+      })
+
+      it('won\'t return pages whose membership is a secret that you don\'t know', async () => {
+        const { other } = await createTestDocs(model, '||[[Category:Tests]]||')
+        const actual = await Page.findMembers('Tests', other)
+        expect(actual.pages).to.be.empty
+      })
+
+      it('sorts pages by their sort strings', async () => {
+        const { user } = await createTestDocs(model)
+        await Page.create({ title: 'Test 1', body: '[[Category:Tests|Badger]]' }, user)
+        await Page.create({ title: 'Test 2', body: '[[Category:Tests|Coelacanth]]' }, user)
+        await Page.create({ title: 'Test 3', body: '[[Category:Tests|Aardvark]]' }, user)
+        const actual = await Page.findMembers('Tests', user)
+        expect(actual.pages.map(m => m.page.title)).to.be.eql(['Test 3', 'Test 1', 'Test 2'])
+      })
+
+      it('sorts subcategories by their sort strings', async () => {
+        const { user } = await createTestDocs(model)
+        await Page.create({ title: 'Category:Type 1 Tests', body: '[[Category:Tests|Badger]]' }, user)
+        await Page.create({ title: 'Category:Type 2 Tests', body: '[[Category:Tests|Coelacanth]]' }, user)
+        await Page.create({ title: 'Category:Type 3 Tests', body: '[[Category:Tests|Aardvark]]' }, user)
+        const actual = await Page.findMembers('Tests', user)
+        expect(actual.subcategories.map(m => m.page.title.substr(14, 1))).to.be.eql(['3', '1', '2'])
+      })
+    })
+
     describe('create', () => {
       it('creates a new page', async () => {
         const { page } = await createTestDocs(model)

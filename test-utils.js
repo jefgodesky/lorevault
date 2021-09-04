@@ -14,11 +14,11 @@ const createTestDocs = async (model, body = 'This is the original text.') => {
   const user = await User.create({ name: 'Tester 1' })
   const other = await User.create({ name: 'Tester 2' })
   const loremaster = await User.create({ name: 'Loremaster', pov: 'Loremaster' })
-  const page = await Page.create({ title: 'Test Page', body }, user)
   const char1 = await Page.create({ title: 'Character 1', body: 'This is about Character 1.' }, user)
   const char2 = await Page.create({ title: 'Character 2', body: 'This is about Character 2.' }, user)
   await user.claim(char1)
   await user.claim(char2)
+  const page = await Page.create({ title: 'Test Page', body }, user)
   return { user, other, loremaster, page }
 }
 
