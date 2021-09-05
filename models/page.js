@@ -424,6 +424,21 @@ PageSchema.methods.deleteFile = async function () {
 }
 
 /**
+ * Find a page by its path.
+ * @param {string} path - The path of the page that the searcher would like
+ *   to find.
+ * @param {User} searcher - The user conducting the search.
+ * @returns {Promise<Page|null>} - A Promise that resolves with the page with
+ *   the given path, if it exists and the user knows about it, or `null` if one
+ *   of those conditions is not met.
+ */
+
+PageSchema.statics.findByPath = async function (path, searcher) {
+  const Page = this.model('Page')
+  return Page.findOne(makeDiscreteQuery({ path: path.startsWith('/') ? path.substring(1) : path }, searcher))
+}
+
+/**
  * Find all of the members of a category (that the searcher knows about).
  * @param {string} category - The name of the category that the searcher would
  *   like to find the members to.

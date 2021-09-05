@@ -575,6 +575,34 @@ describe('Page', () => {
   })
 
   describe('statics', () => {
+    describe('findByPath', () => {
+      it('returns the page with that path', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = await Page.findByPath('test-page', user)
+        expect(page._id.toString()).to.be.equal(actual._id.toString())
+      })
+
+      it('handles the initial slash', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = await Page.findByPath('/test-page', user)
+        expect(page._id.toString()).to.be.equal(actual._id.toString())
+      })
+
+      it('returns null if the page doesn\'t exist', async () => {
+        const { user } = await createTestDocs(model)
+        const actual = await Page.findByPath('lol-nope', user)
+        expect(actual).to.be.null
+      })
+
+      it('returns null if the page is a secret that you don\'t know', async () => {
+        const { page, user } = await createTestDocs(model)
+        page.secrets.existence = true
+        await page.save()
+        const actual = await Page.findByPath('lol-nope', user)
+        expect(actual).to.be.null
+      })
+    })
+
     describe('findMembers', () => {
       it('returns the pages that belong to a category', async () => {
         const { page, user } = await createTestDocs(model, '[[Category:Tests]]')
