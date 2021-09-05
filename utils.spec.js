@@ -11,6 +11,7 @@ import {
   makeDiscreteQuery,
   match,
   saveBlocks,
+  restoreBlocks,
   isInSecret,
   indexOfRegExp,
   alphabetize,
@@ -155,6 +156,15 @@ describe('saveBlocks', () => {
     const orig = 'The first rule of Unit Testing is you do not talk about Unit Testing.'
     const { blocks } = saveBlocks(orig, /Unit Testing/, 'REDACTED')
     expect(blocks.map(b => b.key)).to.be.eql(['####REDACTED0001####', '####REDACTED0002####'])
+  })
+})
+
+describe('restoreBlocks', () => {
+  it('reverses saveBlocks', () => {
+    const orig = 'The first rule of Unit Testing is you do not talk about Unit Testing.'
+    const { str, blocks } = saveBlocks(orig, /Unit Testing/, 'REDACTED')
+    const actual = restoreBlocks(str, blocks)
+    expect(actual).to.be.equal(orig)
   })
 })
 

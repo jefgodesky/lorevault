@@ -148,6 +148,24 @@ const saveBlocks = (str, regex, code = 'STR') => {
 }
 
 /**
+ * This method reverses the `saveBlocks` method, replacing each replacement
+ * string with the original string that was replaced.
+ * @param {string} str - The string we're working on.
+ * @param {{str: string, key: string}[]} blocks - An array of objects with data
+ *   for the blocks to be restored. This should come from a previous run of the
+ *   `saveBlocks` method.
+ * @returns {string} - The original string with all blocks restored.
+ */
+
+const restoreBlocks = (str, blocks) => {
+  let cpy = str
+  for (const block of blocks) {
+    cpy = cpy.replace(block.key, block.str)
+  }
+  return cpy
+}
+
+/**
  * Checks to see if the subject (`subj`) appears within any of the secrets in
  * the string provided (`body`).
  * @param {object} subj - An object that provides data on the string we're
@@ -232,6 +250,7 @@ export {
   makeDiscreteQuery,
   match,
   saveBlocks,
+  restoreBlocks,
   isInSecret,
   indexOfRegExp,
   alphabetize,
