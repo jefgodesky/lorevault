@@ -7,7 +7,7 @@ import { match, isInSecret } from '../utils.js'
  * @param {string} str - The string to parse.
  * @param {{}} secrets - The secrets parsed from the string. Generally, this
  *   object should be produced by running `parseSecrets` on `str`.
- * @param {User} parser - The person we're parsing for.
+ * @param {User} renderer - The person we're parsing for.
  * @returns {Promise<{str: string, links: object}>} - A Promise that resolves
  *   with an object with two properties: `str`, which provides the updated
  *   version of the original string with all links within it parsed out, and
@@ -25,7 +25,7 @@ import { match, isInSecret } from '../utils.js'
  *               the codename of that secret. If not, this is `null`.
  */
 
-const renderLinks = async (str, secrets, parser) => {
+const renderLinks = async (str, secrets, renderer) => {
   const Page = model('Page')
   const matches = match(str, /\[\[(?!Category:|File:|Image:)((\n|\r|.)*?)\]\]/m)
   const links = await Promise.all(matches.map(async m => {
@@ -34,7 +34,7 @@ const renderLinks = async (str, secrets, parser) => {
     const rawTitle = index < 0 ? inside : inside.substring(0, index)
     const title = rawTitle.startsWith(':') ? rawTitle.substring(1) : rawTitle
     const text = index < 0 ? title : inside.substring(index + 1)
-    const page = await Page.findOneByTitle(title, parser)
+    const page = await Page.findOneByTitle(title, renderer)
     const secret = isInSecret(m, str)
     const markup = page
       ? `<a href="/${page.path}" title="${page.title}">${text}</a>`
