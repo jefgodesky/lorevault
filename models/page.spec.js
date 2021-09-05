@@ -598,8 +598,17 @@ describe('Page', () => {
         const { page, user } = await createTestDocs(model)
         page.secrets.existence = true
         await page.save()
-        const actual = await Page.findByPath('lol-nope', user)
+        const actual = await Page.findByPath('test-page', user)
         expect(actual).to.be.null
+      })
+
+      it('returns the page it it\'s a secret that you know', async () => {
+        const { page, user } = await createTestDocs(model)
+        page.secrets.existence = true
+        page.secrets.knowers.addToSet(user.getPOV()._id)
+        await page.save()
+        const actual = await Page.findByPath('test-page', user)
+        expect(page._id.toString()).to.be.equal(actual._id.toString())
       })
     })
 
