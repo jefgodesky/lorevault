@@ -20,6 +20,7 @@ class Template {
 
   static parseParams (str) {
     const params = { ordered: [], named: {} }
+    if (!str) return params
     const brackets = saveBlocks(str, /\[\[(.*?)\]\]/im, 'BRACKET')
     const elems = brackets.str.split('|').map(el => el.trim())
     for (const elem of elems) {
@@ -35,6 +36,32 @@ class Template {
       }
     }
     return params
+  }
+
+  /**
+   * Parse a string invoking a template into an object representing the details
+   * of the invocation.
+   * @param {string} str - A string invoking a template.
+   * @returns {{name, params: {ordered: string[], named: {}}}} - An object with
+   *   the following parameters:
+   *     `name`     The name of the template being invoked.
+   *     `params`   The paramaters of the invocation. This is an object with
+   *                the properties `ordered` and `named` (see this class's
+   *                `parseParams` method for more details on this). Any content
+   *                within the invocation is saved as the named `content`
+   *                parameter.
+   */
+
+  static parseInstance (str) {
+    const front = str.match(/^{{(?!\/)(.*?)((\s|\n|\r)*?\|((.|\n|\r)*?))?}}/im)
+    if (!front || front.length < 6) return
+    const name = front[1]
+    const params = Template.parseParams(front[4])
+    const contentRegex = new RegExp(`{{${name}.*?}}((.|\n|\r)*?){{\\/${name}}}`)
+    const content = str.match(contentRegex)
+    if (!content || content.length < 1) return { name, params }
+    params.named.content = content[1]
+    return { name, params }
   }
 }
 

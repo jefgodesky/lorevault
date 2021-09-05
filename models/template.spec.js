@@ -30,4 +30,26 @@ describe('Template', () => {
       expect(actual.named).to.be.eql({ link: '[[Test Page | Alias]]' })
     })
   })
+
+  describe('parseInstance', () => {
+    it('gets the name of the template', () => {
+      const { name } = Template.parseInstance('{{TestTemplate}}')
+      expect(name).to.be.equal('TestTemplate')
+    })
+
+    it('gets ordered parameters', () => {
+      const { params } = Template.parseInstance('{{TestTemplate|hello|world}}')
+      expect(params.ordered).to.be.eql(['hello', 'world'])
+    })
+
+    it('gets explicitly ordered parameters', () => {
+      const { params } = Template.parseInstance('{{TestTemplate|2=world|1=hello}}')
+      expect(params.ordered).to.be.eql(['hello', 'world'])
+    })
+
+    it('gets named parameters', () => {
+      const { params } = Template.parseInstance('{{TestTemplate\n  |greeting=hello\n  |subject=world\n}}')
+      expect(params.named).to.be.eql({ greeting: 'hello', subject: 'world' })
+    })
+  })
 })
