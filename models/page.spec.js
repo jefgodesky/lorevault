@@ -650,6 +650,44 @@ describe('Page', () => {
       })
     })
 
+    describe('findOneByTitle', () => {
+      it('returns null if there are no pages with that title', async () => {
+        const { user } = await createTestDocs(model)
+        const actual = await Page.findOneByTitle('lolnope', user)
+        expect(actual).to.be.null
+      })
+
+      it('returns a page', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = await Page.findOneByTitle(page.title, user)
+        expect(actual._id.toString()).to.be.eql(page._id.toString())
+      })
+
+      it('returns the first page if several match', async () => {
+        const { page, user } = await createTestDocs(model)
+        await Page.create({ title: page.title, body: 'This is a different page.' }, user)
+        const actual = await Page.findOneByTitle(page.title, user)
+        expect(actual._id.toString()).to.be.eql(page._id.toString())
+      })
+
+      it('won\'t return pages that are a secret to the searcher', async () => {
+        const { page, user } = await createTestDocs(model)
+        page.secrets.existence = true
+        await page.save()
+        const actual = await Page.findOneByTitle(page.title, user)
+        expect(actual).to.be.null
+      })
+
+      it('returns pages that are secrets that the user knows', async () => {
+        const { page, user } = await createTestDocs(model)
+        page.secrets.existence = true
+        page.secrets.knowers.addToSet(user.getPOV()._id)
+        await page.save()
+        const actual = await Page.findOneByTitle(page.title, user)
+        expect(actual._id.toString()).to.be.eql(page._id.toString())
+      })
+    })
+
     describe('findMembers', () => {
       it('returns the pages that belong to a category', async () => {
         const { page, user } = await createTestDocs(model, '[[Category:Tests]]')

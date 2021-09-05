@@ -454,6 +454,22 @@ PageSchema.statics.findByTitle = async function (title, searcher) {
 }
 
 /**
+ * Returns the first page that has the given title.
+ * @param {string} title - The title of the page that the searcher is
+ *   looking for.
+ * @param {User} searcher - The user conducting the search.
+ * @returns {Promise<Page|null>} - The first page that has the given title and
+ *   that the searcher has access to, or `null` if no page meets both of those
+ *   criteria.
+ */
+
+PageSchema.statics.findOneByTitle = async function (title, searcher) {
+  const Page = this.model('Page')
+  const pages = await Page.findByTitle(title, searcher)
+  return pages.length > 0 ? pages[0] : null
+}
+
+/**
  * Find all of the members of a category (that the searcher knows about).
  * @param {string} category - The name of the category that the searcher would
  *   like to find the members to.
