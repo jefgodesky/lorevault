@@ -52,6 +52,14 @@ const PageSchema = new Schema({
     secret: Boolean,
     codename: String
   }],
+  links: [{
+    page: {
+      type: Schema.Types.ObjectId,
+      ref: 'Page'
+    },
+    secret: Boolean,
+    codename: String
+  }],
   created: {
     type: Date,
     default: Date.now
