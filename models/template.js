@@ -1,4 +1,4 @@
-import { saveBlocks, restoreBlocks } from '../utils.js'
+import { saveBlocks, restoreBlocks, indexOfRegExp } from '../utils.js'
 
 class Template {
   constructor (arg) {
@@ -64,6 +64,38 @@ class Template {
     if (!content || content.length < 1) return { name, params }
     params.named.content = content[1]
     return { name, params }
+  }
+
+  /**
+   * Parse an array of Template instances from invocations in a string.
+   * @param {string} str - The string to parse.
+   * @returns {Template[]} - An array of Template instances parsed from the
+   *   given string `str`.
+   */
+
+  static parse (str) {
+    const regex = /{{(?!\/)(.*?)((\s|\n|\r)*?\|((.|\n|\r)*?))?}}/im
+    const instances = []
+    let reader = 0
+    while (reader > -1) {
+      reader = indexOfRegExp(str, regex, reader)
+      if (reader < 0) continue
+      const match = str.substring(reader).match(regex)
+      if (!match || match.length < 1) { reader += 2; continue }
+      const name = match[1].trim()
+      const afterMatch = reader + match[0].length
+      const closerRegex = new RegExp(`{{\\/${name}}}`)
+      const closer = indexOfRegExp(str, closerRegex, afterMatch)
+      const next = indexOfRegExp(str, regex, afterMatch)
+      if (closer > 0 && (next < 0 || closer < next)) {
+        instances.push(str.substring(reader, closer + name.length + 5))
+        reader = closer + name.length + 5
+      }  else {
+        instances.push(str.substring(reader, afterMatch))
+        reader = afterMatch
+      }
+    }
+    return instances.map(instance => new Template(instance))
   }
 }
 

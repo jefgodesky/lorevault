@@ -57,4 +57,31 @@ describe('Template', () => {
       expect(params.named).to.be.eql({ greeting: 'hello', subject: 'world' })
     })
   })
+
+  describe('parse', () => {
+    it('returns an array', () => {
+      const templates = Template.parse(' {{Test}} {{Test}} {{Test}}')
+      expect(templates).to.have.lengthOf(3)
+    })
+
+    it('returns an array of Templates', () => {
+      const templates = Template.parse(' {{Test}}')
+      expect(templates[0]).to.be.an.instanceof(Template)
+    })
+
+    it('returns the name of each template', () => {
+      const templates = Template.parse(' {{Test}}')
+      expect(templates[0].name).to.equal('Test')
+    })
+
+    it('captures parameters', () => {
+      const templates = Template.parse(' {{Test\n  |greeting=Hello\n  |subject=World\n}}')
+      expect(templates[0].params).to.eql({ ordered: [], named: { greeting: 'Hello', subject: 'World' } })
+    })
+
+    it('captures content', () => {
+      const templates = Template.parse(' {{Test}}\n\nHello, world!\n\n{{/Test}}')
+      expect(templates[0].params).to.eql({ ordered: [], named: { content: '\n\nHello, world!\n\n' } })
+    })
+  })
 })
