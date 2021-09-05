@@ -2,7 +2,9 @@ import { saveBlocks, restoreBlocks } from '../utils.js'
 
 class Template {
   constructor (arg) {
-    this.name = arg.name
+    if (typeof arg === 'string') return new Template(Template.parseInstance(arg))
+    if (typeof arg !== 'object') return new Template({})
+    for (const key of Object.keys(arg)) this[key] = arg[key]
   }
 
   /**

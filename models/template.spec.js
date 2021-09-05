@@ -4,8 +4,13 @@ import Template from './template.js'
 describe('Template', () => {
   describe('Constructor', () => {
     it('takes a name', () => {
-      const actual = new Template({ name: 'Test' })
-      expect(actual.name).to.be.equal('Test')
+      const { name } = new Template({ name: 'Test' })
+      expect(name).to.be.equal('Test')
+    })
+
+    it('can parse a string into a Template instance', () => {
+      const { name } = new Template('{{Test}}')
+      expect(name).to.be.equal('Test')
     })
   })
 
