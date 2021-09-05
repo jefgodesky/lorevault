@@ -68,6 +68,49 @@ describe('Page', () => {
       })
     })
 
+    describe('Links', () => {
+      it('records links in the text', async () => {
+        const { user } = await createTestDocs(model)
+        const page = await Page.create({ title: 'Second Test', body: '[[Test Page|Hello!]]' }, user)
+        expect(page.links).to.have.lengthOf(1)
+      })
+
+      it('doesn\'t record new links', async () => {
+        const { page } = await createTestDocs(model, '[[Second Test]]')
+        expect(page.links).to.be.empty
+      })
+
+      it('records the pages that are linked', async () => {
+        const { page, user } = await createTestDocs(model)
+        const linker = await Page.create({ title: 'Second Test', body: '[[Test Page|Hello!]]' }, user)
+        expect(linker.links[0].page._id.toString()).to.be.equal(page._id.toString())
+      })
+
+      it('records that a link is not a secret', async () => {
+        const { user } = await createTestDocs(model)
+        const page = await Page.create({ title: 'Second Test', body: '[[Test Page|Hello!]]' }, user)
+        expect(page.links[0].secret).to.be.false
+      })
+
+      it('records that a link is a secret', async () => {
+        const { user } = await createTestDocs(model)
+        const page = await Page.create({ title: 'Second Test', body: '||::Wombat:: [[Test Page|Hello!]]||' }, user)
+        expect(page.links[0].secret).to.be.true
+      })
+
+      it('records an empty string for codename when the link isn\'t a secret', async () => {
+        const { user } = await createTestDocs(model)
+        const page = await Page.create({ title: 'Second Test', body: '[[Test Page|Hello!]]' }, user)
+        expect(page.links[0].codename).to.be.equal('')
+      })
+
+      it('records the codename of the secret that the link is in', async () => {
+        const { user } = await createTestDocs(model)
+        const page = await Page.create({ title: 'Second Test', body: '||::Wombat:: [[Test Page|Hello!]]||' }, user)
+        expect(page.links[0].codename).to.be.equal('Wombat')
+      })
+    })
+
     describe('Created', () => {
       it('sets the created timestamp to the time when it is created', async () => {
         const start = new Date()

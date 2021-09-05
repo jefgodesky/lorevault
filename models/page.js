@@ -1,6 +1,7 @@
 import smartquotes from 'smartquotes'
 
 import assignCodenames from '../transformers/assignCodenames.js'
+import renderLinks from '../transformers/renderLinks.js'
 import { pickRandom, union, findOne, match, isInSecret, makeDiscreteQuery, alphabetize, getS3 } from '../utils.js'
 
 import config from '../config/index.js'
@@ -122,6 +123,24 @@ PageSchema.pre('save', function (next) {
     if (secret) obj.codename = secret
     return obj
   }).filter(cat => cat !== false)
+  next()
+})
+
+/**
+ * Pull links from text each time the page is saved.
+ */
+
+PageSchema.pre('save', async function (next) {
+  const User = model('User')
+  const curr = this.getCurr()
+  const editor = await User.findById(curr.editor)
+  const pov = editor.getPOV() || pov
+  const { links } = await renderLinks(curr.body, this.getSecrets(pov), editor)
+  this.links = links.map(link => ({
+    page: link.page,
+    secret: Boolean(link.secret),
+    codename: link.secret || ''
+  })).filter(link => link.page !== null)
   next()
 })
 
