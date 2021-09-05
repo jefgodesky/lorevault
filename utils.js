@@ -143,6 +143,25 @@ const isInSecret = (subj, body) => {
 }
 
 /**
+ * Find the index of the first instance of a substring that matches a given
+ * regular expression. Effectively, this is a version of
+ * `String.prototype.indexOf()` that can take a regular expression instead of
+ * a string.
+ * @param {string} str - The string to search.
+ * @param {RegExp} regex - The regular expression to search for.
+ * @param {number?} start - (Optional). The index to start searching from
+ *   (Default: `0`)
+ * @returns {number} - The index of the first instance of a substring after the
+ *   `start` argument that matches the given regular expression (`regex`). If
+ *   no such substring can be found, it returns -1 instead.
+ */
+
+const indexOfRegExp = (str, regex, start = 0) => {
+  const index = str.substring(start).search(regex)
+  return index > -1 ? index + start : index
+}
+
+/**
  * Sort the items in an array in alphabetical order.
  * @param {*[]} arr - The array to be sorted into alphabetical order.
  * @param {function} fn - This function takes an element from the array as a
@@ -181,6 +200,7 @@ export {
   makeDiscreteQuery,
   match,
   isInSecret,
+  indexOfRegExp,
   alphabetize,
   getS3
 }

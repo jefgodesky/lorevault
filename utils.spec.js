@@ -11,6 +11,7 @@ import {
   makeDiscreteQuery,
   match,
   isInSecret,
+  indexOfRegExp,
   alphabetize,
   getS3
 } from './utils.js'
@@ -141,6 +142,26 @@ describe('isInSecret', () => {
     const str = '||::Wombat:: This is a test.||'
     const actual = isInSecret(match(str, /test/)[0], str)
     expect(actual).to.be.equal('Wombat')
+  })
+})
+
+describe('indexOfRegExp', () => {
+  it('returns first index of substring matching the regular expression', () => {
+    const str = 'This is a test.'
+    const actual = indexOfRegExp(str, /test/gm)
+    expect(actual).to.be.equal(10)
+  })
+
+  it('returns -1 if nothing matches the regular expression', () => {
+    const str = 'This is a test.'
+    const actual = indexOfRegExp(str, /nope/gm)
+    expect(actual).to.be.equal(-1)
+  })
+
+  it('can start from a position other than zero', () => {
+    const str = 'This is a testy test.'
+    const actual = indexOfRegExp(str, /test/gm, 11)
+    expect(actual).to.be.equal(16)
   })
 })
 
