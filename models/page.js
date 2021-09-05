@@ -439,6 +439,21 @@ PageSchema.statics.findByPath = async function (path, searcher) {
 }
 
 /**
+ * Returns an array of pages that have the given title.
+ * @param {string} title - The title of the page that the searcher is
+ *   looking for.
+ * @param {User} searcher - The user conducting the search.
+ * @returns {Promise<Page[]>} - A Promise that resolves with an array of pages
+ *   that have the title requested.
+ */
+
+PageSchema.statics.findByTitle = async function (title, searcher) {
+  const Page = this.model('Page')
+  const pages = await Page.find(makeDiscreteQuery({ title }, searcher))
+  return pages && pages.length > 0 ? [...pages] : []
+}
+
+/**
  * Find all of the members of a category (that the searcher knows about).
  * @param {string} category - The name of the category that the searcher would
  *   like to find the members to.

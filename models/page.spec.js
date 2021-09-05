@@ -603,6 +603,44 @@ describe('Page', () => {
       })
     })
 
+    describe('findByTitle', () => {
+      it('returns an empty array if there are no pages with that title', async () => {
+        const { user } = await createTestDocs(model)
+        const actual = await Page.findByTitle('lolnope', user)
+        expect(actual).to.be.eql([])
+      })
+
+      it('returns an array with one page if that\'s all that matches', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = await Page.findByTitle(page.title, user)
+        expect(actual.map(p => p._id.toString())).to.be.eql([page._id.toString()])
+      })
+
+      it('returns an array with all the pages with that title', async () => {
+        const { page, user } = await createTestDocs(model)
+        const p2 = await Page.create({ title: page.title, body: 'This is a different page.' }, user)
+        const actual = await Page.findByTitle(page.title, user)
+        expect(actual.map(p => p._id.toString())).to.be.eql([page._id.toString(), p2._id.toString()])
+      })
+
+      it('won\'t return pages that are a secret to the searcher', async () => {
+        const { page, user } = await createTestDocs(model)
+        page.secrets.existence = true
+        await page.save()
+        const actual = await Page.findByTitle(page.title, user)
+        expect(actual).to.be.eql([])
+      })
+
+      it('returns pages that are secrets that the user knows', async () => {
+        const { page, user } = await createTestDocs(model)
+        page.secrets.existence = true
+        page.secrets.knowers.addToSet(user.getPOV()._id)
+        await page.save()
+        const actual = await Page.findByTitle(page.title, user)
+        expect(actual.map(p => p._id.toString())).to.be.eql([page._id.toString()])
+      })
+    })
+
     describe('findMembers', () => {
       it('returns the pages that belong to a category', async () => {
         const { page, user } = await createTestDocs(model, '[[Category:Tests]]')
