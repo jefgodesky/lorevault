@@ -182,6 +182,25 @@ PageSchema.methods.getCategorization = function (name, searcher) {
 }
 
 /**
+ * Return an array of the pages that link to this page (that you know about).
+ * @param {User} searcher - The user conducting the search.
+ * @returns {Promise<Page[]>} - An array of pages that link to this page,
+ *   excluding any pages that are secret to you, or where any links to this
+ *   page are part of secrets that you don't know.
+ */
+
+PageSchema.methods.getLinks = async function (searcher) {
+  const Page = model('Page')
+  const pages = await Page.find(makeDiscreteQuery({ 'links.page': this._id }, searcher))
+  if (!pages) return []
+  return pages.filter(page => {
+    const pov = searcher.getPOV()
+    const links = page.links.filter(link => !link.secret || pov === 'Loremaster' || page.knows(pov, link.codename))
+    return links.length > 0
+  })
+}
+
+/**
  * Return an object with information about the page's file.
  * @returns {{url: string, mimetype: string, display: string,
  *   size: number}|null} - An object that describes the page's file. This

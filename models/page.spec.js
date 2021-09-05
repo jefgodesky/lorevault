@@ -173,6 +173,65 @@ describe('Page', () => {
       })
     })
 
+    describe('getLinks', () => {
+      it('returns an array of pages that link to the page', async () => {
+        const { page, user } = await createTestDocs(model)
+        await Page.create({ title: 'Second Page', body: '[[Test Page]]' }, user)
+        const links = await page.getLinks(user)
+        expect(links).to.have.lengthOf(1)
+      })
+
+      it('returns a page once even if it has several links', async () => {
+        const { page, user } = await createTestDocs(model)
+        await Page.create({ title: 'Second Page', body: '[[Test Page]] [[Test Page]] [[Test Page]]' }, user)
+        const links = await page.getLinks(user)
+        expect(links).to.have.lengthOf(1)
+      })
+
+      it('returns the pages that link to the page', async () => {
+        const { page, user } = await createTestDocs(model)
+        const p2 = await Page.create({ title: 'Second Page', body: '[[Test Page]]' }, user)
+        const links = await page.getLinks(user)
+        expect(links[0]._id.toString()).to.be.equal(p2._id.toString())
+      })
+
+      it('doesn\'t return pages that are secrets to you', async () => {
+        const { page, user } = await createTestDocs(model)
+        const p2 = await Page.create({ title: 'Second Page', body: '[[Test Page]]' }, user)
+        p2.secrets.existence = true
+        await p2.save()
+        const links = await page.getLinks(user)
+        expect(links).to.be.empty
+      })
+
+      it('returns pages that are secrets that you know', async () => {
+        const { page, user } = await createTestDocs(model)
+        const p2 = await Page.create({ title: 'Second Page', body: '[[Test Page]]' }, user)
+        p2.secrets.existence = true
+        p2.secrets.knowers.addToSet(user.getPOV()._id)
+        await p2.save()
+        const links = await page.getLinks(user)
+        expect(links).to.have.lengthOf(1)
+      })
+
+      it('doesn\'t return pages that are linked in secrets that you don\'t know', async () => {
+        const { page, user, other } = await createTestDocs(model)
+        await Page.create({ title: 'Second Page', body: '||::Wombat:: [[Test Page]]||' }, user)
+        const links = await page.getLinks(other)
+        expect(links).to.be.empty
+      })
+
+      it('returns pages that are linked in secrets that you know', async () => {
+        const { page, user, other } = await createTestDocs(model)
+        const p2 = await Page.create({ title: 'Second Page', body: '||::Wombat:: [[Test Page]]||' }, user)
+        const char = await Page.create({ title: 'New Character', body: 'This is about a new character.' }, other)
+        await other.claim(char)
+        await p2.reveal(other.getPOV(), 'Wombat')
+        const links = await page.getLinks(other)
+        expect(links).to.have.lengthOf(1)
+      })
+    })
+
     describe('getFile', () => {
       it('returns null if the page doesn\'t have a file', async () => {
         const { page } = await createTestDocs(model)
