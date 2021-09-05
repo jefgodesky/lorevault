@@ -49,7 +49,8 @@ const PageSchema = new Schema({
   categories: [{
     name: String,
     sort: String,
-    secret: String
+    secret: Boolean,
+    codename: String
   }],
   created: {
     type: Date,
@@ -108,9 +109,9 @@ PageSchema.pre('save', function (next) {
     const sort = regexMatch && regexMatch[3] ? regexMatch[3].trim() : this.title
     const secret = isInSecret(category, body)
     if (!name) return false
-    const obj = { name }
+    const obj = { name, secret: Boolean(secret) }
     if (sort) obj.sort = sort
-    if (secret) obj.secret = secret
+    if (secret) obj.codename = secret
     return obj
   }).filter(cat => cat !== false)
   next()
@@ -149,7 +150,7 @@ PageSchema.methods.getVersion = function (id) {
 
 PageSchema.methods.getCategorization = function (name, searcher) {
   const cat = findOne(this.categories, c => c.name === name)
-  if (!cat || (cat.secret && !this.knows(searcher.getPOV(), cat.secret))) return false
+  if (!cat || (cat.secret && !this.knows(searcher.getPOV(), cat.codename))) return false
   return cat
 }
 

@@ -54,12 +54,17 @@ describe('Page', () => {
 
       it('has no secret property if it isn\'t a secret', async () => {
         const { page } = await createTestDocs(model, '[[Category:Tests]]')
-        expect(page.categories[0].secret).to.be.undefined
+        expect(page.categories[0].secret).to.be.false
+      })
+
+      it('records if it\'s a secret.', async () => {
+        const { page } = await createTestDocs(model, '||::Wombat:: [[Category:Tests]]||')
+        expect(page.categories[0].secret).to.be.true
       })
 
       it('records the codename if it\'s a secret.', async () => {
         const { page } = await createTestDocs(model, '||::Wombat:: [[Category:Tests]]||')
-        expect(page.categories[0].secret).to.be.eql('Wombat')
+        expect(page.categories[0].codename).to.be.eql('Wombat')
       })
     })
 
