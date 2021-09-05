@@ -54,12 +54,60 @@ describe('Page', () => {
 
       it('has no secret property if it isn\'t a secret', async () => {
         const { page } = await createTestDocs(model, '[[Category:Tests]]')
-        expect(page.categories[0].secret).to.be.undefined
+        expect(page.categories[0].secret).to.be.false
+      })
+
+      it('records if it\'s a secret.', async () => {
+        const { page } = await createTestDocs(model, '||::Wombat:: [[Category:Tests]]||')
+        expect(page.categories[0].secret).to.be.true
       })
 
       it('records the codename if it\'s a secret.', async () => {
         const { page } = await createTestDocs(model, '||::Wombat:: [[Category:Tests]]||')
-        expect(page.categories[0].secret).to.be.eql('Wombat')
+        expect(page.categories[0].codename).to.be.eql('Wombat')
+      })
+    })
+
+    describe('Links', () => {
+      it('records links in the text', async () => {
+        const { user } = await createTestDocs(model)
+        const page = await Page.create({ title: 'Second Test', body: '[[Test Page|Hello!]]' }, user)
+        expect(page.links).to.have.lengthOf(1)
+      })
+
+      it('doesn\'t record new links', async () => {
+        const { page } = await createTestDocs(model, '[[Second Test]]')
+        expect(page.links).to.be.empty
+      })
+
+      it('records the pages that are linked', async () => {
+        const { page, user } = await createTestDocs(model)
+        const linker = await Page.create({ title: 'Second Test', body: '[[Test Page|Hello!]]' }, user)
+        expect(linker.links[0].page._id.toString()).to.be.equal(page._id.toString())
+      })
+
+      it('records that a link is not a secret', async () => {
+        const { user } = await createTestDocs(model)
+        const page = await Page.create({ title: 'Second Test', body: '[[Test Page|Hello!]]' }, user)
+        expect(page.links[0].secret).to.be.false
+      })
+
+      it('records that a link is a secret', async () => {
+        const { user } = await createTestDocs(model)
+        const page = await Page.create({ title: 'Second Test', body: '||::Wombat:: [[Test Page|Hello!]]||' }, user)
+        expect(page.links[0].secret).to.be.true
+      })
+
+      it('records an empty string for codename when the link isn\'t a secret', async () => {
+        const { user } = await createTestDocs(model)
+        const page = await Page.create({ title: 'Second Test', body: '[[Test Page|Hello!]]' }, user)
+        expect(page.links[0].codename).to.be.equal('')
+      })
+
+      it('records the codename of the secret that the link is in', async () => {
+        const { user } = await createTestDocs(model)
+        const page = await Page.create({ title: 'Second Test', body: '||::Wombat:: [[Test Page|Hello!]]||' }, user)
+        expect(page.links[0].codename).to.be.equal('Wombat')
       })
     })
 
@@ -122,6 +170,65 @@ describe('Page', () => {
         const { page, user } = await createTestDocs(model, '||[[Category:Test]]||')
         const actual = page.getCategorization('Test', user)
         expect(actual.name).to.be.equal('Test')
+      })
+    })
+
+    describe('getLinks', () => {
+      it('returns an array of pages that link to the page', async () => {
+        const { page, user } = await createTestDocs(model)
+        await Page.create({ title: 'Second Page', body: '[[Test Page]]' }, user)
+        const links = await page.getLinks(user)
+        expect(links).to.have.lengthOf(1)
+      })
+
+      it('returns a page once even if it has several links', async () => {
+        const { page, user } = await createTestDocs(model)
+        await Page.create({ title: 'Second Page', body: '[[Test Page]] [[Test Page]] [[Test Page]]' }, user)
+        const links = await page.getLinks(user)
+        expect(links).to.have.lengthOf(1)
+      })
+
+      it('returns the pages that link to the page', async () => {
+        const { page, user } = await createTestDocs(model)
+        const p2 = await Page.create({ title: 'Second Page', body: '[[Test Page]]' }, user)
+        const links = await page.getLinks(user)
+        expect(links[0]._id.toString()).to.be.equal(p2._id.toString())
+      })
+
+      it('doesn\'t return pages that are secrets to you', async () => {
+        const { page, user } = await createTestDocs(model)
+        const p2 = await Page.create({ title: 'Second Page', body: '[[Test Page]]' }, user)
+        p2.secrets.existence = true
+        await p2.save()
+        const links = await page.getLinks(user)
+        expect(links).to.be.empty
+      })
+
+      it('returns pages that are secrets that you know', async () => {
+        const { page, user } = await createTestDocs(model)
+        const p2 = await Page.create({ title: 'Second Page', body: '[[Test Page]]' }, user)
+        p2.secrets.existence = true
+        p2.secrets.knowers.addToSet(user.getPOV()._id)
+        await p2.save()
+        const links = await page.getLinks(user)
+        expect(links).to.have.lengthOf(1)
+      })
+
+      it('doesn\'t return pages that are linked in secrets that you don\'t know', async () => {
+        const { page, user, other } = await createTestDocs(model)
+        await Page.create({ title: 'Second Page', body: '||::Wombat:: [[Test Page]]||' }, user)
+        const links = await page.getLinks(other)
+        expect(links).to.be.empty
+      })
+
+      it('returns pages that are linked in secrets that you know', async () => {
+        const { page, user, other } = await createTestDocs(model)
+        const p2 = await Page.create({ title: 'Second Page', body: '||::Wombat:: [[Test Page]]||' }, user)
+        const char = await Page.create({ title: 'New Character', body: 'This is about a new character.' }, other)
+        await other.claim(char)
+        await p2.reveal(other.getPOV(), 'Wombat')
+        const links = await page.getLinks(other)
+        expect(links).to.have.lengthOf(1)
       })
     })
 
@@ -575,6 +682,119 @@ describe('Page', () => {
   })
 
   describe('statics', () => {
+    describe('findByPath', () => {
+      it('returns the page with that path', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = await Page.findByPath('test-page', user)
+        expect(page._id.toString()).to.be.equal(actual._id.toString())
+      })
+
+      it('handles the initial slash', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = await Page.findByPath('/test-page', user)
+        expect(page._id.toString()).to.be.equal(actual._id.toString())
+      })
+
+      it('returns null if the page doesn\'t exist', async () => {
+        const { user } = await createTestDocs(model)
+        const actual = await Page.findByPath('lol-nope', user)
+        expect(actual).to.be.null
+      })
+
+      it('returns null if the page is a secret that you don\'t know', async () => {
+        const { page, user } = await createTestDocs(model)
+        page.secrets.existence = true
+        await page.save()
+        const actual = await Page.findByPath('test-page', user)
+        expect(actual).to.be.null
+      })
+
+      it('returns the page it it\'s a secret that you know', async () => {
+        const { page, user } = await createTestDocs(model)
+        page.secrets.existence = true
+        page.secrets.knowers.addToSet(user.getPOV()._id)
+        await page.save()
+        const actual = await Page.findByPath('test-page', user)
+        expect(page._id.toString()).to.be.equal(actual._id.toString())
+      })
+    })
+
+    describe('findByTitle', () => {
+      it('returns an empty array if there are no pages with that title', async () => {
+        const { user } = await createTestDocs(model)
+        const actual = await Page.findByTitle('lolnope', user)
+        expect(actual).to.be.eql([])
+      })
+
+      it('returns an array with one page if that\'s all that matches', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = await Page.findByTitle(page.title, user)
+        expect(actual.map(p => p._id.toString())).to.be.eql([page._id.toString()])
+      })
+
+      it('returns an array with all the pages with that title', async () => {
+        const { page, user } = await createTestDocs(model)
+        const p2 = await Page.create({ title: page.title, body: 'This is a different page.' }, user)
+        const actual = await Page.findByTitle(page.title, user)
+        expect(actual.map(p => p._id.toString())).to.be.eql([page._id.toString(), p2._id.toString()])
+      })
+
+      it('won\'t return pages that are a secret to the searcher', async () => {
+        const { page, user } = await createTestDocs(model)
+        page.secrets.existence = true
+        await page.save()
+        const actual = await Page.findByTitle(page.title, user)
+        expect(actual).to.be.eql([])
+      })
+
+      it('returns pages that are secrets that the user knows', async () => {
+        const { page, user } = await createTestDocs(model)
+        page.secrets.existence = true
+        page.secrets.knowers.addToSet(user.getPOV()._id)
+        await page.save()
+        const actual = await Page.findByTitle(page.title, user)
+        expect(actual.map(p => p._id.toString())).to.be.eql([page._id.toString()])
+      })
+    })
+
+    describe('findOneByTitle', () => {
+      it('returns null if there are no pages with that title', async () => {
+        const { user } = await createTestDocs(model)
+        const actual = await Page.findOneByTitle('lolnope', user)
+        expect(actual).to.be.null
+      })
+
+      it('returns a page', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = await Page.findOneByTitle(page.title, user)
+        expect(actual._id.toString()).to.be.eql(page._id.toString())
+      })
+
+      it('returns the first page if several match', async () => {
+        const { page, user } = await createTestDocs(model)
+        await Page.create({ title: page.title, body: 'This is a different page.' }, user)
+        const actual = await Page.findOneByTitle(page.title, user)
+        expect(actual._id.toString()).to.be.eql(page._id.toString())
+      })
+
+      it('won\'t return pages that are a secret to the searcher', async () => {
+        const { page, user } = await createTestDocs(model)
+        page.secrets.existence = true
+        await page.save()
+        const actual = await Page.findOneByTitle(page.title, user)
+        expect(actual).to.be.null
+      })
+
+      it('returns pages that are secrets that the user knows', async () => {
+        const { page, user } = await createTestDocs(model)
+        page.secrets.existence = true
+        page.secrets.knowers.addToSet(user.getPOV()._id)
+        await page.save()
+        const actual = await Page.findOneByTitle(page.title, user)
+        expect(actual._id.toString()).to.be.eql(page._id.toString())
+      })
+    })
+
     describe('findMembers', () => {
       it('returns the pages that belong to a category', async () => {
         const { page, user } = await createTestDocs(model, '[[Category:Tests]]')

@@ -79,6 +79,7 @@ UserSchema.methods.claim = async function (page, stats) {
   this.characters.list.addToSet(char)
   this.characters.active = this.characters.active || char
   if (this.pov === 'Anonymous') this.pov = 'Character'
+  await this.save()
   return true
 }
 

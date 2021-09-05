@@ -1,6 +1,7 @@
 import smartquotes from 'smartquotes'
 
 import assignCodenames from '../transformers/assignCodenames.js'
+import renderLinks from '../transformers/renderLinks.js'
 import { pickRandom, union, findOne, match, isInSecret, makeDiscreteQuery, alphabetize, getS3 } from '../utils.js'
 
 import config from '../config/index.js'
@@ -49,7 +50,16 @@ const PageSchema = new Schema({
   categories: [{
     name: String,
     sort: String,
-    secret: String
+    secret: Boolean,
+    codename: String
+  }],
+  links: [{
+    page: {
+      type: Schema.Types.ObjectId,
+      ref: 'Page'
+    },
+    secret: Boolean,
+    codename: String
   }],
   created: {
     type: Date,
@@ -108,11 +118,29 @@ PageSchema.pre('save', function (next) {
     const sort = regexMatch && regexMatch[3] ? regexMatch[3].trim() : this.title
     const secret = isInSecret(category, body)
     if (!name) return false
-    const obj = { name }
+    const obj = { name, secret: Boolean(secret) }
     if (sort) obj.sort = sort
-    if (secret) obj.secret = secret
+    if (secret) obj.codename = secret
     return obj
   }).filter(cat => cat !== false)
+  next()
+})
+
+/**
+ * Pull links from text each time the page is saved.
+ */
+
+PageSchema.pre('save', async function (next) {
+  const User = model('User')
+  const curr = this.getCurr()
+  const editor = await User.findById(curr.editor)
+  const pov = editor.getPOV() || pov
+  const { links } = await renderLinks(curr.body, this.getSecrets(pov), editor)
+  this.links = links.map(link => ({
+    page: link.page,
+    secret: Boolean(link.secret),
+    codename: link.secret || ''
+  })).filter(link => link.page !== null)
   next()
 })
 
@@ -149,8 +177,27 @@ PageSchema.methods.getVersion = function (id) {
 
 PageSchema.methods.getCategorization = function (name, searcher) {
   const cat = findOne(this.categories, c => c.name === name)
-  if (!cat || (cat.secret && !this.knows(searcher.getPOV(), cat.secret))) return false
+  if (!cat || (cat.secret && !this.knows(searcher.getPOV(), cat.codename))) return false
   return cat
+}
+
+/**
+ * Return an array of the pages that link to this page (that you know about).
+ * @param {User} searcher - The user conducting the search.
+ * @returns {Promise<Page[]>} - An array of pages that link to this page,
+ *   excluding any pages that are secret to you, or where any links to this
+ *   page are part of secrets that you don't know.
+ */
+
+PageSchema.methods.getLinks = async function (searcher) {
+  const Page = model('Page')
+  const pages = await Page.find(makeDiscreteQuery({ 'links.page': this._id }, searcher))
+  if (!pages) return []
+  return pages.filter(page => {
+    const pov = searcher.getPOV()
+    const links = page.links.filter(link => !link.secret || pov === 'Loremaster' || page.knows(pov, link.codename))
+    return links.length > 0
+  })
 }
 
 /**
@@ -421,6 +468,52 @@ PageSchema.methods.deleteFile = async function () {
   if (!this.file?.url) return
   const s3 = getS3()
   await s3.deleteObject({ Bucket: bucket, Key: this.file.url.substr(domain.length + 1) }).promise()
+}
+
+/**
+ * Find a page by its path.
+ * @param {string} path - The path of the page that the searcher would like
+ *   to find.
+ * @param {User} searcher - The user conducting the search.
+ * @returns {Promise<Page|null>} - A Promise that resolves with the page with
+ *   the given path, if it exists and the user knows about it, or `null` if one
+ *   of those conditions is not met.
+ */
+
+PageSchema.statics.findByPath = async function (path, searcher) {
+  const Page = this.model('Page')
+  return Page.findOne(makeDiscreteQuery({ path: path.startsWith('/') ? path.substring(1) : path }, searcher))
+}
+
+/**
+ * Returns an array of pages that have the given title.
+ * @param {string} title - The title of the page that the searcher is
+ *   looking for.
+ * @param {User} searcher - The user conducting the search.
+ * @returns {Promise<Page[]>} - A Promise that resolves with an array of pages
+ *   that have the title requested.
+ */
+
+PageSchema.statics.findByTitle = async function (title, searcher) {
+  const Page = this.model('Page')
+  const pages = await Page.find(makeDiscreteQuery({ title }, searcher))
+  return pages && pages.length > 0 ? [...pages] : []
+}
+
+/**
+ * Returns the first page that has the given title.
+ * @param {string} title - The title of the page that the searcher is
+ *   looking for.
+ * @param {User} searcher - The user conducting the search.
+ * @returns {Promise<Page|null>} - The first page that has the given title and
+ *   that the searcher has access to, or `null` if no page meets both of those
+ *   criteria.
+ */
+
+PageSchema.statics.findOneByTitle = async function (title, searcher) {
+  const Page = this.model('Page')
+  const pages = await Page.findByTitle(title, searcher)
+  return pages.length > 0 ? pages[0] : null
 }
 
 /**
