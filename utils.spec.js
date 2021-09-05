@@ -10,6 +10,7 @@ import {
   findOne,
   makeDiscreteQuery,
   match,
+  saveBlocks,
   isInSecret,
   indexOfRegExp,
   alphabetize,
@@ -128,6 +129,32 @@ describe('match', () => {
     const str = 'This is a Test. We are Testing. Test'
     const actual = match(str, /Test/m)
     expect(actual.map(m => m.index)).to.be.eql([10, 23, 32])
+  })
+})
+
+describe('saveBlocks', () => {
+  it('replaces instances of the blocks', () => {
+    const orig = 'The first rule of Unit Testing is you do not talk about Unit Testing.'
+    const { str } = saveBlocks(orig, /Unit Testing/, 'REDACTED')
+    expect(str).to.be.equal('The first rule of ####REDACTED0001#### is you do not talk about ####REDACTED0002####.')
+  })
+
+  it('saves information about each instance', () => {
+    const orig = 'The first rule of Unit Testing is you do not talk about Unit Testing.'
+    const { blocks } = saveBlocks(orig, /Unit Testing/, 'REDACTED')
+    expect(blocks).to.have.lengthOf(2)
+  })
+
+  it('saves the original string from each instance', () => {
+    const orig = 'The first rule of Unit Testing is you do not talk about Unit Testing.'
+    const { blocks } = saveBlocks(orig, /Unit Testing/, 'REDACTED')
+    expect(blocks.map(b => b.str)).to.be.eql(['Unit Testing', 'Unit Testing'])
+  })
+
+  it('saves the replacement used for each instance', () => {
+    const orig = 'The first rule of Unit Testing is you do not talk about Unit Testing.'
+    const { blocks } = saveBlocks(orig, /Unit Testing/, 'REDACTED')
+    expect(blocks.map(b => b.key)).to.be.eql(['####REDACTED0001####', '####REDACTED0002####'])
   })
 })
 

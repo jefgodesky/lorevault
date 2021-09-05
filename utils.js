@@ -116,6 +116,38 @@ const match = (str, regex) => {
 }
 
 /**
+ * This method pulls blocks of text out of a string, along with information
+ * needed to restore it later, perhaps after some other transformations have
+ * been done on the string.
+ * @param {string} str - The string being operated on.
+ * @param {RegExp} regex - The regular expression of the substrings that we'd
+ *   like to find and save.
+ * @param {string} [code = 'STR'] - A string used to identify substrings saved
+ *   by one execution of this method versus another. For example, with the
+ *   default value of `STR`, the first matched string will be replaced with
+ *   `####STR0001####`, the second by `####STR0002####`, and so on.
+ * @returns {{str: string, blocks: {str: string, index: number}[], code: string}} -
+ *   An object with the following properties:
+ *     `str`      The string that we're working on.
+ *     `blocks`   The blocks that were replaced. This is an array of objects.
+ *                Each object includes a property `str` (the original string
+ *                that was replaced) and a property `key` (the string with
+ *                which `str` was replaced in the new string).
+ */
+
+const saveBlocks = (str, regex, code = 'STR') => {
+  let cpy = str
+  const matches = match(str, regex)
+  const blocks = []
+  for (let i = 0; i < matches.length; i++) {
+    const key = `####${code.toUpperCase()}${String(i + 1).padStart(4, '0')}####`
+    blocks.push({ str: matches[i].str, key })
+    cpy = cpy.replace(matches[i].str, key)
+  }
+  return { str: cpy, blocks }
+}
+
+/**
  * Checks to see if the subject (`subj`) appears within any of the secrets in
  * the string provided (`body`).
  * @param {object} subj - An object that provides data on the string we're
@@ -199,6 +231,7 @@ export {
   findOne,
   makeDiscreteQuery,
   match,
+  saveBlocks,
   isInSecret,
   indexOfRegExp,
   alphabetize,
