@@ -64,6 +64,12 @@ describe('Character', () => {
         expect(char.constructor.modelName).to.be.equal('Character')
       })
 
+      it('sets the character\'s name', async () => {
+        const { page } = await createTestDocs(model)
+        const char = await Character.create(page)
+        expect(char.name).to.be.equal('Test Page')
+      })
+
       it('sets the character\'s page', async () => {
         const { page } = await createTestDocs(model)
         const char = await Character.create(page)

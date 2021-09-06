@@ -27,6 +27,7 @@ const addGames = async def => {
 }
 
 const CharacterSchema = new Schema(await addGames({
+  name: String,
   page: {
     type: Schema.Types.ObjectId,
     ref: 'Page'
@@ -104,8 +105,11 @@ CharacterSchema.statics.isClaimed = async function (page) {
  */
 
 CharacterSchema.statics.create = async function (page, player, stats) {
+  const Page = model('Page')
+  const fullpage = page?.title ? page : await Page.findById(page)
   const Character = model('Character')
   const char = new Character()
+  if (fullpage?.title) char.name = fullpage.title
   await char.update(page, player, stats)
   return char
 }
