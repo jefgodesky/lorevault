@@ -19,7 +19,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "mocha --reporter nyan"
+    "test": "mocha"
   },
   "dependencies": {
     "aws-sdk": "^2.983.0",
