@@ -1,0 +1,113 @@
+@use './mixins';
+@use './colors';
+
+%unformatted-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+%blocklike {
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 0 1em rgba(0, 0, 0, 0.5);
+}
+
+%layout-size {
+  margin: 2em;
+  width: calc(100% - 4em);
+
+  @media (min-width: 44em) {
+    margin: 2em auto;
+    max-width: 40em;
+  }
+}
+
+%layout-block {
+  @extend %layout-size;
+  @extend %blocklike;
+  padding: 2em;
+}
+
+%box {
+  background: #f1e8cb;
+  margin: 2em -2em;
+  padding: 2em;
+}
+
+%tabs {
+  @extend %layout-size;
+  margin-bottom: 0;
+  text-align: right;
+
+  ul {
+    @extend %unformatted-list;
+  }
+
+  li {
+    @extend %blocklike;
+    display: inline-block;
+  }
+
+  a {
+    color: black;
+    display: block;
+    padding: 1em 2em;
+    text-decoration: none;
+  }
+
+  li.active {
+    font-weight: bold;
+    padding: 1em 2em;
+  }
+}
+
+%left-circle-link {
+  background: #822000;
+  border-radius: 50%;
+  box-shadow: 0 0 0.25em rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  display: block;
+  float: left;
+  height: 2rem;
+  margin: 0 0 0 -3.5rem;
+  padding: 0.333rem;
+  width: 2rem;
+
+  img,
+  svg {
+    display: block;
+    height: 100%;
+    width: 100%;
+  }
+
+  path {
+    fill: #fff;
+  }
+}
+
+%box-text {
+  background: #eee;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  margin: 1em -2em;
+  padding: 2em;
+
+  blockquote {
+    margin: 1em 0;
+  }
+}
+
+%message {
+  @include mixins.message(colors.$altbg);
+  margin: 1em -2em;
+  padding: 1em 2em;
+
+  p,
+  li {
+    font-size: 80%;
+  }
+
+  li {
+    margin: 0.5em 0;
+  }
+}

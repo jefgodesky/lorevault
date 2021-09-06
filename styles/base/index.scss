@@ -1,0 +1,14 @@
+// Normalize CSS
+@forward 'node_modules/normalize-scss/sass/normalize';
+
+@use 'partials/layout';
+@use 'partials/typography';
+@use 'partials/buttons';
+@use 'partials/form';
+@use 'partials/tables';
+@use 'partials/page';
+@use 'partials/errors';
+@use 'partials/messages';
+
+// Import game-specific Sass
+@use 'games.scss';
