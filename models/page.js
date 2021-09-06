@@ -2,6 +2,7 @@ import smartquotes from 'smartquotes'
 
 import assignCodenames from '../transformers/assignCodenames.js'
 import renderLinks from '../transformers/renderLinks.js'
+import Template from './template.js'
 import { pickRandom, union, findOne, match, isInSecret, makeDiscreetQuery, alphabetize, getS3 } from '../utils.js'
 
 import config from '../config/index.js'
@@ -145,6 +146,23 @@ PageSchema.pre('save', async function (next) {
     secret: Boolean(link.secret),
     codename: link.secret || ''
   })).filter(link => link.page !== null)
+  next()
+})
+
+/**
+ * Catalog templates used on save.
+ */
+
+PageSchema.pre('save', async function (next) {
+  const { body } = this.getCurr()
+  const templates = Template.parse(body)
+  const arr = []
+  for (const template of templates) {
+    await template.recurse('Loremaster', (tpl, page) => {
+      arr.push(page._id)
+    })
+  }
+  this.templates = arr
   next()
 })
 
