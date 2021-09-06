@@ -12,6 +12,6 @@ const formatDate = (date, format) => {
   return d.format(format)
 }
 
-export {
+export default {
   formatDate
 }
