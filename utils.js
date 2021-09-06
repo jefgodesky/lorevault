@@ -116,6 +116,56 @@ const match = (str, regex) => {
 }
 
 /**
+ * This method pulls blocks of text out of a string, along with information
+ * needed to restore it later, perhaps after some other transformations have
+ * been done on the string.
+ * @param {string} str - The string being operated on.
+ * @param {RegExp} regex - The regular expression of the substrings that we'd
+ *   like to find and save.
+ * @param {string} [code = 'STR'] - A string used to identify substrings saved
+ *   by one execution of this method versus another. For example, with the
+ *   default value of `STR`, the first matched string will be replaced with
+ *   `####STR0001####`, the second by `####STR0002####`, and so on.
+ * @returns {{str: string, blocks: {str: string, index: number}[], code: string}} -
+ *   An object with the following properties:
+ *     `str`      The string that we're working on.
+ *     `blocks`   The blocks that were replaced. This is an array of objects.
+ *                Each object includes a property `str` (the original string
+ *                that was replaced) and a property `key` (the string with
+ *                which `str` was replaced in the new string).
+ */
+
+const saveBlocks = (str, regex, code = 'STR') => {
+  let cpy = str
+  const matches = match(str, regex)
+  const blocks = []
+  for (let i = 0; i < matches.length; i++) {
+    const key = `####${code.toUpperCase()}${String(i + 1).padStart(4, '0')}####`
+    blocks.push({ str: matches[i].str, key })
+    cpy = cpy.replace(matches[i].str, key)
+  }
+  return { str: cpy, blocks }
+}
+
+/**
+ * This method reverses the `saveBlocks` method, replacing each replacement
+ * string with the original string that was replaced.
+ * @param {string} str - The string we're working on.
+ * @param {{str: string, key: string}[]} blocks - An array of objects with data
+ *   for the blocks to be restored. This should come from a previous run of the
+ *   `saveBlocks` method.
+ * @returns {string} - The original string with all blocks restored.
+ */
+
+const restoreBlocks = (str, blocks) => {
+  let cpy = str
+  for (const block of blocks) {
+    cpy = cpy.replace(block.key, block.str)
+  }
+  return cpy
+}
+
+/**
  * Checks to see if the subject (`subj`) appears within any of the secrets in
  * the string provided (`body`).
  * @param {object} subj - An object that provides data on the string we're
@@ -140,6 +190,25 @@ const isInSecret = (subj, body) => {
     }
   }
   return false
+}
+
+/**
+ * Find the index of the first instance of a substring that matches a given
+ * regular expression. Effectively, this is a version of
+ * `String.prototype.indexOf()` that can take a regular expression instead of
+ * a string.
+ * @param {string} str - The string to search.
+ * @param {RegExp} regex - The regular expression to search for.
+ * @param {number?} start - (Optional). The index to start searching from
+ *   (Default: `0`)
+ * @returns {number} - The index of the first instance of a substring after the
+ *   `start` argument that matches the given regular expression (`regex`). If
+ *   no such substring can be found, it returns -1 instead.
+ */
+
+const indexOfRegExp = (str, regex, start = 0) => {
+  const index = str.substring(start).search(regex)
+  return index > -1 ? index + start : index
 }
 
 /**
@@ -180,7 +249,10 @@ export {
   findOne,
   makeDiscreteQuery,
   match,
+  saveBlocks,
+  restoreBlocks,
   isInSecret,
+  indexOfRegExp,
   alphabetize,
   getS3
 }

@@ -10,7 +10,10 @@ import {
   findOne,
   makeDiscreteQuery,
   match,
+  saveBlocks,
+  restoreBlocks,
   isInSecret,
+  indexOfRegExp,
   alphabetize,
   getS3
 } from './utils.js'
@@ -130,6 +133,41 @@ describe('match', () => {
   })
 })
 
+describe('saveBlocks', () => {
+  it('replaces instances of the blocks', () => {
+    const orig = 'The first rule of Unit Testing is you do not talk about Unit Testing.'
+    const { str } = saveBlocks(orig, /Unit Testing/, 'REDACTED')
+    expect(str).to.be.equal('The first rule of ####REDACTED0001#### is you do not talk about ####REDACTED0002####.')
+  })
+
+  it('saves information about each instance', () => {
+    const orig = 'The first rule of Unit Testing is you do not talk about Unit Testing.'
+    const { blocks } = saveBlocks(orig, /Unit Testing/, 'REDACTED')
+    expect(blocks).to.have.lengthOf(2)
+  })
+
+  it('saves the original string from each instance', () => {
+    const orig = 'The first rule of Unit Testing is you do not talk about Unit Testing.'
+    const { blocks } = saveBlocks(orig, /Unit Testing/, 'REDACTED')
+    expect(blocks.map(b => b.str)).to.be.eql(['Unit Testing', 'Unit Testing'])
+  })
+
+  it('saves the replacement used for each instance', () => {
+    const orig = 'The first rule of Unit Testing is you do not talk about Unit Testing.'
+    const { blocks } = saveBlocks(orig, /Unit Testing/, 'REDACTED')
+    expect(blocks.map(b => b.key)).to.be.eql(['####REDACTED0001####', '####REDACTED0002####'])
+  })
+})
+
+describe('restoreBlocks', () => {
+  it('reverses saveBlocks', () => {
+    const orig = 'The first rule of Unit Testing is you do not talk about Unit Testing.'
+    const { str, blocks } = saveBlocks(orig, /Unit Testing/, 'REDACTED')
+    const actual = restoreBlocks(str, blocks)
+    expect(actual).to.be.equal(orig)
+  })
+})
+
 describe('isInSecret', () => {
   it('returns false if the match is not in any secret', () => {
     const str = 'This is a test.'
@@ -141,6 +179,26 @@ describe('isInSecret', () => {
     const str = '||::Wombat:: This is a test.||'
     const actual = isInSecret(match(str, /test/)[0], str)
     expect(actual).to.be.equal('Wombat')
+  })
+})
+
+describe('indexOfRegExp', () => {
+  it('returns first index of substring matching the regular expression', () => {
+    const str = 'This is a test.'
+    const actual = indexOfRegExp(str, /test/gm)
+    expect(actual).to.be.equal(10)
+  })
+
+  it('returns -1 if nothing matches the regular expression', () => {
+    const str = 'This is a test.'
+    const actual = indexOfRegExp(str, /nope/gm)
+    expect(actual).to.be.equal(-1)
+  })
+
+  it('can start from a position other than zero', () => {
+    const str = 'This is a testy test.'
+    const actual = indexOfRegExp(str, /test/gm, 11)
+    expect(actual).to.be.equal(16)
   })
 })
 
