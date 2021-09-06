@@ -40,6 +40,49 @@ describe('Template', () => {
     })
   })
 
+  describe('list', () => {
+    it('lists the template', async () => {
+      const { user } = await createTestDocs(model)
+      await Page.create({ title: 'Template:Test', body: 'This is my template.' }, user)
+      const template = new Template('{{Test}}')
+      const actual = await template.list(user)
+      expect(actual).to.have.lengthOf(1)
+    })
+
+    it('provides the template\'s ID', async () => {
+      const { user } = await createTestDocs(model)
+      const page = await Page.create({ title: 'Template:Test', body: 'This is my template.' }, user)
+      const template = new Template('{{Test}}')
+      const actual = await template.list(user)
+      expect(actual[0].page).to.be.eql(page._id)
+    })
+
+    it('provides the template\'s name', async () => {
+      const { user } = await createTestDocs(model)
+      await Page.create({ title: 'Template:Test', body: 'This is my template.' }, user)
+      const template = new Template('{{Test}}')
+      const actual = await template.list(user)
+      expect(actual[0].name).to.be.equal('Test')
+    })
+
+    it('provides the template\'s path', async () => {
+      const { user } = await createTestDocs(model)
+      const page = await Page.create({ title: 'Template:Test', body: 'This is my template.' }, user)
+      const template = new Template('{{Test}}')
+      const actual = await template.list(user)
+      expect(actual[0].path).to.be.equal(page.path)
+    })
+
+    it('lists deeper templates recursively', async () => {
+      const { user } = await createTestDocs(model)
+      await Page.create({ title: 'Template:Inner', body: 'Inner template' }, user)
+      await Page.create({ title: 'Template:Outer', body: '{{Inner}}' }, user)
+      const template = new Template('{{Outer}}')
+      const actual = await template.list(user)
+      expect(actual).to.have.lengthOf(2)
+    })
+  })
+
   describe('parseParams', () => {
     it('can parse ordered parameters', () => {
       const actual = Template.parseParams('hello|world')

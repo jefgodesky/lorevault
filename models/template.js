@@ -44,6 +44,27 @@ class Template {
   }
 
   /**
+   * Returns an array listing this template and any templates that it invokes,
+   * recursively.
+   * @param {User} user - The user who initiated this action.
+   * @returns {Promise<{ page: Schema.Types.ObjectId, name: string}[]>} - An
+   *   array of objects documenting the template and any other templates that
+   *   this template calls, recursively. Each object has the following
+   *   properties:
+   *     `page`   The ID of the template's Page document.
+   *     `name`   The name of the template.
+   *     `path`   The path for the template's Page document.
+   */
+
+  async list (user) {
+    const templates = []
+    await this.recurse(user, tpl => {
+      templates.push({ page: tpl._id, name: tpl.title.substring(9), path: tpl.path })
+    })
+    return templates
+  }
+
+  /**
    * Parse a string representing a template's parameters into an object.
    * @param {string} str - A string representing the template's parameters.
    * @return {{ordered: string[], named: {}}} - An object representing the
