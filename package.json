@@ -54,6 +54,7 @@
     "commander": "^8.1.0",
     "mocha": "^9.1.1",
     "mongodb-memory-server": "^7.3.6",
+    "normalize-scss": "^7.0.1",
     "sass": "^1.39.0"
   }
 }
