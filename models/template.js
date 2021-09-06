@@ -56,9 +56,9 @@ class Template {
    *     `path`   The path for the template's Page document.
    */
 
-  async list (user) {
+  async list (lister) {
     const templates = []
-    await this.recurse(user, tpl => {
+    await this.recurse(lister, tpl => {
       templates.push({ page: tpl._id, name: tpl.title.substring(9), path: tpl.path })
     })
     return templates
