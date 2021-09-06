@@ -42,6 +42,11 @@ describe('Template', () => {
       expect(name).to.be.equal('TestTemplate')
     })
 
+    it('gets the original string', () => {
+      const { str } = Template.parseInstance('{{TestTemplate}}')
+      expect(str).to.be.equal('{{TestTemplate}}')
+    })
+
     it('gets ordered parameters', () => {
       const { params } = Template.parseInstance('{{TestTemplate|hello|world}}')
       expect(params.ordered).to.be.eql(['hello', 'world'])

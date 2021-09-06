@@ -52,6 +52,7 @@ class Template {
    *                `parseParams` method for more details on this). Any content
    *                within the invocation is saved as the named `content`
    *                parameter.
+   *     `str`      The original string invocation.
    */
 
   static parseInstance (str) {
@@ -61,9 +62,9 @@ class Template {
     const params = Template.parseParams(front[4])
     const contentRegex = new RegExp(`{{${name}.*?}}((.|\n|\r)*?){{\\/${name}}}`)
     const content = str.match(contentRegex)
-    if (!content || content.length < 1) return { name, params }
+    if (!content || content.length < 1) return { name, params, str }
     params.named.content = content[1]
-    return { name, params }
+    return { name, params, str }
   }
 
   /**
