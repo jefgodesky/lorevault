@@ -7,7 +7,9 @@ import { match, isInSecret } from '../utils.js'
  * @param {string} str - The string to parse.
  * @param {{}} secrets - The secrets parsed from the string. Generally, this
  *   object should be produced by running `parseSecrets` on `str`.
- * @param {User} renderer - The person we're parsing for.
+ * @param {User|string} renderer - The user we're rendering these links for, or
+ *   the string `Loremaster` for a loremaster, or the string `Anonymous` for an
+ *   anonymous user.
  * @returns {Promise<{str: string, links: object}>} - A Promise that resolves
  *   with an object with two properties: `str`, which provides the updated
  *   version of the original string with all links within it parsed out, and

@@ -2,7 +2,7 @@ import smartquotes from 'smartquotes'
 
 import assignCodenames from '../transformers/assignCodenames.js'
 import renderLinks from '../transformers/renderLinks.js'
-import { pickRandom, union, findOne, match, isInSecret, makeDiscreteQuery, alphabetize, getS3 } from '../utils.js'
+import { pickRandom, union, findOne, match, isInSecret, makeDiscreetQuery, alphabetize, getS3 } from '../utils.js'
 
 import config from '../config/index.js'
 
@@ -172,7 +172,9 @@ PageSchema.methods.getVersion = function (id) {
 /**
  * Return the page's categorization object for the given category.
  * @param {string} name - The name of the category.
- * @param {User} searcher - The user asking for the categorization
+ * @param {User|string} searcher - The user asking for the categorization, or
+ *   the string `Loremaster` for a loremaster, or the string `Anonymous` for an
+ *   anonymous user.
  * @returns {{name: string, sort: string, secret: string}|false} - The page's
  *   categorization object for the category requested, or `false` if it cannot
  *   be returned (e.g., the page isn't in that category, or it is, but it's a
@@ -181,13 +183,15 @@ PageSchema.methods.getVersion = function (id) {
 
 PageSchema.methods.getCategorization = function (name, searcher) {
   const cat = findOne(this.categories, c => c.name === name)
-  if (!cat || (cat.secret && !this.knows(searcher.getPOV(), cat.codename))) return false
+  if (!cat || (cat.secret && (searcher === 'Loremaster' || !this.knows(searcher.getPOV(), cat.codename)))) return false
   return cat
 }
 
 /**
  * Return an array of the pages that link to this page (that you know about).
- * @param {User} searcher - The user conducting the search.
+ * @param {User|string} searcher - The user conducting the search, or the
+ *   string `Loremaster` for a loremaster, or the string `Anonymous` for an
+ *   anonymous user.
  * @returns {Promise<Page[]>} - An array of pages that link to this page,
  *   excluding any pages that are secret to you, or where any links to this
  *   page are part of secrets that you don't know.
@@ -195,7 +199,7 @@ PageSchema.methods.getCategorization = function (name, searcher) {
 
 PageSchema.methods.getLinks = async function (searcher) {
   const Page = model('Page')
-  const pages = await Page.find(makeDiscreteQuery({ 'links.page': this._id }, searcher))
+  const pages = await Page.find(makeDiscreetQuery({ 'links.page': this._id }, searcher))
   if (!pages) return []
   return pages.filter(page => {
     const pov = searcher.getPOV()
@@ -478,7 +482,9 @@ PageSchema.methods.deleteFile = async function () {
  * Find a page by its path.
  * @param {string} path - The path of the page that the searcher would like
  *   to find.
- * @param {User} searcher - The user conducting the search.
+ * @param {User|string} searcher - The user conducting the search, or the
+ *   string `Loremaster` for a loremaster, or the string `Anonymous` for an
+ *   anonymous user.
  * @returns {Promise<Page|null>} - A Promise that resolves with the page with
  *   the given path, if it exists and the user knows about it, or `null` if one
  *   of those conditions is not met.
@@ -486,21 +492,23 @@ PageSchema.methods.deleteFile = async function () {
 
 PageSchema.statics.findByPath = async function (path, searcher) {
   const Page = this.model('Page')
-  return Page.findOne(makeDiscreteQuery({ path: path.startsWith('/') ? path.substring(1) : path }, searcher))
+  return Page.findOne(makeDiscreetQuery({ path: path.startsWith('/') ? path.substring(1) : path }, searcher))
 }
 
 /**
  * Returns an array of pages that have the given title.
  * @param {string} title - The title of the page that the searcher is
  *   looking for.
- * @param {User} searcher - The user conducting the search.
+ * @param {User|string} searcher - The user conducting the search, or the
+ *   string `Loremaster` for a loremaster, or the string `Anonymous` for an
+ *   anonymous user.
  * @returns {Promise<Page[]>} - A Promise that resolves with an array of pages
  *   that have the title requested.
  */
 
 PageSchema.statics.findByTitle = async function (title, searcher) {
   const Page = this.model('Page')
-  const pages = await Page.find(makeDiscreteQuery({ title }, searcher))
+  const pages = await Page.find(makeDiscreetQuery({ title }, searcher))
   return pages && pages.length > 0 ? [...pages] : []
 }
 
@@ -508,7 +516,9 @@ PageSchema.statics.findByTitle = async function (title, searcher) {
  * Returns the first page that has the given title.
  * @param {string} title - The title of the page that the searcher is
  *   looking for.
- * @param {User} searcher - The user conducting the search.
+ * @param {User|string} searcher - The user conducting the search, or the
+ *   string `Loremaster` for a loremaster, or the string `Anonymous` for an
+ *   anonymous user.
  * @returns {Promise<Page|null>} - The first page that has the given title and
  *   that the searcher has access to, or `null` if no page meets both of those
  *   criteria.
@@ -524,8 +534,9 @@ PageSchema.statics.findOneByTitle = async function (title, searcher) {
  * Find all of the members of a category (that the searcher knows about).
  * @param {string} category - The name of the category that the searcher would
  *   like to find the members to.
- * @param {User} searcher - The user who would like to find all of the members
- *   of the category.
+ * @param {User|string} searcher - The user who would like to find all of the
+ *   members of the category, or the string `Loremaster` (for a loremaster) or
+ *   `Anonymous` (for an anonymous user.
  * @returns {Promise<{pages: *[], subcategories: *[]}>} - A Promise that
  *   resolves with an object with the following properties:
  *     `subcategories`   The members of the category that are categories
@@ -536,7 +547,7 @@ PageSchema.statics.findOneByTitle = async function (title, searcher) {
 
 PageSchema.statics.findMembers = async function (category, searcher) {
   const Page = this.model('Page')
-  const pages = await Page.find(makeDiscreteQuery({ 'categories.name': category }, searcher))
+  const pages = await Page.find(makeDiscreetQuery({ 'categories.name': category }, searcher))
   const members = { subcategories: [], pages: [] }
   for (const page of pages) {
     const cat = page.getCategorization(category, searcher)

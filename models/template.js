@@ -15,7 +15,9 @@ class Template {
    * Load the template from the database, perform a function on it (`fn`), then
    * find any other templates that the template invokes and perform the same
    * function on them, recursively.
-   * @param {User} user - The user who initiated this action.
+   * @param {User|string} user - The user who initiated this action, or the
+   *   string `Loremaster` for a loremaster, or the string `Anonymous` for an
+   *   anonymous user.
    * @param {function} fn - The function that is recursively called on this
    *   template and any others that this template invokes. The syntax for this
    *   function is `fn(tpl, page, body)`, with arguments:
@@ -47,7 +49,9 @@ class Template {
   /**
    * Returns an array listing this template and any templates that it invokes,
    * recursively.
-   * @param {User} lister - The user who initiated this action.
+   * @param {User|string} lister - The user who asked for this list, or the
+   *   string `Loremaster` for a loremaster, or the string `Anonymous` for an
+   *   anonymous user.
    * @returns {Promise<{ page: Schema.Types.ObjectId, name: string}[]>} - An
    *   array of objects documenting the template and any other templates that
    *   this template calls, recursively. Each object has the following
@@ -67,8 +71,10 @@ class Template {
 
   /**
    * Render the template.
-   * @param {User} renderer - The user that we're rendering the template for.
-   * @returns {Promise<string>}
+   * @param {User|string} renderer - The user that we're rendering the template
+   *   for, or the string `Loremaster` for a loremaster, or the string
+   *   `Anonymous` for an anonymous user.
+   * @returns {Promise<string>} - The string rendering of the template.
    */
 
   async render (renderer) {
