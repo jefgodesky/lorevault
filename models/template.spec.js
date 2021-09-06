@@ -210,4 +210,24 @@ describe('Template', () => {
       expect(templates[0].params).to.eql({ ordered: [], named: { content: '\n\nHello, world!\n\n' } })
     })
   })
+
+  describe('findPagesThatUse', () => {
+    it('returns the pages that use a template', async () => {
+      const { page, user } = await createTestDocs(model)
+      await Page.create({ title: 'Template:Test', body: 'Hello, world!' }, user)
+      await page.update({ title: 'Test Page', body: '{{Test}}' }, user)
+      await Page.create({ title: 'Second Page', body: '{{Test}}' }, user)
+      const actual = await Template.findPagesThatUse('Test', user)
+      expect(actual).to.have.lengthOf(2)
+    })
+
+    it('returns pages', async () => {
+      const { page, user } = await createTestDocs(model)
+      await Page.create({ title: 'Template:Test', body: 'Hello, world!' }, user)
+      await page.update({ title: 'Test Page', body: '{{Test}}' }, user)
+      await Page.create({ title: 'Second Page', body: '{{Test}}' }, user)
+      const actual = await Template.findPagesThatUse('Test', user)
+      expect(actual.map(p => p.constructor.modelName)).to.be.eql(['Page', 'Page'])
+    })
+  })
 })

@@ -1,5 +1,5 @@
 import renderTags from '../transformers/renderTags.js'
-import { saveBlocks, restoreBlocks, indexOfRegExp } from '../utils.js'
+import { saveBlocks, restoreBlocks, indexOfRegExp, makeDiscreetQuery } from '../utils.js'
 
 import mongoose from 'mongoose'
 const { model } = mongoose
@@ -181,6 +181,22 @@ class Template {
       }
     }
     return instances.map(instance => new Template(instance))
+  }
+
+  /**
+   * Find the pages that use the template with the given name.
+   * @param {string} name - The name of the template.
+   * @param {User|string} searcher - The user who's looking for these pages,
+   *   or the string `Loremaster` for a loremaster, or the string `Anonymous`
+   *   for an anonymous user.
+   * @returns {Promise<Page[]>} - An array of pages that use the named template
+   *   (that the user knows about).
+   */
+
+  static async findPagesThatUse (name, searcher) {
+    const Page = model('Page')
+    const page = await Page.findOneByTitle(`Template:${name}`, searcher)
+    return Page.find(makeDiscreetQuery({ templates: page._id }, searcher))
   }
 }
 
