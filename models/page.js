@@ -382,6 +382,36 @@ PageSchema.methods.reveal = async function (char, codename = null) {
 }
 
 /**
+ * Reveal a secret to every character that has a page in a given category. This
+ * is a recursive function, so it will explore all of the category's
+ * subcategories, and reveal the secret to any characters with pages in any of
+ * those categories, too.
+ * @param {string} category - The name of the category.
+ * @param {string} [codename = null] - The codename of the secret that you
+ *   would like to reveal to the character `char`. If the page itself is a
+ *   secret, and you set this argument to a falsy value (`false`, `null`, etc.)
+ *   then the secret to reveal is the existence of the page.
+ * @returns {Promise<void>} - A Promise that resolves once the secret has been
+ *   revealed to all characters with pages in the category or any of its
+ *   subcategories.
+ */
+
+PageSchema.methods.revealToCategory = async function (category, codename = null) {
+  const Page = model('Page')
+  const Character = model('Character')
+  const { subcategories, pages } = await Page.findMembers(category, 'Loremaster')
+  for (const categorization of subcategories) {
+    const { title } = categorization.page
+    const name = title.startsWith('Category:') ? title.substring(9) : title
+    await this.revealToCategory(name, codename)
+  }
+  for (const categorization of pages) {
+    const char = await Character.findOne({ page: categorization.page._id })
+    if (char) await this.reveal(char, codename)
+  }
+}
+
+/**
  * Reports on whether the character `char` knows the secret identified by the
  * given `codename`.
  * @param {Character|Schema.Types.ObjectId|string} char - The character who
