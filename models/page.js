@@ -61,6 +61,10 @@ const PageSchema = new Schema({
     secret: Boolean,
     codename: String
   }],
+  templates: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Page'
+  }],
   created: {
     type: Date,
     default: Date.now
