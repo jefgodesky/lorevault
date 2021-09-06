@@ -66,6 +66,26 @@ class Template {
   }
 
   /**
+   * Render the template.
+   * @param {User} renderer - The user that we're rendering the template for.
+   * @returns {Promise<string>}
+   */
+
+  async render (renderer) {
+    let str = this.str
+    await this.recurse(renderer, (tpl, page, body) => {
+      for (let i = 0; i < tpl.params.ordered.length; i++) {
+        body = body.replace(`{{{${i+1}}}}`, tpl.params.ordered[i])
+      }
+      for (const key of Object.keys(tpl.params.named)) {
+        body = body.replace(`{{{${key}}}}`, tpl.params.named[key])
+      }
+      str = str.replace(tpl.str, body)
+    })
+    return str
+  }
+
+  /**
    * Parse a string representing a template's parameters into an object.
    * @param {string} str - A string representing the template's parameters.
    * @return {{ordered: string[], named: {}}} - An object representing the

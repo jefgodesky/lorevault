@@ -83,6 +83,58 @@ describe('Template', () => {
     })
   })
 
+  describe('render', () => {
+    it('renders the template', async () => {
+      const { user } = await createTestDocs(model)
+      await Page.create({title: 'Template:Test', body: 'This is my template.'}, user)
+      const template = new Template('{{Test}}')
+      const actual = await template.render(user)
+      expect(actual).to.be.equal('This is my template.')
+    })
+
+    it('renders ordered parameters', async () => {
+      const { user } = await createTestDocs(model)
+      await Page.create({title: 'Template:Test', body: 'This is my {{{1}}}.'}, user)
+      const template = new Template('{{Test|template}}')
+      const actual = await template.render(user)
+      expect(actual).to.be.equal('This is my template.')
+    })
+
+    it('renders explicitly ordered parameters', async () => {
+      const { user } = await createTestDocs(model)
+      await Page.create({title: 'Template:Test', body: 'This is my {{{2}}}.'}, user)
+      const template = new Template('{{Test|2=template}}')
+      const actual = await template.render(user)
+      expect(actual).to.be.equal('This is my template.')
+    })
+
+    it('renders named parameters', async () => {
+      const { user } = await createTestDocs(model)
+      await Page.create({title: 'Template:Test', body: 'This is my {{{thing}}}.'}, user)
+      const template = new Template('{{Test|thing=template}}')
+      const actual = await template.render(user)
+      expect(actual).to.be.equal('This is my template.')
+    })
+
+    it('renders nested templates', async () => {
+      const { user } = await createTestDocs(model)
+      await Page.create({ title: 'Template:Inner', body: 'Inner template' }, user)
+      await Page.create({ title: 'Template:Outer', body: '{{Inner}}' }, user)
+      const template = new Template('{{Outer}}')
+      const actual = await template.render(user)
+      expect(actual).to.be.equal('Inner template')
+    })
+
+    it('renders nested templates with parameters', async () => {
+      const { user } = await createTestDocs(model)
+      await Page.create({ title: 'Template:Inner', body: '{{{1}}}' }, user)
+      await Page.create({ title: 'Template:Outer', body: '{{Inner|Hello, world!}}' }, user)
+      const template = new Template('{{Outer}}')
+      const actual = await template.render(user)
+      expect(actual).to.be.equal('Hello, world!')
+    })
+  })
+
   describe('parseParams', () => {
     it('can parse ordered parameters', () => {
       const actual = Template.parseParams('hello|world')
