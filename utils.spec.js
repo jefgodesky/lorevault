@@ -8,7 +8,7 @@ import {
   union,
   intersection,
   findOne,
-  makeDiscreteQuery,
+  makeDiscreetQuery,
   match,
   saveBlocks,
   restoreBlocks,
@@ -91,21 +91,36 @@ describe('findOne', () => {
   })
 })
 
-describe('makeDiscreteQuery', () => {
+describe('makeDiscreetQuery', () => {
   it('returns the search object for a loremaster', async () => {
     const { loremaster } = await createTestDocs(model)
-    expect(makeDiscreteQuery({ test: 42 }, loremaster)).to.be.eql({ test: 42 })
+    expect(makeDiscreetQuery({ test: 42 }, loremaster)).to.be.eql({ test: 42 })
+  })
+
+  it('can take the string "Loremaster"', async () => {
+    await createTestDocs(model)
+    expect(makeDiscreetQuery({ test: 42 }, 'Loremaster')).to.be.eql({ test: 42 })
   })
 
   it('adds that the page can\'t be a secret if you\'re anonymous', async () => {
     const { other } = await createTestDocs(model)
-    expect(JSON.stringify(makeDiscreteQuery({ test: 42 }, other))).to.be.eql('{"$and":[{"test":42},{"secrets.existence":false}]}')
+    expect(JSON.stringify(makeDiscreetQuery({ test: 42 }, other))).to.be.eql('{"$and":[{"test":42},{"secrets.existence":false}]}')
+  })
+
+  it('can take the string "Anonymous"', async () => {
+    await createTestDocs(model)
+    expect(JSON.stringify(makeDiscreetQuery({ test: 42 }, 'Anonymous'))).to.be.eql('{"$and":[{"test":42},{"secrets.existence":false}]}')
   })
 
   it('adds conditions if your character is your POV', async () => {
     const { user } = await createTestDocs(model)
     const { _id } = user.characters.active
-    expect(JSON.stringify(makeDiscreteQuery({ test: 42 }, user))).to.be.eql(`{"$and":[{"test":42},{"$or":[{"secrets.existence":false},{"secrets.knowers":"${_id}"}]}]}`)
+    expect(JSON.stringify(makeDiscreetQuery({ test: 42 }, user))).to.be.eql(`{"$and":[{"test":42},{"$or":[{"secrets.existence":false},{"secrets.knowers":"${_id}"}]}]}`)
+  })
+
+  it('treats any other searcher as anonymous', async () => {
+    await createTestDocs(model)
+    expect(JSON.stringify(makeDiscreetQuery({ test: 42 }, 42))).to.be.eql('{"$and":[{"test":42},{"secrets.existence":false}]}')
   })
 })
 

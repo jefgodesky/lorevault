@@ -77,13 +77,15 @@ const findOne = (arr, fn) => {
  * only those pages that aren't a secret at all, or that the POV character
  * knows about. For loremasters, show everything.
  * @param {{}} orig - The Mongoose query object.
- * @param {User} searcher - The User who's conducting the search.
+ * @param {User|string} searcher - The User who's conducting the search, or the
+ *   string `Loremaster` for a loremaster, or the string `Anonymous` for an
+ *   anonymous user.
  * @returns {{}} - A modified Mongoose query object that takes Page secrecy and
  *   the user's point of view into account.
  */
 
-const makeDiscreteQuery = (orig, searcher) => {
-  const pov = searcher.getPOV()
+const makeDiscreetQuery = (orig, searcher) => {
+  const pov = searcher.getPOV ? searcher.getPOV() : searcher === 'Loremaster' ? 'Loremaster' : 'Anonymous'
   return pov === 'Loremaster'
     ? orig
     : pov === 'Anonymous'
@@ -247,7 +249,7 @@ export {
   union,
   intersection,
   findOne,
-  makeDiscreteQuery,
+  makeDiscreetQuery,
   match,
   saveBlocks,
   restoreBlocks,

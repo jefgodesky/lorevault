@@ -111,6 +111,30 @@ describe('Page', () => {
       })
     })
 
+    describe('Templates', () => {
+      it('catalogs templates used when the page is saved', async () => {
+        const { page, user } = await createTestDocs(model)
+        await Page.create({ title: 'Template:Test', body: 'Hello, world!' }, user)
+        await page.update({ title: 'Test Page', body: '{{Test}}' }, user)
+        expect(page.templates).to.have.lengthOf(1)
+      })
+
+      it('catalogs the Page ID of the templates used when the page is saved', async () => {
+        const { page, user } = await createTestDocs(model)
+        const tpl = await Page.create({ title: 'Template:Test', body: 'Hello, world!' }, user)
+        await page.update({ title: 'Test Page', body: '{{Test}}' }, user)
+        expect(page.templates[0].toString()).to.be.equal(tpl._id.toString())
+      })
+
+      it('catalogs templates used when the page is saved recursively', async () => {
+        const { page, user } = await createTestDocs(model)
+        await Page.create({ title: 'Template:Inner', body: 'Hello, world!' }, user)
+        await Page.create({ title: 'Template:Outer', body: '{{Inner}}' }, user)
+        await page.update({ title: 'Test Page', body: '{{Outer}}' }, user)
+        expect(page.templates).to.have.lengthOf(2)
+      })
+    })
+
     describe('Created', () => {
       it('sets the created timestamp to the time when it is created', async () => {
         const start = new Date()
