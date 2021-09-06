@@ -25,8 +25,8 @@ describe('Template', () => {
       await Page.create({ title: 'Template:Test', body: 'This is my template.' }, user)
       const template = new Template('{{Test}}')
       const arr = []
-      await template.recurse(user, (tpl, body) => { arr.push(tpl.title, body) })
-      expect(arr).to.be.eql(['Template:Test', 'This is my template.'])
+      await template.recurse(user, (tpl, page, body) => { arr.push(tpl.name, page.title, body) })
+      expect(arr).to.be.eql(['Test', 'Template:Test', 'This is my template.'])
     })
 
     it('recurses through other templates', async () => {
@@ -35,8 +35,8 @@ describe('Template', () => {
       await Page.create({ title: 'Template:Outer', body: '{{Inner}}' }, user)
       const template = new Template('{{Outer}}')
       const arr = []
-      await template.recurse(user, (tpl, body) => { arr.push(tpl.title, body) })
-      expect(arr).to.be.eql(['Template:Outer', '{{Inner}}', 'Template:Inner', 'Inner template'])
+      await template.recurse(user, (tpl, page, body) => { arr.push(tpl.name, page.title, body) })
+      expect(arr).to.be.eql(['Outer', 'Template:Outer', '{{Inner}}', 'Inner', 'Template:Inner', 'Inner template'])
     })
   })
 

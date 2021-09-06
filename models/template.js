@@ -17,11 +17,12 @@ class Template {
    * function on them, recursively.
    * @param {User} user - The user who initiated this action.
    * @param {function} fn - The function that is recursively called on this
-   *   template and any others that this template invokes. This function can
-   *   take two arguments: `tpl`, which is the template's Page document, and
-   *   `body`, which is the template's rendered body (from the most recent
-   *   version, with all <noinclude> tags stripped out, and all <includeonly>
-   *   tags unwrapped).
+   *   template and any others that this template invokes. The syntax for this
+   *   function is `fn(tpl, page, body)`, with arguments:
+   *     `tpl`    The Template instance.
+   *     `page`   The template's Page document.
+   *     `body`   The body of the template, with any <noinclude> tags and their
+   *              contents stripped out, and any <includeonly> tags unwrapped.
    * @returns {Promise<void>} - A Promise that resolves once the recursion has
    *   finished, and the function `fn` has been run on this template and any
    *   templates that it invokes.
@@ -36,7 +37,7 @@ class Template {
     body = renderTags(body, '<includeonly>', true)
     body = renderTags(body, '<noinclude>')
 
-    fn(tpl, body)
+    fn(this, tpl, body)
     const templates = Template.parse(body)
     for (const template of templates) {
       await template.recurse(user, fn)
@@ -58,8 +59,8 @@ class Template {
 
   async list (lister) {
     const templates = []
-    await this.recurse(lister, tpl => {
-      templates.push({ page: tpl._id, name: tpl.title.substring(9), path: tpl.path })
+    await this.recurse(lister, (tpl, page) => {
+      templates.push({ page: page._id, name: tpl.name, path: page.path })
     })
     return templates
   }
