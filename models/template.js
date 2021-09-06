@@ -1,10 +1,46 @@
+import renderTags from '../transformers/renderTags.js'
 import { saveBlocks, restoreBlocks, indexOfRegExp } from '../utils.js'
+
+import mongoose from 'mongoose'
+const { model } = mongoose
 
 class Template {
   constructor (arg) {
     if (typeof arg === 'string') return new Template(Template.parseInstance(arg))
     if (typeof arg !== 'object') return new Template({})
     for (const key of Object.keys(arg)) this[key] = arg[key]
+  }
+
+  /**
+   * Load the template from the database, perform a function on it (`fn`), then
+   * find any other templates that the template invokes and perform the same
+   * function on them, recursively.
+   * @param {User} user - The user who initiated this action.
+   * @param {function} fn - The function that is recursively called on this
+   *   template and any others that this template invokes. This function can
+   *   take two arguments: `tpl`, which is the template's Page document, and
+   *   `body`, which is the template's rendered body (from the most recent
+   *   version, with all <noinclude> tags stripped out, and all <includeonly>
+   *   tags unwrapped).
+   * @returns {Promise<void>} - A Promise that resolves once the recursion has
+   *   finished, and the function `fn` has been run on this template and any
+   *   templates that it invokes.
+   */
+
+  async recurse (user, fn) {
+    const Page = model('Page')
+    const tpl = await Page.findOneByTitle(`Template:${this.name}`, user)
+    if (!tpl) return
+
+    let { body } = tpl.getCurr()
+    body = renderTags(body, '<includeonly>', true)
+    body = renderTags(body, '<noinclude>')
+
+    fn(tpl, body)
+    const templates = Template.parse(body)
+    for (const template of templates) {
+      await template.recurse(user, fn)
+    }
   }
 
   /**

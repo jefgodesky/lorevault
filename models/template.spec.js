@@ -1,5 +1,10 @@
 import { expect } from 'chai'
+import { createTestDocs } from '../test-utils.js'
+import Page from './page.js'
 import Template from './template.js'
+
+import mongoose from 'mongoose'
+const { model } = mongoose
 
 describe('Template', () => {
   describe('Constructor', () => {
@@ -11,6 +16,27 @@ describe('Template', () => {
     it('can parse a string into a Template instance', () => {
       const { name } = new Template('{{Test}}')
       expect(name).to.be.equal('Test')
+    })
+  })
+
+  describe('recurse', () => {
+    it('runs the function on the template', async () => {
+      const { user } = await createTestDocs(model)
+      await Page.create({ title: 'Template:Test', body: 'This is my template.' }, user)
+      const template = new Template('{{Test}}')
+      const arr = []
+      await template.recurse(user, (tpl, body) => { arr.push(tpl.title, body) })
+      expect(arr).to.be.eql(['Template:Test', 'This is my template.'])
+    })
+
+    it('recurses through other templates', async () => {
+      const { user } = await createTestDocs(model)
+      await Page.create({ title: 'Template:Inner', body: 'Inner template' }, user)
+      await Page.create({ title: 'Template:Outer', body: '{{Inner}}' }, user)
+      const template = new Template('{{Outer}}')
+      const arr = []
+      await template.recurse(user, (tpl, body) => { arr.push(tpl.title, body) })
+      expect(arr).to.be.eql(['Template:Outer', '{{Inner}}', 'Template:Inner', 'Inner template'])
     })
   })
 
