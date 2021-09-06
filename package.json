@@ -32,6 +32,7 @@
     "mongoose": "^6.0.3",
     "mongoose-slug-generator": "^1.0.4",
     "morgan": "^1.10.0",
+    "multer": "^1.4.3",
     "rehype-autolink-headings": "^6.1.0",
     "rehype-format": "^4.0.0",
     "rehype-raw": "^6.1.0",
