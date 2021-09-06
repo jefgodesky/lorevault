@@ -46,7 +46,7 @@ class Template {
   /**
    * Returns an array listing this template and any templates that it invokes,
    * recursively.
-   * @param {User} user - The user who initiated this action.
+   * @param {User} lister - The user who initiated this action.
    * @returns {Promise<{ page: Schema.Types.ObjectId, name: string}[]>} - An
    *   array of objects documenting the template and any other templates that
    *   this template calls, recursively. Each object has the following
