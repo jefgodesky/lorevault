@@ -388,9 +388,9 @@ PageSchema.methods.reveal = async function (char, codename = null) {
  * those categories, too.
  * @param {string} category - The name of the category.
  * @param {string} [codename = null] - The codename of the secret that you
- *   would like to reveal to the character `char`. If the page itself is a
- *   secret, and you set this argument to a falsy value (`false`, `null`, etc.)
- *   then the secret to reveal is the existence of the page.
+ *   would like to reveal. If the page itself is a secret, and you set this
+ *   argument to a falsy value (`false`, `null`, etc.) then the secret to
+ *   reveal is the existence of the page.
  * @returns {Promise<void>} - A Promise that resolves once the secret has been
  *   revealed to all characters with pages in the category or any of its
  *   subcategories.
@@ -407,6 +407,32 @@ PageSchema.methods.revealToCategory = async function (category, codename = null)
   }
   for (const categorization of pages) {
     const char = await Character.findOne({ page: categorization.page._id })
+    if (char) await this.reveal(char, codename)
+  }
+}
+
+/**
+ * Reveal a secret to the characters indicated by the string `name`. This could
+ * be just one character, if `name` is the name of a single character. It could
+ * be several characters who share the same name. It could be a whole group, if
+ * `name` is the name of a category.
+ * @param {string} name - The name indicating who you'd like to reveal the
+ *   secret to.
+ * @param {string} [codename = null] - The codename of the secret that you
+ *   would like to reveal. If the page itself is a secret, and you set this
+ *   argument to a falsy value (`false`, `null`, etc.) then the secret to
+ *   reveal is the existence of the page.
+ * @returns {Promise<void>} - A Promise that resolves when the secret has been
+ *   revealed to the characters indicated by the `name` argument.
+ */
+
+PageSchema.methods.revealToName = async function (name, codename = null) {
+  const Page = model('Page')
+  const Character = model('Character')
+  await this.revealToCategory(name, codename)
+  const pages = await Page.findByTitle(name, 'Loremaster')
+  for (const page of pages) {
+    const char = await Character.findOne({ page: page._id })
     if (char) await this.reveal(char, codename)
   }
 }
