@@ -1,0 +1,24 @@
+.dnd5e .char-form-stats {
+  align-items: flex-end;
+  display: flex;
+  text-align: center;
+
+  label {
+    font-size: 75%;
+    margin-top: 0;
+  }
+
+  .detail {
+    display: block;
+    font-size: 75%;
+    font-weight: normal;
+  }
+
+  input {
+    text-align: center;
+  }
+}
+
+.dnd5e .char-form-stat {
+  margin: 0 0.25em;
+}

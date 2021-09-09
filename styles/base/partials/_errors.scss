@@ -1,0 +1,9 @@
+@use '../modules/colors';
+
+.error {
+  color: colors.$error;
+}
+
+input.error {
+  border-color: colors.$error;
+}

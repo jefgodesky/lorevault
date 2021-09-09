@@ -19,7 +19,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "mocha --reporter nyan"
+    "test": "mocha"
   },
   "dependencies": {
     "aws-sdk": "^2.983.0",
@@ -50,8 +50,12 @@
     "unified": "^10.1.0"
   },
   "devDependencies": {
+    "browser-sync": "^2.27.5",
     "chai": "^4.3.4",
+    "commander": "^8.1.0",
     "mocha": "^9.1.1",
-    "mongodb-memory-server": "^7.3.6"
+    "mongodb-memory-server": "^7.3.6",
+    "normalize-scss": "^7.0.1",
+    "sass": "^1.39.0"
   }
 }
