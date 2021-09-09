@@ -67,6 +67,7 @@
     "autoprefixer": "^10.3.4",
     "browser-sync": "^2.27.5",
     "chai": "^4.3.4",
+    "chokidar-cli": "^3.0.0",
     "commander": "^8.1.0",
     "mocha": "^9.1.1",
     "mongodb-memory-server": "^7.3.6",
