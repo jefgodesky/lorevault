@@ -48,6 +48,7 @@
     "multer": "^1.4.3",
     "multer-s3": "^2.9.0",
     "passport": "^0.4.1",
+    "passport-discord": "^0.1.4",
     "rehype-autolink-headings": "^6.1.0",
     "rehype-format": "^4.0.0",
     "rehype-raw": "^6.1.0",
