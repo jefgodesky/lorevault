@@ -1,0 +1,24 @@
+<header class="pov">
+  <nav>
+    <% if (locals.isLoggedIn) { %>
+      <ul>
+        <li><a href="/profile" class="button">Your Profile</a></li>
+        <li><a href="/logout" class="button">Logout</a></li>
+      </ul>
+    <% } else { %>
+      <ul>
+        <li class="label">Log in with:</li>
+        <li><a href="/login/google" class="button">Google</a></li>
+        <li><a href="/login/discord" class="button">Discord</a></li>
+      </ul>
+    <% } %>
+  </nav>
+  <a href="<%= povLink %>"><%= pov %></a>
+</header>
+<header class="site">
+  <h1><a href="/"><%= wiki %></a></h1>
+  <form action="/search" method="GET" class="search">
+    <input type="search" name="q" placeholder="Search for..." value="<%= locals.query ? query : '' %>" />
+    <button>Search</button>
+  </form>
+</header>

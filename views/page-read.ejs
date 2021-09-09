@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <%- include('includes/head') %>
+  <body>
+    <%- include('includes/header') %>
+    <header class="page">
+      <% if (locals.version?.isOld) { %>
+      <aside class="warning">
+        <p>You&rsquo;re looking at an old version of this page, created on <%= formatDate(version.timestamp, 'D MMM YYYY [at] h:m A') %><% if (version.msg) { %> with the message, &ldquo;<em><%= version.msg %></em>.&rdquo;<% } else { %>.<% } %></p>
+        <ul>
+          <li><a href="/<%= page.path %>">Go to the current version of this page</a></li>
+          <li><a href="/<%= page.path %>/history">See other versions of this page</a></li>
+          <li><a href="/<%= page.path %>/v/<%= version._id %>/rollback">Roll the page back to this version</a></li>
+        </ul>
+      </aside>
+      <% } %>
+      <h1><%= locals.version?.title || page.title %></h1>
+    </header>
+    <main>
+      <%- include('includes/page-tabs', { page, view: locals.version?.isOld ? 'History' : 'Read' }) %>
+      <div class="content-wrapper">
+        <%- page.markup %>
+        <%- include('includes/members-category') %>
+      </div>
+      <% if (locals.categories && categories.length > 0) { %>
+      <ul class="categories">
+        <% for (const cat of categories) { %>
+        <li>
+          <%- cat.render %>
+        </li>
+        <% } %>
+      </ul>
+      <% } %>
+    </main>
+    <%- include('includes/footer') %>
+  </body>
+</html>

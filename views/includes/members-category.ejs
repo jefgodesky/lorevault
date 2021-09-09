@@ -1,0 +1,23 @@
+<% if (locals.category) { %>
+<%
+  const subcats = {
+    className: 'category-subcategories',
+    title: 'Subcategories',
+    intro: category.categories.length === 1
+      ? 'This category contains only the following subcategory.'
+      : `This category has the following ${category.categories.length} subcategories.`,
+    members: category.categories
+  }
+
+  const pages = {
+    className: 'category-pages',
+    title: `Pages in category &ldquo;${title.substring(9)}&rdquo;`,
+    intro: category.pages.length === 1
+        ? 'This category contains only the following page.'
+        : `This category has the following ${category.pages.length} pages.`,
+    members: category.pages
+  }
+%>
+<%- include('members', subcats) %>
+<%- include('members', pages) %>
+<% } %>

@@ -1,0 +1,11 @@
+<nav class="page">
+  <li<% if (view === 'Read') { %> class="current"<% } %>>
+    <a href="/<%= page.path %>">Read</a>
+  </li>
+  <li<% if (view === 'Edit') { %> class="current"<% } %>>
+    <a href="/<%= page.path %>/edit">Edit</a>
+  </li>
+  <li<% if (view === 'History') { %> class="current"<% } %>>
+    <a href="/<%= page.path %>/history">History</a>
+  </li>
+</nav>

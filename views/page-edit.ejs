@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html>
-<%- include('includes/head') %>
+  <%- include('includes/head') %>
   <body>
     <%- include('includes/header') %>
     <header class="page">
-      <h1><%= message %></h1>
+      <h1>Editing <%= page.title %></h1>
     </header>
     <main>
+      <%- include('includes/page-tabs', { page, view: 'Edit' }) %>
       <div class="content-wrapper">
-        <p><%- resolution %></p>
+        <%- include('includes/form-page') %>
       </div>
     </main>
     <%- include('includes/footer') %>
