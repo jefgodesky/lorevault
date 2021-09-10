@@ -2,8 +2,21 @@ import smartquotes from 'smartquotes'
 
 import assignCodenames from '../transformers/assignCodenames.js'
 import renderLinks from '../transformers/renderLinks.js'
+import renderMarkup from '../transformers/renderMarkup.js'
+import renderTags from '../transformers/renderTags.js'
 import Template from './template.js'
-import { pickRandom, union, findOne, match, isInSecret, makeDiscreetQuery, alphabetize, getS3 } from '../utils.js'
+import {
+  pickRandom,
+  union,
+  findOne,
+  match,
+  isInSecret,
+  makeDiscreetQuery,
+  alphabetize,
+  saveBlocks,
+  restoreBlocks,
+  getS3
+} from '../utils.js'
 
 import config from '../config/index.js'
 
@@ -553,6 +566,30 @@ PageSchema.methods.update = async function (content, editor) {
   this.versions.push(Object.assign({}, content, { editor: editor._id }))
   await this.save()
   return this
+}
+
+/**
+ * Render a version of the page to HTML.
+ * @param {User} renderer - The user that we're rendering the page for.
+ * @param {Version} [version = this.getCurr()] - The version of the page that
+ *   we're rendering. This defaults to the most recent version.
+ * @returns {Promise<string>} - A Promise that resolves with the string of
+ *   rendered HTML for the version of the page specified, as the renderer would
+ *   see it.
+ */
+
+PageSchema.methods.render = async function (renderer, version = this.getCurr()) {
+  const pov = renderer.getPOV() || pov
+  const src = this.write({ pov, version })
+  const pre = saveBlocks(src, /(```|<pre><code>)(\r|\n|.)*?(```|<\/code><\/pre>)/, 'PREBLOCK')
+  let { str } = pre
+  str = renderTags(str, '<includeonly>')
+  str = renderTags(str, '<noinclude>', true)
+  str = await Template.render(str, renderer)
+  const links = await renderLinks(str, this.getSecrets(pov), renderer)
+  str = restoreBlocks(links.str, pre.blocks)
+  str = await renderMarkup(str)
+  return str
 }
 
 /**

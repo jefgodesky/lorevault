@@ -776,6 +776,42 @@ describe('Page', () => {
         expect(page.getCurr().body).to.be.equal('This is some updated text.\n\n||::Wombat:: This is a secret.||')
       })
     })
+
+    describe('render', () => {
+      it('renders the page', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = await page.render(user)
+        expect(actual).to.be.equal('\n<p>This is the original text.</p>\n')
+      })
+
+      it('preserves the content of pre-blocks', async () => {
+        const { page, user } = await createTestDocs(model, '```\n\n[[Link]]\n\n{{Test}}\n\n```\n\nThis is outside the block.')
+        const actual = await page.render(user)
+        expect(actual).to.be.equal('\n<pre><code>\n[[Link]]\n\n{{Test}}\n\n</code></pre>\n<p>This is outside the block.</p>\n')
+      })
+
+      it('renders links', async () => {
+        const { user } = await createTestDocs(model)
+        const p = await Page.create({ title: 'Test', body: '[[Test Page|Alias]]\n\n[[New Page|Alias]]' }, user)
+        const actual = await p.render(user)
+        expect(actual).to.be.equal('\n<p><a href="/test-page" title="Test Page">Alias</a></p>\n<p><a href="/create?title=New%20Page" class="new">Alias</a></p>\n')
+      })
+
+      it('renders templates', async () => {
+        const { page, user } = await createTestDocs(model)
+        await Page.create({ title: 'Template:Test', body: '<noinclude>This should not be rendered.</noinclude>\n\n<includeonly>This should be rendered.</includeonly>' }, user)
+        await page.update({ title: page.title, body: '{{Test}}' }, user)
+        const actual = await page.render(user)
+        expect(actual).to.be.equal('\n<p>This should be rendered.</p>\n')
+      })
+
+      it('renders a template\'s page', async () => {
+        const { user } = await createTestDocs(model)
+        const tpl = await Page.create({ title: 'Template:Test', body: '<noinclude>This should be rendered.</noinclude>\n\n<includeonly>This should not be rendered.</includeonly>' }, user)
+        const actual = await tpl.render(user)
+        expect(actual).to.be.equal('\n<p>This should be rendered.</p>\n')
+      })
+    })
   })
 
   describe('statics', () => {
