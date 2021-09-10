@@ -8,8 +8,8 @@ describe('renderMarkup', () => {
   })
 
   it('allows HTML', async () => {
-    const actual = await renderMarkup('<strong>Hello, world!</strong>')
-    expect(actual).to.be.equal('\n<p><strong>Hello, world!</strong></p>\n')
+    const actual = await renderMarkup('<strong class="test">Hello, world!</strong>')
+    expect(actual).to.be.equal('\n<p><strong class="test">Hello, world!</strong></p>\n')
   })
 
   it('doesn\'t allow *all* HTML', async () => {
