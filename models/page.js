@@ -188,6 +188,22 @@ PageSchema.methods.getVersion = function (id) {
 }
 
 /**
+ * Return the categories for the page that the user knows about.
+ * @param {User} user - The user asking for the page's categories.
+ * @returns {string[]} - An array of the names of the categories that the page
+ *   belongs to, which the user is privy to.
+ */
+
+PageSchema.methods.getCategories = function (user) {
+  return this.categories.filter(category => {
+    if (!category.secret) return true
+    const pov = user?.getPOV() || user
+    if (pov === 'Loremaster' || this.knows(char, category.codename)) return true
+    return false
+  }).map(category => category.name)
+}
+
+/**
  * Return the page's categorization object for the given category.
  * @param {string} name - The name of the category.
  * @param {User|string} searcher - The user asking for the categorization, or

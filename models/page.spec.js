@@ -171,6 +171,13 @@ describe('Page', () => {
       })
     })
 
+    describe('getCategories', () => {
+      it('returns the page\'s categories', async () => {
+        const { page, user } = await createTestDocs(model, '[[Category:Test]]')
+        expect(page.getCategories(user)).to.be.eql(['Test'])
+      })
+    })
+
     describe('getCategorization', () => {
       it('returns false if the page isn\'t in that category', async () => {
         const { page, user } = await createTestDocs(model)
