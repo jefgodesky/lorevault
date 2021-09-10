@@ -779,6 +779,31 @@ describe('Page', () => {
   })
 
   describe('statics', () => {
+    describe('findByIdDiscreetly', () => {
+      it('returns a non-secret page', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = await Page.findByIdDiscreetly(page._id, user)
+        expect(actual._id.toString()).to.be.equal(page._id.toString())
+      })
+
+      it('doesn\'t return a secret page that you don\'t know about', async () => {
+        const { page, user } = await createTestDocs(model)
+        page.secrets.existence = true
+        await page.save()
+        const actual = await Page.findByIdDiscreetly(page._id, user)
+        expect(actual).to.be.null
+      })
+
+      it('returns a secret page that you do know about', async () => {
+        const { page, user } = await createTestDocs(model)
+        page.secrets.existence = true
+        page.secrets.knowers.addToSet(user.getPOV()._id)
+        await page.save()
+        const actual = await Page.findByIdDiscreetly(page._id, user)
+        expect(actual._id.toString()).to.be.equal(page._id.toString())
+      })
+    })
+
     describe('findByPath', () => {
       it('returns the page with that path', async () => {
         const { page, user } = await createTestDocs(model)

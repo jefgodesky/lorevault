@@ -569,6 +569,25 @@ PageSchema.methods.deleteFile = async function () {
 }
 
 /**
+ * Looks up a Page by its ID, with all the necessary safeguards to keep secret
+ * pages away from those who don't know about them.
+ * @param {Schema.Types.ObjectId|string} id - The ID of the page that you would
+ *   like to find, or a string representation of it.
+ * @param {User|string} user - The User who's asking for the Page, or the
+ *   string `Loremaster` for a loremaster, or the string `Anonymous` for an
+ *   anonymous user.
+ * @returns {Promise<Page|null>} - A Promise that resolves with the Page if a
+ *   Page document with that ID exists, and it is either not a secret, or if it
+ *   is, it's a secret that the user's point of view has access to, or `null`
+ *   if not.
+ */
+
+PageSchema.statics.findByIdDiscreetly = async function (id, user) {
+  const Page = this.model('Page')
+  return Page.findOne(makeDiscreetQuery({ _id: id }, user))
+}
+
+/**
  * Find a page by its path.
  * @param {string} path - The path of the page that the searcher would like
  *   to find.
