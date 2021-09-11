@@ -218,8 +218,13 @@ PageSchema.methods.getVersions = function (ids) {
 /**
  * Return the categories for the page that the user knows about.
  * @param {User} user - The user asking for the page's categories.
- * @returns {string[]} - An array of the names of the categories that the page
- *   belongs to, which the user is privy to.
+ * @returns {{title: string, path: string}[]} - An array of objects
+ *   representing the  categories that the page belongs to, which the user is
+ *   privy to. Each object has the following properties:
+ *     `title`   The name of the category. This does not include the
+ *               "Category:" prefix.
+ *     `path`    The path to the category page. This is only included if the
+ *               category has a page.
  */
 
 PageSchema.methods.getCategories = async function (user) {
