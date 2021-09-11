@@ -682,7 +682,8 @@ PageSchema.statics.findByIdDiscreetly = async function (id, user) {
 
 PageSchema.statics.findByPath = async function (path, searcher) {
   const Page = this.model('Page')
-  return Page.findOne(makeDiscreetQuery({ path: path.startsWith('/') ? path.substring(1) : path }, searcher))
+  const elems = path.startsWith('/') ? path.substring(1).split('/') : path.split('/')
+  return Page.findOne(makeDiscreetQuery({ path: elems[0] }, searcher))
 }
 
 /**
