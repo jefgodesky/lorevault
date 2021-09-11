@@ -201,6 +201,20 @@ PageSchema.methods.getVersion = function (id) {
 }
 
 /**
+ * Return one or more versions of the page, sorted in chronological order.
+ * @param {(Schema.Types.ObjectId|string)[]} ids - An array of ID's of the
+ *   versions to be returned.
+ * @returns {Version[]} - An array of versions with ID's identified by the
+ *   `ids` array, sorted in chronological order.
+ */
+
+PageSchema.methods.getVersions = function (ids) {
+  const clean = ids.filter(id => id !== null && id !== undefined)
+  const versions = clean.map(id => this.getVersion(id)).filter(v => v !== null)
+  return versions.sort((a, b) => a.timestamp - b.timestamp)
+}
+
+/**
  * Return the categories for the page that the user knows about.
  * @param {User} user - The user asking for the page's categories.
  * @returns {string[]} - An array of the names of the categories that the page

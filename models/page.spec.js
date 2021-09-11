@@ -177,6 +177,40 @@ describe('Page', () => {
       })
     })
 
+    describe('getVersions', () => {
+      it('returns matching versions in chronological order', async () => {
+        const { page, user } = await createTestDocs(model)
+        await page.update({ title: 'Test Page', body: 'Updated body.' }, user)
+        const v1 = page.versions[0]._id
+        const v2 = page.versions[1]._id
+        const actual = page.getVersions([v2, v1])
+        expect(actual.map(v => v._id)).to.be.eql([v1, v2])
+      })
+
+      it('works with strings', async () => {
+        const { page, user } = await createTestDocs(model)
+        await page.update({ title: 'Test Page', body: 'Updated body.' }, user)
+        const v1 = page.versions[0]._id
+        const v2 = page.versions[1]._id
+        const actual = page.getVersions([v2.toString(), v1.toString()])
+        expect(actual.map(v => v._id)).to.be.eql([v1, v2])
+      })
+
+      it('skips versions that don\'t exist', async () => {
+        const { page, user } = await createTestDocs(model)
+        await page.update({ title: 'Test Page', body: 'Updated body.' }, user)
+        const actual = page.getVersions(['lol', 'nope'])
+        expect(actual).to.be.empty
+      })
+
+      it('skips null/undefined input', async () => {
+        const { page, user } = await createTestDocs(model)
+        await page.update({ title: 'Test Page', body: 'Updated body.' }, user)
+        const actual = page.getVersions([undefined, null])
+        expect(actual).to.be.empty
+      })
+    })
+
     describe('getCategories', () => {
       it('returns the page\'s categories', async () => {
         const { page, user } = await createTestDocs(model, '[[Category:Test]]')
