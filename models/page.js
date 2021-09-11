@@ -197,7 +197,7 @@ PageSchema.methods.getCurr = function () {
  */
 
 PageSchema.methods.getVersion = function (id) {
-  return findOne(this.versions, v => v._id === id)
+  return findOne(this.versions, v => v._id === id || v._id.toString() === id)
 }
 
 /**
