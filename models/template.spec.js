@@ -211,6 +211,16 @@ describe('Template', () => {
     })
   })
 
+  describe('render', () => {
+    it('renders all templates in a string', async () => {
+      const { user } = await createTestDocs(model)
+      await Page.create({ title: 'Template:First', body: 'First template' }, user)
+      await Page.create({ title: 'Template:Second', body: 'Second template' }, user)
+      const actual = await Template.render('{{First}}\n\n{{Second}}')
+      expect(actual).to.be.equal('First template\n\nSecond template')
+    })
+  })
+
   describe('findPagesThatUse', () => {
     it('returns the pages that use a template', async () => {
       const { page, user } = await createTestDocs(model)

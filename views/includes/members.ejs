@@ -1,0 +1,39 @@
+<% if (members && members.length > 0) { %>
+<section class="<%= className %>">
+  <h2><%- title %></h2>
+  <p><%- intro %></p>
+  <% if (Array.isArray(members)) { %>
+  <ul>
+    <% for (const member of members) { %>
+    <li><a href="/<%= member.path%>"><%= member.title %></a></li>
+    <% } %>
+  </ul>
+  <% } else { %>
+  <% if (members.other && members.other.length > 0) { %>
+  <ul>
+    <% for (const member of members.other) { %>
+    <li><a href="/<%= member.path%>"><%= member.title %></a></li>
+    <% } %>
+  </ul>
+  <% } %>
+  <% if (members.numbers && members.numbers.length > 0) { %>
+  <h3>0-9</h3>
+  <ul>
+    <% for (const member of members.numbers) { %>
+    <li><a href="/<%= member.path%>"><%= member.title %></a></li>
+    <% } %>
+  </ul>
+  <% } %>
+  <% for (const letter of Object.keys(members).filter(m => m !== 'other' && m !== 'numbers')) { %>
+  <% if (members[letter] && members[letter].length > 0) { %>
+  <h3><%= letter.toUpperCase() %></h3>
+  <ul>
+    <% for (const member of members[letter]) { %>
+    <li><a href="/<%= member.path%>"><%= member.title %></a></li>
+    <% } %>
+  </ul>
+  <% } %>
+  <% } %>
+  <% } %>
+</section>
+<% } %>

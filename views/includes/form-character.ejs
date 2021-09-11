@@ -1,0 +1,28 @@
+<form action="<%= locals.character ? `/profile/character/${character._id}` : '/profile/character' %>" method="POST">
+  <label for="path"<% if (locals.errors && errors?.path) { %> class="error"<% } %>>Path</label>
+  <input type="text" id="path" name="path" placeholder="Enter the path for your character’s page" value="<%= locals.character ? `/${character.page?.path}` : locals.get?.path ? get.path : '' %>"<% if (locals.errors && errors?.path) { %> class="error"<% } %> />
+  <% if (locals.errors && errors?.path) { %><p class="error"><%- errors.path %></p><% } %>
+  <% if (locals.games) { %>
+  <% for (const game of Object.keys(games)) { %>
+  <section class="<%= game %> char-form">
+    <h3><%- games[game].name %></h3>
+    <p>Please enter the statistics that this character has under the rules of <%- games[game].name %>.</p>
+    <div class="char-form-stats">
+      <% for (const stat of games[game].stats) { %>
+      <div class="char-form-stat">
+        <label for="<%= stat.id %>">
+          <%= stat.label %>
+          <span class="detail"><%= stat.detail %></span>
+        </label>
+        <input type="<%= stat.type %>" id="<%= stat.id %>" name="<%= stat.id %>" value="<%= stat.val || 0 %>" />
+      </div>
+      <% } %>
+    </div>
+  </section>
+  <% } %>
+  <% } %>
+  <p class="actions">
+    <button><%= locals.character ? `Edit ${character.page.title}` : 'Create Character' %></button>
+    <a href="/profile" class="button-space">Cancel</a>
+  </p>
+</form>

@@ -19,14 +19,25 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "mocha"
+    "test": "mocha",
+    "dev": "npm-run-all -p dev:serve dev:css",
+    "dev:serve": "nodemon index.js",
+    "dev:css": "npm-run-all -p css:build css:watch css:sync",
+    "css:build": "npm-run-all css:compile css:postcss",
+    "css:compile": "node sass.js",
+    "css:postcss": "postcss public/css/*.css --use autoprefixer --dir public/css",
+    "css:watch": "chokidar './styles/**/index.scss' './styles/**/**/_*.scss' './games/**/*.scss' -i --command 'npm run css:compile'",
+    "css:sync": "browser-sync start --proxy localhost:8080 --files 'public/css/*.css' 'views/*.ejs' 'views/**/*.ejs' --no-ui --no-inject-changes"
   },
   "dependencies": {
     "aws-sdk": "^2.983.0",
+    "axios": "^0.21.1",
     "body-parser": "^1.19.0",
+    "connect-mongo": "^4.5.0",
     "cookie-parser": "^1.4.5",
     "dayjs": "^1.10.6",
     "deepmerge": "^4.2.2",
+    "diff": "^5.0.0",
     "ejs": "^3.1.6",
     "express": "^4.17.1",
     "express-session": "^1.17.2",
@@ -36,6 +47,9 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.3",
     "multer-s3": "^2.9.0",
+    "passport": "^0.4.1",
+    "passport-discord": "^0.1.4",
+    "passport-google-oauth20": "^2.0.0",
     "rehype-autolink-headings": "^6.1.0",
     "rehype-format": "^4.0.0",
     "rehype-raw": "^6.1.0",
@@ -50,12 +64,17 @@
     "unified": "^10.1.0"
   },
   "devDependencies": {
+    "autoprefixer": "^10.3.4",
     "browser-sync": "^2.27.5",
     "chai": "^4.3.4",
+    "chokidar-cli": "^3.0.0",
     "commander": "^8.1.0",
     "mocha": "^9.1.1",
     "mongodb-memory-server": "^7.3.6",
+    "nodemon": "^2.0.12",
     "normalize-scss": "^7.0.1",
+    "npm-run-all": "^4.1.5",
+    "postcss-cli": "^8.3.1",
     "sass": "^1.39.0"
   }
 }

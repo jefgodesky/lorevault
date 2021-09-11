@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <%- include('includes/head') %>
+  <body>
+    <%- include('includes/header') %>
+    <header class="page">
+      <% if (locals.version?.isOld) { %>
+        <aside class="warning">
+          <p>You&rsquo;re looking at an old version of this page, created on <%= formatDate(version.timestamp, 'D MMM YYYY [at] h:m A') %><% if (version.msg) { %> with the message, &ldquo;<em><%= version.msg %></em>.&rdquo;<% } else { %>.<% } %></p>
+          <p>
+            <a href="/<%= page.path %>">Go to current version of this page</a> |
+            <a href="/<%= page.path %>/v/<%= version._id %>/rollback">Roll page back to this version</a>
+          </p>
+        </aside>
+      <% } %>
+      <h1><%= page.title %>: Differences Between Versions</h1>
+    </header>
+    <main class="diff">
+      <%- include('includes/page-tabs', { page, view: 'History' }) %>
+      <div class="content-wrapper">
+        <header>
+          <p>Comparing the version created on
+            <a href="/<%= page.path %>/v/<%= versions[0]._id %>"><%= formatDate(versions[0].timestamp, 'D MMM YYYY [at] h:mm A') %></a>
+            (<em><%= versions[0].msg %></em>) to the version created on
+            <a href="/<%= page.path %>/<%= versions[1]._id %>"><%= formatDate(versions[1].timestamp, 'D MMM YYYY [at] h:mm A') %></a>
+            (<em><%= versions[1].msg %></em>).
+          </p>
+          <p><ins>This style indicates parts that were added</ins> by the latter.</p>
+          <p><del>This style indicates parts that were removed</del> from the former.</p>
+        </header>
+        <%- diff %>
+      </div>
+    </main>
+    <%- include('includes/footer') %>
+  </body>
+</html>

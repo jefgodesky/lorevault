@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <%- include('includes/head') %>
+  <body>
+    <%- include('includes/header') %>
+    <header class="page">
+      <h1>Your Profile</h1>
+    </header>
+    <main>
+      <section class="content-wrapper">
+        <h2>Logins</h2>
+        <p>You&rsquo;ll need to leave at least one of these services connected in order to log into your account in the future. Connecting an account simply lets you use it to log in.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th class="short">Status</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Google</td>
+              <td class="short"><%= connections.google.status %></td>
+              <td class="actions">
+                <a href="<%= connections.google.link %>" class="button"><%= connections.google.label %></a>
+              </td>
+            </tr>
+            <tr>
+              <td>Discord</td>
+              <td class="short"><%= connections.discord.status %></td>
+              <td class="actions">
+                <a href="<%= connections.discord.link %>" class="button"><%= connections.discord.label %></a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <% if (locals.isPotentialLoremaster) { %>
+      <section class="content-wrapper">
+        <h2>Loremaster</h2>
+        <p>
+          In <strong>loremaster mode</strong>, you can see all of the secrets on the site.
+          <% if (isLoremaster) { %>You are currently viewing the site as a loremaster.<% } %>
+          <% if (isAnonymous) { %>You are currently viewing the site anonymously, showing you only what someone who hasn&rsquo;t even logged in would see..<% } %>
+          <% if (isCharacter) { %>You are currently in character mode, which shows you only those secrets known to your active character &mdash; right now, that&rsquo;s <a href="<%= povLink %>"><%= pov %></a>.<% } %>
+        </p>
+        <p>
+          <a href="/profile/loremaster" class="button"><% if (isLoremaster) { %>Deactivate<% } else { %>Activate<% } %> Loremaster Mode</a>
+        </p>
+      </section>
+      <% } %>
+      <section class="content-wrapper">
+        <h2>Characters</h2>
+        <% if (!locals.characters) { %>
+        <p><strong>You do not have any characters yet.</strong> Characters have to have pages first, so find your
+          character&rsquo;s page or, if one doesn&rsquo;t exist yet, <a href="/create">make one</a>. You&rsquo;ll need
+          the page&rsquo;s <em>path</em> (the part of the URL from the slash onward; for example, this page&rsquo;s
+          path is <code>/profile</code>). Once you have that, you&rsquo;re ready to
+          <a href="/profile/character">make a new character</a>.</p>
+        <% } else { %>
+        <table>
+          <thead>
+            <tr>
+              <th />
+              <th>Character</th>
+              <th class="actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% for (const char of characters) { %>
+            <tr>
+              <td class="short"><% if (char.isActive) { %>&#9733;<% } %></td>
+              <td><a href="/<%= char.path %>"><%= char.name %></a></td>
+              <td class="actions">
+                <% if (!char.isActive) { %><a href="/profile/character/<%= char.id %>/activate" class="button">Activate</a><% } %>
+                <a href="/profile/character/<%= char.id %>" class="button">Edit</a>
+                <a href="/profile/character/<%= char.id %>/release" class="button">Release</a>
+              </td>
+            </tr>
+            <% } %>
+          </tbody>
+        </table>
+        <% } %>
+        <p>
+          <a href="/profile/character" class="button">+ Add New Character</a>
+        </p>
+      </section>
+    </main>
+    <%- include('includes/footer') %>
+  </body>
+</html>

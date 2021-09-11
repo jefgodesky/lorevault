@@ -184,6 +184,25 @@ class Template {
   }
 
   /**
+   * Render all templates in a string.
+   * @param {string} str - The string to be rendered.
+   * @param {User|string} renderer - The user that we're rendering the string
+   *   for, or the string `Loremaster` for a loremaster, or the string
+   *   `Anonymous` for an anonymous user.
+   * @returns {Promise<string>} - A Promise that resolves with the rendered
+   *   string.
+   */
+
+  static async render (str, renderer) {
+    const templates = Template.parse(str)
+    for (const template of templates) {
+      const render = await template.render(renderer)
+      str = str.replace(template.str, render)
+    }
+    return str
+  }
+
+  /**
    * Find the pages that use the template with the given name.
    * @param {string} name - The name of the template.
    * @param {User|string} searcher - The user who's looking for these pages,

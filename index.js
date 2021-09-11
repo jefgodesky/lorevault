@@ -5,17 +5,24 @@ import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import logger from 'morgan'
 import mongoose from 'mongoose'
+import passport from 'passport'
 import session from 'express-session'
+import MongoStore from 'connect-mongo'
 
 import './models/user.js'
 import './models/page.js'
 import './models/character.js'
+
+import initPassport from './auth.js'
+initPassport(passport)
 
 import initViewOpts from './middleware/initViewOpts.js'
 import ejsHelpers from './views/helpers.js'
 
 import config from './config/index.js'
 const { db, port, name, secret } = config
+import authRouter from './routes/auth.js'
+import userRouter from './routes/users.js'
 import pageRouter from './routes/pages.js'
 
 const server = express()
@@ -41,13 +48,18 @@ server.use(express.static(path.join(__dirname, 'public')))
 server.use(session({
   secret,
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  store: new MongoStore({ mongoUrl: db })
 }))
+server.use(passport.initialize())
+server.use(passport.session())
 
 // Set up middleware
 server.use(initViewOpts)
 
 // Set up routers
+server.use('/', authRouter)
+server.use('/', userRouter)
 server.use('/', pageRouter)
 
 // Catch 404 and forward to error handler

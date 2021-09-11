@@ -2,13 +2,27 @@ import smartquotes from 'smartquotes'
 
 import assignCodenames from '../transformers/assignCodenames.js'
 import renderLinks from '../transformers/renderLinks.js'
+import renderMarkup from '../transformers/renderMarkup.js'
+import renderTags from '../transformers/renderTags.js'
 import Template from './template.js'
-import { pickRandom, union, findOne, match, isInSecret, makeDiscreetQuery, alphabetize, getS3 } from '../utils.js'
+import {
+  pickRandom,
+  union,
+  findOne,
+  match,
+  isInSecret,
+  makeDiscreetQuery,
+  alphabetize,
+  saveBlocks,
+  restoreBlocks,
+  getS3
+} from '../utils.js'
 
 import config from '../config/index.js'
 
 import mongoose from 'mongoose'
 import slugger from 'mongoose-slug-generator'
+import dayjs from 'dayjs'
 const { Schema, model } = mongoose
 
 const ContentSchema = {
@@ -184,7 +198,45 @@ PageSchema.methods.getCurr = function () {
  */
 
 PageSchema.methods.getVersion = function (id) {
-  return findOne(this.versions, v => v._id === id)
+  return findOne(this.versions, v => v._id === id || v._id.toString() === id)
+}
+
+/**
+ * Return one or more versions of the page, sorted in chronological order.
+ * @param {(Schema.Types.ObjectId|string)[]} ids - An array of ID's of the
+ *   versions to be returned.
+ * @returns {Version[]} - An array of versions with ID's identified by the
+ *   `ids` array, sorted in chronological order.
+ */
+
+PageSchema.methods.getVersions = function (ids) {
+  const clean = ids.filter(id => id !== null && id !== undefined)
+  const versions = clean.map(id => this.getVersion(id)).filter(v => v !== null)
+  return versions.sort((a, b) => a.timestamp - b.timestamp)
+}
+
+/**
+ * Return the categories for the page that the user knows about.
+ * @param {User} user - The user asking for the page's categories.
+ * @returns {string[]} - An array of the names of the categories that the page
+ *   belongs to, which the user is privy to.
+ */
+
+PageSchema.methods.getCategories = async function (user) {
+  const Page = model('Page')
+  const titles = this.categories.filter(category => {
+    if (!category.secret) return true
+    const pov = user?.getPOV() || user
+    if (pov === 'Loremaster' || this.knows(char, category.codename)) return true
+    return false
+  }).map(category => category.name)
+  const categories = []
+  for (const title of titles) {
+    const page = await Page.findOneByTitle(`Category:${title}`, user)
+    const obj = page ? { title, path: page.path } : { title }
+    categories.push(obj)
+  }
+  return categories
 }
 
 /**
@@ -540,6 +592,50 @@ PageSchema.methods.update = async function (content, editor) {
 }
 
 /**
+ * Roll the page back to a previous version.
+ * @param {Version} version - The version that the editor would like to return
+ *   the page to.
+ * @param {User} editor - The user who is rolling the page back.
+ * @returns {Promise<void>} - A Promise that resolves when the rollback has
+ *   been completed.
+ */
+
+PageSchema.methods.rollback = async function (version, editor) {
+  const d = dayjs(version.timestamp)
+  await this.update({
+    title: version.title,
+    body: version.body,
+    editor,
+    timestamp: Date.now(),
+    msg: `Rolling back to version made on ${d.format('D MMM YYYY [at] h:mm A')}`
+  }, editor)
+}
+
+/**
+ * Render a version of the page to HTML.
+ * @param {User} renderer - The user that we're rendering the page for.
+ * @param {Version} [version = this.getCurr()] - The version of the page that
+ *   we're rendering. This defaults to the most recent version.
+ * @returns {Promise<string>} - A Promise that resolves with the string of
+ *   rendered HTML for the version of the page specified, as the renderer would
+ *   see it.
+ */
+
+PageSchema.methods.render = async function (renderer, version = this.getCurr()) {
+  const pov = renderer?.getPOV ? renderer.getPOV() : renderer
+  const src = this.write({ pov, version })
+  const pre = saveBlocks(src, /(```|<pre><code>)(\r|\n|.)*?(```|<\/code><\/pre>)/, 'PREBLOCK')
+  let { str } = pre
+  str = renderTags(str, '<includeonly>')
+  str = renderTags(str, '<noinclude>', true)
+  str = await Template.render(str, renderer)
+  const links = await renderLinks(str, this.getSecrets(pov), renderer)
+  str = restoreBlocks(links.str, pre.blocks)
+  str = await renderMarkup(str)
+  return str
+}
+
+/**
  * Delete the file associated with the page.
  * @returns {Promise<void>} - A Promise that resolves once the page's file has
  *   been deleted from the CDN. If the page has no file, nothing happens.
@@ -550,6 +646,25 @@ PageSchema.methods.deleteFile = async function () {
   if (!this.file?.url) return
   const s3 = getS3()
   await s3.deleteObject({ Bucket: bucket, Key: this.file.url.substr(domain.length + 1) }).promise()
+}
+
+/**
+ * Looks up a Page by its ID, with all the necessary safeguards to keep secret
+ * pages away from those who don't know about them.
+ * @param {Schema.Types.ObjectId|string} id - The ID of the page that you would
+ *   like to find, or a string representation of it.
+ * @param {User|string} user - The User who's asking for the Page, or the
+ *   string `Loremaster` for a loremaster, or the string `Anonymous` for an
+ *   anonymous user.
+ * @returns {Promise<Page|null>} - A Promise that resolves with the Page if a
+ *   Page document with that ID exists, and it is either not a secret, or if it
+ *   is, it's a secret that the user's point of view has access to, or `null`
+ *   if not.
+ */
+
+PageSchema.statics.findByIdDiscreetly = async function (id, user) {
+  const Page = this.model('Page')
+  return Page.findOne(makeDiscreetQuery({ _id: id }, user))
 }
 
 /**

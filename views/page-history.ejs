@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<%- include('includes/head') %>
+  <body>
+    <%- include('includes/header') %>
+    <header class="page">
+      <h1><%= page.title %> — Revision History</h1>
+    </header>
+    <main>
+      <%- include('includes/page-tabs', { page, view: 'History' }) %>
+      <form action="/<%= page.path %>/compare" method="GET" class="content-wrapper">
+        <table class="history">
+          <thead>
+            <tr>
+              <th />
+              <th />
+              <th>Revision</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% for (const v of versions) { %>
+            <tr>
+              <td><input type="radio" name="a" value="<%= v._id %>" /></td>
+              <td><input type="radio" name="b" value="<%= v._id %>" /></td>
+              <td>
+                <p><%= v.msg || '<em>No message provided for this revision.</em>' %></p>
+                <p class="revision-link"><a href="/<%= page.path %>/v/<%= v._id %>">Revision made on <%= formatDate(v.timestamp, 'D MMM YYYY [at] h:mm A') %></a></p>
+              </td>
+            </tr>
+            <% } %>
+          </tbody>
+        </table>
+        <p>
+          <button>Compare Versions</button>
+        </p>
+      </form>
+    </main>
+    <%- include('includes/footer') %>
+  </body>
+</html>

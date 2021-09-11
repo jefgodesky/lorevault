@@ -1,0 +1,11 @@
+<footer>
+  <% if (locals.isLoggedIn) { %>
+  <nav>
+    <ul>
+      <li><a href="/create" class="button">Create a New Page</a></li>
+      <li><a href="/upload" class="button">Upload a File</a></li>
+    </ul>
+  </nav>
+  <% } %>
+  <% if (locals.footer) { %><p><%= footer %></p><% } %>
+</footer>

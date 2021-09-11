@@ -85,7 +85,7 @@ const findOne = (arr, fn) => {
  */
 
 const makeDiscreetQuery = (orig, searcher) => {
-  const pov = searcher.getPOV ? searcher.getPOV() : searcher === 'Loremaster' ? 'Loremaster' : 'Anonymous'
+  const pov = searcher?.getPOV ? searcher.getPOV() : searcher === 'Loremaster' ? 'Loremaster' : 'Anonymous'
   return pov === 'Loremaster'
     ? orig
     : pov === 'Anonymous'
