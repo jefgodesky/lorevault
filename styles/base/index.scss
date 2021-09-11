@@ -9,6 +9,7 @@
 @use 'partials/page';
 @use 'partials/errors';
 @use 'partials/messages';
+@use 'partials/secrets';
 
 // Import game-specific Sass
 @use 'games.scss';
