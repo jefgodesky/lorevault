@@ -622,16 +622,18 @@ PageSchema.methods.rollback = async function (version, editor) {
  * @param {User} renderer - The user that we're rendering the page for.
  * @param {Version} [version = this.getCurr()] - The version of the page that
  *   we're rendering. This defaults to the most recent version.
+ * @param {string} str - If provided, the method renders this string instead of
+ *   the body of the version provided.
  * @returns {Promise<string>} - A Promise that resolves with the string of
  *   rendered HTML for the version of the page specified, as the renderer would
  *   see it.
  */
 
-PageSchema.methods.render = async function (renderer, version = this.getCurr()) {
+PageSchema.methods.render = async function (renderer, version = this.getCurr(), str) {
   const pov = renderer?.getPOV ? renderer.getPOV() : renderer
-  const src = this.write({ pov, version })
-  const pre = saveBlocks(src, /(```|<pre><code>)(\r|\n|.)*?(```|<\/code><\/pre>)/, 'PREBLOCK')
-  let { str } = pre
+  str = str || this.write({ pov, version })
+  const pre = saveBlocks(str, /(```|<pre><code>)(\r|\n|.)*?(```|<\/code><\/pre>)/, 'PREBLOCK')
+  str = pre.str
   str = renderTags(str, '<includeonly>')
   str = renderTags(str, '<noinclude>', true)
   str = str.replace(/\[\[Category:.*?(\|.*?)?\]\]/gm, '')
