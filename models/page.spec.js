@@ -927,6 +927,12 @@ describe('Page', () => {
         expect(actual).to.be.equal('\n<p>This is the original text.</p>\n')
       })
 
+      it('renders a string', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = await page.render(user, null, 'This is a string provided to the method.')
+        expect(actual).to.be.equal('\n<p>This is a string provided to the method.</p>\n')
+      })
+
       it('renders the page for a loremaster', async () => {
         const { page } = await createTestDocs(model)
         const actual = await page.render('Loremaster')
