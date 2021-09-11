@@ -597,6 +597,7 @@ PageSchema.methods.update = async function (content, editor) {
   this.processSecrets(secrets, editor)
   content.title = smartquotes(content.title)
   content.body = this.write({ str, pov: editor.getPOV(), mode: 'full' })
+  if (content.file) this.file = content.file
   this.title = content.title
   this.versions.push(Object.assign({}, content, { editor: editor._id }))
   await this.save()
