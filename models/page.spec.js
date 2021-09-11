@@ -976,6 +976,12 @@ describe('Page', () => {
         expect(page._id.toString()).to.be.equal(actual._id.toString())
       })
 
+      it('ignores following elements', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = await Page.findByPath('/test-page/other/stuff', user)
+        expect(page._id.toString()).to.be.equal(actual._id.toString())
+      })
+
       it('returns null if the page doesn\'t exist', async () => {
         const { user } = await createTestDocs(model)
         const actual = await Page.findByPath('lol-nope', user)
