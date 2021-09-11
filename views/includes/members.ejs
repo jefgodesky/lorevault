@@ -5,14 +5,14 @@
   <% if (Array.isArray(members)) { %>
   <ul>
     <% for (const member of members) { %>
-    <li><a href="/<%= member.path%>"><%= member.title %></a></li>
+    <li><a href="/<%= member.path %>"><%= member.title %></a></li>
     <% } %>
   </ul>
   <% } else { %>
   <% if (members.other && members.other.length > 0) { %>
   <ul>
     <% for (const member of members.other) { %>
-    <li><a href="/<%= member.path%>"><%= member.title %></a></li>
+    <li><a href="/<%= member.path %>"><%= member.title %></a></li>
     <% } %>
   </ul>
   <% } %>
@@ -20,7 +20,7 @@
   <h3>0-9</h3>
   <ul>
     <% for (const member of members.numbers) { %>
-    <li><a href="/<%= member.path%>"><%= member.title %></a></li>
+    <li><a href="/<%= member.path %>"><%= member.title %></a></li>
     <% } %>
   </ul>
   <% } %>
@@ -29,7 +29,7 @@
   <h3><%= letter.toUpperCase() %></h3>
   <ul>
     <% for (const member of members[letter]) { %>
-    <li><a href="/<%= member.path%>"><%= member.title %></a></li>
+    <li><a href="/<%= member.path %>"><%= member.title %></a></li>
     <% } %>
   </ul>
   <% } %>

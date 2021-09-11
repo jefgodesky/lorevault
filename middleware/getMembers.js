@@ -80,7 +80,7 @@ const getMembers = async (req, res, next) => {
   if (pages.length < 1 && subcategories.length < 1) return next()
   req.viewOpts.category = {
     pages: pages.length < alphabetizedThreshold ? pages : alphabetizeMembers(pages, title),
-    categories: subcategories.length < alphabetizedThreshold ? subcategories : alphabetizeMembers(subcategories, title)
+    subcategories: subcategories.length < alphabetizedThreshold ? subcategories : alphabetizeMembers(subcategories, title)
   }
   return next()
 }

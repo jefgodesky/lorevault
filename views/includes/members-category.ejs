@@ -3,10 +3,10 @@
   const subcats = {
     className: 'category-subcategories',
     title: 'Subcategories',
-    intro: category.categories.length === 1
+    intro: category.subcategories.length === 1
       ? 'This category contains only the following subcategory.'
-      : `This category has the following ${category.categories.length} subcategories.`,
-    members: category.categories
+      : `This category has the following ${category.subcategories.length} subcategories.`,
+    members: category.subcategories.map(p => p.page)
   }
 
   const pages = {
@@ -15,7 +15,7 @@
     intro: category.pages.length === 1
         ? 'This category contains only the following page.'
         : `This category has the following ${category.pages.length} pages.`,
-    members: category.pages
+    members: category.pages.map(p => p.page)
   }
 %>
 <%- include('members', subcats) %>
