@@ -499,7 +499,8 @@ PageSchema.methods.revealToName = async function (name, codename = null) {
  * given `codename`.
  * @param {Character|Schema.Types.ObjectId|string} char - The character who
  *   might (or might not) know the secret (or hens ID, or the string
- *   representation of hens ID).
+ *   representation of hens ID), or the string 'Anonymous' for an anonymous
+ *   user, or the string 'Loremaster' for a loremaster.
  * @param {string} codename - The codename identifying the secret. If you
  *   provide a falsy value (e.g., `false` or `null`) and the page itself is a
  *   secret, then the secret the method reports on is the existence of the page
