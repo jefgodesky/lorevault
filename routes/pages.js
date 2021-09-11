@@ -45,6 +45,18 @@ router.get('/*/compare', getPage, async (req, res, next) => {
   res.render('page-compare', req.viewOpts)
 })
 
+// GET /*/reveal/:codename
+router.get('/*/reveal/:codename', getPage, async (req, res, next) => {
+  const { codename } = req.params
+  if (!req.viewOpts.page || !req.user) return next()
+  const { page } = req.viewOpts
+  if (!page.knows(req.user.getPOV(), codename)) return res.redirect(`/${page.path}`)
+  const secret = page.findSecret(codename)
+  req.viewOpts.secret = await page.render(req.user, null, secret.content)
+  req.viewOpts.action = `/${page.path}/reveal/${codename}`
+  res.render('page-reveal', req.viewOpts)
+})
+
 // GET /*/v/:version
 router.get('/*/v/:version', getPage, async (req, res, next) => {
   if (!req.viewOpts.page) return next()

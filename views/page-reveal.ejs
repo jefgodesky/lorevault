@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <%- include('includes/head') %>
+  <body>
+    <%- include('includes/header') %>
+    <header class="page">
+      <h1><%= locals.version?.title || page.title %></h1>
+    </header>
+    <main>
+      <%- include('includes/page-tabs', { page, view: locals.version?.isOld ? 'History' : 'Read' }) %>
+      <div class="content-wrapper">
+        <%- secret %>
+        <form action="<%= action %>" method="POST">
+          <label for="revealto">Reveal this secret to</label>
+          <input type="text" name="revealto" id="revealto" placeholder="Name of a character or a category with characters in it" />
+          <p class="actions">
+            <button>Reveal Secret</button>
+          </p>
+        </form>
+      </div>
+    </main>
+    <%- include('includes/footer') %>
+  </body>
+</html>
