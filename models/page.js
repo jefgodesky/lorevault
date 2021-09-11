@@ -22,6 +22,7 @@ import config from '../config/index.js'
 
 import mongoose from 'mongoose'
 import slugger from 'mongoose-slug-generator'
+import dayjs from 'dayjs'
 const { Schema, model } = mongoose
 
 const ContentSchema = {
@@ -221,13 +222,21 @@ PageSchema.methods.getVersions = function (ids) {
  *   belongs to, which the user is privy to.
  */
 
-PageSchema.methods.getCategories = function (user) {
-  return this.categories.filter(category => {
+PageSchema.methods.getCategories = async function (user) {
+  const Page = model('Page')
+  const titles = this.categories.filter(category => {
     if (!category.secret) return true
     const pov = user?.getPOV() || user
     if (pov === 'Loremaster' || this.knows(char, category.codename)) return true
     return false
   }).map(category => category.name)
+  const categories = []
+  for (const title of titles) {
+    const page = await Page.findOneByTitle(`Category:${title}`, user)
+    const obj = page ? { title, path: page.path } : { title }
+    categories.push(obj)
+  }
+  return categories
 }
 
 /**

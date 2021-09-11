@@ -213,8 +213,23 @@ describe('Page', () => {
 
     describe('getCategories', () => {
       it('returns the page\'s categories', async () => {
-        const { page, user } = await createTestDocs(model, '[[Category:Test]]')
-        expect(page.getCategories(user)).to.be.eql(['Test'])
+        const { page, user } = await createTestDocs(model, '[[Category:Tests]]')
+        const actual = await page.getCategories(user)
+        expect(actual).to.have.lengthOf(1)
+      })
+
+      it('returns the names of the page\'s categories', async () => {
+        const { page, user } = await createTestDocs(model, '[[Category:Tests]]')
+        const actual = await page.getCategories(user)
+        expect(actual).to.be.eql([{ title: 'Tests' }])
+      })
+
+      it('returns the paths of categories that have them', async () => {
+        const { page, user } = await createTestDocs(model)
+        await Page.create({ title: 'Category:Tests', body: 'This is a category for tests.' }, user)
+        await page.update({ title: page.title, body: '[[Category:Tests]]' }, user)
+        const actual = await page.getCategories(user)
+        expect(actual).to.be.eql([{ title: 'Tests', path: 'category-tests' }])
       })
     })
 
