@@ -629,6 +629,21 @@ describe('Page', () => {
     })
 
     describe('knows', () => {
+      it('returns true for a loremaster', async () => {
+        const { page } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        expect(page.knows('Loremaster', 'Wombat')).to.be.true
+      })
+
+      it('returns false for an anonymous user', async () => {
+        const { page } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        expect(page.knows('Anonymous', 'Wombat')).to.be.false
+      })
+
+      it('returns false for any other string', async () => {
+        const { page } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        expect(page.knows('Jabberwocky', 'Wombat')).to.be.false
+      })
+
       it('returns true if the character knows the secret', async () => {
         const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
         expect(page.knows(user.getPOV(), 'Wombat')).to.be.true
