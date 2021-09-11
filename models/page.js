@@ -583,7 +583,11 @@ PageSchema.methods.write = function (params = {}) {
 
 PageSchema.methods.update = async function (content, editor) {
   const codenamer = this.findCodename.bind(this)
-  const { str, secrets } = assignCodenames(smartquotes(content.body), codenamer)
+  let { body } = content
+  body = body && body.length > 0 ? smartquotes(content.body) : ''
+  const tags = body.match(/<.*? (.*?=“.*?”)*?>/gm)
+  if (tags) { for (const tag of tags) body = body.replace(tag, tag.replace(/[“|”]/g, '"')) }
+  const { str, secrets } = assignCodenames(body, codenamer)
   this.processSecrets(secrets, editor)
   content.title = smartquotes(content.title)
   content.body = this.write({ str, pov: editor.getPOV(), mode: 'full' })
