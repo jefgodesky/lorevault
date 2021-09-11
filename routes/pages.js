@@ -3,6 +3,7 @@ import { diffWords } from 'diff'
 import Page from '../models/page.js'
 import getPage from '../middleware/getPage.js'
 import getMembers from '../middleware/getMembers.js'
+import { makeDiscreetQuery } from '../utils.js'
 import config from '../config/index.js'
 const router = Router()
 
@@ -23,6 +24,17 @@ router.post('/create', async (req, res) => {
   const { title, body, msg } = req.body
   const page = await Page.create({ title, body, msg }, req.user)
   res.redirect(`/${page.path}`)
+})
+
+// GET /search
+router.get('/search', async (req, res, next) => {
+  const query = req.query.q
+  req.viewOpts.query = query
+  req.viewOpts.title = `Results for &ldquo;${query}&rdquo;`
+  req.viewOpts.searchResults = await Page
+    .find(makeDiscreetQuery({ $text: { $search: query } }, req.user?.getPOV() || req.user), { score: { $meta: 'textScore' } })
+    .sort({ score: { $meta: 'textScore' } })
+  res.render('search', req.viewOpts)
 })
 
 // GET /*/history
