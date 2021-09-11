@@ -20,7 +20,7 @@ import rehypeStringify from 'rehype-stringify'
 const renderMarkup = async str => {
   const schema = deepmerge(defaultSchema, {
     attributes: {
-      '*': ['className']
+      '*': ['className', 'data*'],
     },
     tagNames: ['section', 'aside', 'figure', 'figcaption']
   })
