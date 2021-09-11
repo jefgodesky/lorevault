@@ -1,6 +1,30 @@
 import Page from '../models/page.js'
 
 /**
+ * Fetch categories for rendering the page.
+ * @param {Page} page - The page being rendered.
+ * @param {User} user - The user we're rendering the page for.
+ * @returns {Promise<{title: string, path: string, render: string}[]>} - A
+ *   Promise that resolves with an array of objects represneting the categories
+ *   that the page belongs to, which the user is privy to. Each object includes
+ *   the following properties:
+ *     `title`    The name of the category. This does not include the
+ *                "Category:" prefix.
+ *     `path`     The path to the category page. This is only included if the
+ *                category has a page.
+ *     `render`   A rendered HTML link to the category.
+ */
+
+const getCategories = async (page, user) => {
+  const categories = await page.getCategories(user)
+  return categories.map(category => Object.assign({}, category, {
+    render: Boolean(category.path)
+      ? `<a href="/${category.path}">${category.title.startsWith('Category:') ? category.title.substring(9) : category.title}</a>`
+      : `<a href="/create?title=${encodeURIComponent(`Category:${category.title}`)}" class="new">${category.title}</a>`
+  }))
+}
+
+/**
  * Express.js middleware that finds the page identified by the request path,
  * loads it from the database, and renders it.
  * @param {object} req - The Express.js request object.
@@ -18,12 +42,7 @@ const getPage = async (req, res, next) => {
   const version = params?.version ? viewOpts.page.getVersion(params.version) : null
   viewOpts.title = viewOpts.page.title
   viewOpts.page.markup = await viewOpts.page.render(user, version || viewOpts.page.getCurr())
-  viewOpts.categories = await viewOpts.page.getCategories(user)
-  viewOpts.categories.forEach(cat => {
-    cat.render = Boolean(cat.path)
-      ? `<a href="/${cat.path}">${cat.title.startsWith('Category:') ? cat.title.substring(9) : cat.title}</a>`
-      : `<a href="/create?title=${encodeURIComponent(`Category:${cat.title}`)}" class="new">${cat.title}</a>`
-  })
+  viewOpts.categories = await getCategories(viewOpts.page, user)
   return next()
 }
 
