@@ -907,6 +907,12 @@ describe('Page', () => {
         expect(actual).to.be.equal('\n<pre><code>\n[[Link]]\n\n{{Test}}\n\n</code></pre>\n<p>This is outside the block.</p>\n')
       })
 
+      it('removes category tags', async () => {
+        const { page, user } = await createTestDocs(model, '[[Category:Test| Alias ]]')
+        const actual = await page.render(user)
+        expect(actual).to.be.equal('')
+      })
+
       it('renders links', async () => {
         const { user } = await createTestDocs(model)
         const p = await Page.create({ title: 'Test', body: '[[Test Page|Alias]]\n\n[[New Page|Alias]]' }, user)
