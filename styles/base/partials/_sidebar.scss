@@ -1,0 +1,61 @@
+@use '../modules/colors';
+
+.sidebar {
+  background: colors.$highlight;
+  border-top: 0.25em solid colors.$text;
+  border-bottom: 0.25em solid colors.$text;
+  padding: 1em;
+  position: relative;
+  text-align: center;
+
+  dl {
+    font-family: 'Trebuchet MS', serif;
+    display: table;
+    margin: 1em auto;
+    text-align: left;
+
+    div {
+      display: table-row;
+
+      dt,
+      dd {
+        display: table-cell;
+        padding: 0.25em;
+      }
+
+      dt {
+        font-weight: bold;
+        padding-right: 1em;
+      }
+    }
+  }
+
+  &:before,
+  &:after {
+    bottom: -0.75em;
+    border-top: 0.25em solid colors.$text;
+    border-bottom: 0.25em solid transparent;
+    content: '';
+    display: block;
+    height: 0;
+    position: absolute;
+    width: 0;
+  }
+
+  &:before {
+    border-right: 0.25em solid colors.$text;
+    border-left: 0.25em solid transparent;
+    left: 0;
+  }
+
+  &:after {
+    border-right: 0.25em solid transparent;
+    border-left: 0.25em solid colors.$text;
+    right: 0;
+  }
+
+  @media (min-width: 50em) {
+    float: right;
+    margin: 0 -4em 2em 2em;
+  }
+}

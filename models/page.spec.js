@@ -790,6 +790,26 @@ describe('Page', () => {
         expect(actual.versions[1].body).to.be.equal('This is the updated text.')
       })
 
+      it('adds smart quotes', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = await page.update({ title: 'After', body: 'I said, "Damn skippy."' }, user)
+        expect(actual.versions[1].body).to.be.equal('I said, “Damn skippy.”')
+      })
+
+      it('preserves straight quotes in HTML attributes', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = await page.update({ title: 'After', body: '<span class="secret" data-codename="Wombat">I said, "Damn skippy."</span>' }, user)
+        expect(actual.versions[1].body).to.be.equal('<span class="secret" data-codename="Wombat">I said, “Damn skippy.”</span>')
+      })
+
+      it('saves a file', async () => {
+        const { page, user } = await createTestDocs(model)
+        const file = { url: 'https://example.com/test', mimetype: 'plain/text', size: 42 }
+        const after = await page.update({ title: 'After', body: 'This is the updated text.', file }, user)
+        const { url, mimetype, size } = after.file
+        expect([url, mimetype, size]).to.be.eql([file.url, file.mimetype, file.size])
+      })
+
       it('saves a commit message', async () => {
         const { page, user } = await createTestDocs(model)
         const actual = await page.update({ title: 'After', body: 'This is the updated text.', msg: 'This is an update.' }, user)
