@@ -832,6 +832,56 @@ describe('Page', () => {
       })
     })
 
+    describe('rollback', () => {
+      it('creates a new version', async () => {
+        const { page, user } = await createTestDocs(model)
+        await page.update({ title: 'Test Page', body: 'Updated body.' }, user)
+        await page.rollback(page.versions[0], user)
+        expect(page.versions).to.have.lengthOf(3)
+      })
+
+      it('sets the title to that of the old version', async () => {
+        const { page, user } = await createTestDocs(model)
+        await page.update({ title: 'Test Page', body: 'Updated body.' }, user)
+        await page.rollback(page.versions[0], user)
+        const curr = page.getCurr()
+        expect(curr.title).to.be.equal(page.versions[0].title)
+      })
+
+      it('sets the body to that of the old version', async () => {
+        const { page, user } = await createTestDocs(model)
+        await page.update({ title: 'Test Page', body: 'Updated body.' }, user)
+        await page.rollback(page.versions[0], user)
+        const curr = page.getCurr()
+        expect(curr.body).to.be.equal(page.versions[0].body)
+      })
+
+      it('leaves a message about the rollback', async () => {
+        const { page, user } = await createTestDocs(model)
+        await page.update({ title: 'Test Page', body: 'Updated body.' }, user)
+        await page.rollback(page.versions[0], user)
+        const curr = page.getCurr()
+        expect(curr.msg.startsWith('Rolling back to version made on')).to.be.equal(true)
+      })
+
+      it('sets a new timestamp', async () => {
+        const { page, user } = await createTestDocs(model)
+        await page.update({ title: 'Test Page', body: 'Updated body.' }, user)
+        const time = Date.now()
+        await page.rollback(page.versions[0], user)
+        const curr = page.getCurr()
+        expect(curr.timestamp.getTime()).to.be.least(time)
+      })
+
+      it('sets the person who made the rollback as the editor', async () => {
+        const { page, user, other } = await createTestDocs(model)
+        await page.update({ title: 'Test Page', body: 'Updated body.' }, user)
+        await page.rollback(page.versions[0], other)
+        const curr = page.getCurr()
+        expect(curr.editor._id).to.be.eql(other._id)
+      })
+    })
+
     describe('render', () => {
       it('renders the page', async () => {
         const { page, user } = await createTestDocs(model)

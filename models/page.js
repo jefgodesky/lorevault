@@ -592,6 +592,26 @@ PageSchema.methods.update = async function (content, editor) {
 }
 
 /**
+ * Roll the page back to a previous version.
+ * @param {Version} version - The version that the editor would like to return
+ *   the page to.
+ * @param {User} editor - The user who is rolling the page back.
+ * @returns {Promise<void>} - A Promise that resolves when the rollback has
+ *   been completed.
+ */
+
+PageSchema.methods.rollback = async function (version, editor) {
+  const d = dayjs(version.timestamp)
+  await this.update({
+    title: version.title,
+    body: version.body,
+    editor,
+    timestamp: Date.now(),
+    msg: `Rolling back to version made on ${d.format('D MMM YYYY [at] h:mm A')}`
+  }, editor)
+}
+
+/**
  * Render a version of the page to HTML.
  * @param {User} renderer - The user that we're rendering the page for.
  * @param {Version} [version = this.getCurr()] - The version of the page that
