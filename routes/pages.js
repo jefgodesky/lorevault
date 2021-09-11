@@ -57,6 +57,16 @@ router.get('/*/reveal/:codename', getPage, async (req, res, next) => {
   res.render('page-reveal', req.viewOpts)
 })
 
+// POST /*/reveal/:codename
+router.post('/*/reveal/:codename', getPage, async (req, res, next) => {
+  const { codename } = req.params
+  if (!req.viewOpts.page || !req.user) return next()
+  const { page } = req.viewOpts
+  if (!page.knows(req.user.getPOV(), codename)) return res.redirect(`/${page.path}`)
+  await page.revealToName(req.body.revealto, codename)
+  res.redirect(`/${page.path}`)
+})
+
 // GET /*/v/:version
 router.get('/*/v/:version', getPage, async (req, res, next) => {
   if (!req.viewOpts.page) return next()
