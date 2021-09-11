@@ -17,7 +17,7 @@ const initViewOpts = (req, res, next) => {
     skin,
     footer,
     isLoggedIn: Boolean(req.user),
-    pov: !pov ? 'Anonymous' : pov === 'Loremaster' ? 'Loremaster' : pov.name,
+    pov: !pov ? 'Anonymous' : pov === 'Loremaster' ? 'Loremaster' : pov.name || pov,
     povLink: pov?.page?.path ? `/${pov.page.path}` : pov === 'loremaster' ? '/profile' : '/',
     get: req.query
   }
