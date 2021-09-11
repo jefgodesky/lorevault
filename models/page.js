@@ -552,7 +552,7 @@ PageSchema.methods.write = function (params = {}) {
       : editing && !secret.known
         ? `||::${secret.codename}::||`
         : reading && secret.known
-          ? secret.content
+          ? `<span class="secret" data-codename="${secret.codename}">${secret.content} <a href="/${this.path}/reveal/${secret.codename}">[Reveal]</a></span>`
           : ''
 
     const regex = new RegExp(`\\|\\|::${secret.codename}::\\s*?.*?\\|\\|`, 'gm')
