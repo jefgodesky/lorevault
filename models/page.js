@@ -540,7 +540,7 @@ PageSchema.methods.knows = function (char, codename) {
 PageSchema.methods.write = function (params = {}) {
   const { pov = 'Anonymous', mode = 'reading', version = this.getCurr() } = params
   const secrets = this.getSecrets(pov)
-  let str = params.str || version.body
+  let str = params.str || version?.body || ''
 
   const full = mode.toLowerCase() === 'full'
   const editing = !full && mode.toLowerCase() === 'editing'
