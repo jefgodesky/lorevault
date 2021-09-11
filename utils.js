@@ -24,6 +24,18 @@ const pickRandomNum = (...numbers) => {
 const pickRandom = arr => arr[pickRandomNum(0, arr.length - 1)]
 
 /**
+ * Round a number to a given number of decimal places.
+ * @param {number} num - The number to be rounded.
+ * @param {number} places - The number of decimal places to round `num` to.
+ * @returns {number} - `num` rounded to `places` decimal places.
+ */
+
+const round = (num, places) => {
+  const factor = 10 ** places
+  return Math.round(num * factor) / factor
+}
+
+/**
  * Returns the union of several arrays.
  * @param {...*[]} arr - One of the arrays to create a union from.
  * @returns {*[]} - An array that is the union of all arrays passed to the

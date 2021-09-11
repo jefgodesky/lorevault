@@ -5,6 +5,7 @@ import { createTestDocs } from './test-utils.js'
 import {
   pickRandomNum,
   pickRandom,
+  round,
   union,
   intersection,
   findOne,
@@ -36,6 +37,15 @@ describe('pickRandom', () => {
     const arr = []
     for (let i = 1; i < len; i++) arr.push(i)
     expect(arr).to.include(pickRandom(arr))
+  })
+})
+
+describe('round', () => {
+  it('rounds a number to a set number of decimal places', () => {
+    const expected = [ 3, 3.1, 3.14, 3.142, 3.1416, 3.14159, 3.141593 ]
+    const places = pickRandomNum(1, 6)
+    const actual = round(3.14159265, places)
+    expect(actual).to.be.equal(expected[places])
   })
 })
 
