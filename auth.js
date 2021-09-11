@@ -1,7 +1,11 @@
-const GoogleStrategy = require('passport-google-oauth20').Strategy
-const DiscordStrategy = require('passport-discord').Strategy
-const User = require('./models/user')
-const { google, discord } = require('./config')
+import PassportGoogle from 'passport-google-oauth20'
+import PassportDiscord from 'passport-discord'
+import User from './models/user.js'
+import config from './config/index.js'
+
+const GoogleStrategy = PassportGoogle.Strategy
+const DiscordStrategy = PassportDiscord.Strategy
+const { google, discord } = config
 
 const initPassport = passport => {
   passport.use(new GoogleStrategy({
@@ -62,4 +66,4 @@ const initPassport = passport => {
   })
 }
 
-module.exports = initPassport
+export default initPassport

@@ -1,7 +1,9 @@
-const { Router } = require('express')
-const populateCharacterForm = require('../middleware/populateCharacterForm')
-const processCharacterForm = require('../middleware/processCharacterForm')
-const { loremasters } = require('../config')
+import { Router } from 'express'
+import populateCharacterForm from '../middleware/populateCharacterForm.js'
+import processCharacterForm from '../middleware/processCharacterForm.js'
+import config from '../config/index.js'
+import { findOne } from '../utils.js'
+const { loremasters } = config
 const router = Router()
 
 // GET /profile
@@ -30,6 +32,7 @@ router.get('/profile', async (req, res, next) => {
     path: char.page.path,
     name: char.page.title
   }))
+  if (characters.list.length < 1) req.viewOpts.characters = false
 
   const { pov } = req.viewOpts
   req.viewOpts.isPotentialLoremaster = loremasters.includes(user._id.toString())
@@ -68,9 +71,9 @@ router.post('/profile/character/:id', processCharacterForm, populateCharacterFor
 router.get('/profile/character/:id/activate', async (req, res, next) => {
   const { user } = req
   if (!user) return res.redirect('/')
-  const filtered = user.characters.list.filter(c => c._id.toString() === req.params.id)
-  if (filtered.length < 1) return res.redirect('/profile')
-  user.characters.active = filtered[0]._id
+  const char = findOne(user.characters.list, c => c._id.toString() === req.params.id)
+  if (!char) return res.redirect('/profile')
+  user.characters.active = char._id
   await user.save()
   res.redirect('/profile')
 })
@@ -87,16 +90,16 @@ router.get('/profile/loremaster', async (req, res, next) => {
   const { user } = req
   if (!user) res.redirect('/')
   if (loremasters.includes(user._id.toString())) {
-    if (user.pov === 'loremaster' && user.characters.list.length > 0) {
-      user.pov = 'character'
-    } else if (user.pov === 'loremaster') {
-      user.pov = 'public'
+    if (user.pov === 'Loremaster' && user.characters.list.length > 0) {
+      user.pov = 'Character'
+    } else if (user.pov === 'Loremaster') {
+      user.pov = 'Anonymous'
     } else {
-      user.pov = 'loremaster'
+      user.pov = 'Loremaster'
     }
     await user.save()
   }
   res.redirect('/profile')
 })
 
-module.exports = router
+export default router

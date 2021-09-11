@@ -1,16 +1,16 @@
-const { Router } = require('express')
-const diff = require('diff')
-const Page = require('../models/page')
-const getPage = require('../middleware/getPage')
-const getMembers = require('../middleware/getMembers')
-const { home } = require('../config')
+import { Router } from 'express'
+import { diffWords } from 'diff'
+import Page from '../models/page.js'
+import getPage from '../middleware/getPage.js'
+import getMembers from '../middleware/getMembers.js'
+import config from '../config/index.js'
 const router = Router()
 
 // GET /
 router.get('/', async (req, res, next) => {
-  const homepage = await Page.findOneByTitle(home, req.user)
+  const homepage = await Page.findOneByTitle(config.home, req.user)
   if (homepage) return res.redirect(`/${homepage.path}`)
-  return res.redirect(`/create?title=${encodeURIComponent(home)}`)
+  return res.redirect(`/create?title=${encodeURIComponent(config.home)}`)
 })
 
 // GET /create
@@ -21,7 +21,7 @@ router.get('/create', getMembers, async (req, res, next) => {
 // POST /create
 router.post('/create', async (req, res) => {
   const { title, body, msg } = req.body
-  const page = await Page.createFromContent({ title, body, msg }, req.user)
+  const page = await Page.create({ title, body, msg }, req.user)
   res.redirect(`/${page.path}`)
 })
 
@@ -39,7 +39,7 @@ router.get('/*/compare', getPage, async (req, res, next) => {
   const { a, b } = req.query
   const versions = page.getVersions([a, b])
   if (versions.length < 2) return res.redirect(`/${page.path}/history`)
-  const d = diff.diffWords(versions[0].body, versions[1].body)
+  const d = diffWords(versions[0].body, versions[1].body)
   req.viewOpts.versions = versions
   req.viewOpts.diff = d.map(part => part.added ? `<ins>${part.value}</ins>` : part.removed ? `<del>${part.value}</del>` : part.value).join('')
   res.render('page-compare', req.viewOpts)
@@ -76,7 +76,7 @@ router.get('/*/edit', getPage, async (req, res, next) => {
 // POST /*/edit
 router.post('/*/edit', getPage, async (req, res, next) => {
   if (!req.viewOpts.page) return next()
-  await req.viewOpts.page.makeUpdate(req.body, req.user)
+  await req.viewOpts.page.update(req.body, req.user)
   res.redirect(`/${req.viewOpts.page.path}`)
 })
 
@@ -86,4 +86,4 @@ router.get('/*', getPage, getMembers, async (req, res, next) => {
   res.render('page-read', req.viewOpts)
 })
 
-module.exports = router
+export default router
