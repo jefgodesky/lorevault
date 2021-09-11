@@ -232,7 +232,7 @@ PageSchema.methods.getCategories = async function (user) {
   const titles = this.categories.filter(category => {
     if (!category.secret) return true
     const pov = user?.getPOV() || user
-    if (pov === 'Loremaster' || this.knows(char, category.codename)) return true
+    if (pov === 'Loremaster' || this.knows(pov, category.codename)) return true
     return false
   }).map(category => category.name)
   const categories = []
