@@ -593,7 +593,7 @@ PageSchema.methods.update = async function (content, editor) {
  */
 
 PageSchema.methods.render = async function (renderer, version = this.getCurr()) {
-  const pov = renderer.getPOV() || pov
+  const pov = renderer?.getPOV ? renderer.getPOV() : renderer
   const src = this.write({ pov, version })
   const pre = saveBlocks(src, /(```|<pre><code>)(\r|\n|.)*?(```|<\/code><\/pre>)/, 'PREBLOCK')
   let { str } = pre

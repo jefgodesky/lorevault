@@ -824,6 +824,18 @@ describe('Page', () => {
         expect(actual).to.be.equal('\n<p>This is the original text.</p>\n')
       })
 
+      it('renders the page for a loremaster', async () => {
+        const { page } = await createTestDocs(model)
+        const actual = await page.render('Loremaster')
+        expect(actual).to.be.equal('\n<p>This is the original text.</p>\n')
+      })
+
+      it('renders the page for an anonymous user', async () => {
+        const { page } = await createTestDocs(model)
+        const actual = await page.render('Anonymous')
+        expect(actual).to.be.equal('\n<p>This is the original text.</p>\n')
+      })
+
       it('preserves the content of pre-blocks', async () => {
         const { page, user } = await createTestDocs(model, '```\n\n[[Link]]\n\n{{Test}}\n\n```\n\nThis is outside the block.')
         const actual = await page.render(user)
