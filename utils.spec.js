@@ -13,6 +13,7 @@ import {
   match,
   saveBlocks,
   restoreBlocks,
+  getReadableFileSize,
   isInSecret,
   indexOfRegExp,
   alphabetize,
@@ -190,6 +191,24 @@ describe('restoreBlocks', () => {
     const { str, blocks } = saveBlocks(orig, /Unit Testing/, 'REDACTED')
     const actual = restoreBlocks(str, blocks)
     expect(actual).to.be.equal(orig)
+  })
+})
+
+describe('getReadableFileSize', () => {
+  it('reports bytes', () => {
+    expect(getReadableFileSize(21)).to.be.equal('21 B')
+  })
+
+  it('reports kilobytes', () => {
+    expect(getReadableFileSize(4321)).to.be.equal('4.3 kB')
+  })
+
+  it('reports megabytes', () => {
+    expect(getReadableFileSize(7654321)).to.be.equal('7.7 MB')
+  })
+
+  it('reports gigabytes', () => {
+    expect(getReadableFileSize(9876543210)).to.be.equal('9.9 GB')
   })
 })
 

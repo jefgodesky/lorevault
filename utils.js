@@ -180,6 +180,22 @@ const restoreBlocks = (str, blocks) => {
 }
 
 /**
+ * Translates a number of bytes into a human-readable file size.
+ * @param {number} bytes - A number of bytes.
+ * @returns {string} - A string communicating the number of bytes given in a
+ *   human-readable format.
+ */
+
+const getReadableFileSize = bytes => {
+  const kB = round(bytes / 1000, 1)
+  const MB = round(kB / 1000, 1)
+  const GB = round(MB / 1000, 1)
+  const val = kB < 1 ? bytes : MB < 1 ? kB : GB < 1 ? MB : GB
+  const unit = kB < 1 ? 'B' : MB < 1 ? 'kB' : GB < 1 ? 'MB' : 'GB'
+  return `${val} ${unit}`
+}
+
+/**
  * Checks to see if the subject (`subj`) appears within any of the secrets in
  * the string provided (`body`).
  * @param {object} subj - An object that provides data on the string we're
@@ -258,6 +274,7 @@ const getS3 = () => {
 export {
   pickRandomNum,
   pickRandom,
+  round,
   union,
   intersection,
   findOne,
@@ -265,6 +282,7 @@ export {
   match,
   saveBlocks,
   restoreBlocks,
+  getReadableFileSize,
   isInSecret,
   indexOfRegExp,
   alphabetize,
