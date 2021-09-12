@@ -703,6 +703,20 @@ PageSchema.methods.renderAudio = function (caption = this.title) {
 }
 
 /**
+ * Renders the page's file as an HTML video tag.
+ * @returns {string} - An HTML video tag for playing the page's file.
+ */
+
+PageSchema.methods.renderVideo = function () {
+  if (!this.file?.url || !this.file?.mimetype) return ''
+  const { url, mimetype } = this.file
+  const notSupported = '<p>Your browser does not support the HTML <code>video</code> element.</p>'
+  const src = `<source src="${url} type="${mimetype}" />`
+  const inside = [src, notSupported].join('\n')
+  return `<video controls>\n${inside}\n</video>`
+}
+
+/**
  * Delete the file associated with the page.
  * @returns {Promise<void>} - A Promise that resolves once the page's file has
  *   been deleted from the CDN. If the page has no file, nothing happens.

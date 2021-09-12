@@ -1033,6 +1033,25 @@ describe('Page', () => {
         expect(page.renderAudio('Caption')).to.be.equal('<figure class="audio">\n<figcaption>Caption</figcaption>\n<audio controls src="https://example.com/test.mp3">\n<p>Your browser does not support the HTML <code>audio</code> element.</p>\n</audio>\n</figure>')
       })
     })
+
+    describe('renderVideo', () => {
+      it('returns an empty string if the page has no file', async () => {
+        const { page } = await createTestDocs(model)
+        expect(page.renderVideo()).to.be.equal('')
+      })
+
+      it('returns an empty string if the page\'s file has no MIME type', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://example.com/test.webm' }
+        expect(page.renderVideo()).to.be.equal('')
+      })
+
+      it('renders a video tag', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://example.com/test.webm', mimetype: 'video/webm' }
+        expect(page.renderVideo()).to.be.equal('<video controls>\n<source src="https://example.com/test.webm type="video/webm" />\n<p>Your browser does not support the HTML <code>video</code> element.</p>\n</video>')
+      })
+    })
   })
 
   describe('statics', () => {
