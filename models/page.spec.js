@@ -964,6 +964,15 @@ describe('Page', () => {
         expect(actual).to.be.equal('\n<p><a href="/test-page" title="Test Page">Alias</a></p>\n<p><a href="/create?title=New%20Page" class="new">Alias</a></p>\n')
       })
 
+      it('renders images', async () => {
+        const { user } = await createTestDocs(model)
+        const file = { url: 'https://example.com/test.jpg', mimetype: 'image/jpeg', size: 12345 }
+        await Page.create({ title: 'Image:Test JPEG Image', file }, user)
+        const p = await Page.create({ title: 'Test', body: '[[Image:Test JPEG Image|Alt text]]' }, user)
+        const actual = await p.render(user)
+        expect(actual).to.be.equal('\n<img src="https://example.com/test.jpg" alt="Alt text">\n')
+      })
+
       it('renders templates', async () => {
         const { page, user } = await createTestDocs(model)
         await Page.create({ title: 'Template:Test', body: '<noinclude>This should not be rendered.</noinclude>\n\n<includeonly>This should be rendered.</includeonly>' }, user)
@@ -977,6 +986,166 @@ describe('Page', () => {
         const tpl = await Page.create({ title: 'Template:Test', body: '<noinclude>This should be rendered.</noinclude>\n\n<includeonly>This should not be rendered.</includeonly>' }, user)
         const actual = await tpl.render(user)
         expect(actual).to.be.equal('\n<p>This should be rendered.</p>\n')
+      })
+    })
+
+    describe('renderImage', () => {
+      it('returns an empty string if the page has no file', async () => {
+        const { page } = await createTestDocs(model)
+        expect(page.renderImage()).to.be.equal('')
+      })
+
+      it('renders an image tag', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://example.com/test.jpg' }
+        expect(page.renderImage()).to.be.equal('<img src="https://example.com/test.jpg" alt="Test Page" />')
+      })
+
+      it('can accept alt text', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://example.com/test.jpg' }
+        expect(page.renderImage('Alt text')).to.be.equal('<img src="https://example.com/test.jpg" alt="Alt text" />')
+      })
+    })
+
+    describe('renderSVG', () => {
+      it('returns the XML of a remote SVG', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://lorevault-test.s3.us-east-2.wasabisys.com/test.svg' }
+        const actual = await page.renderSVG()
+        expect(actual).to.be.equal('<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">\n  <circle cx="50" cy="50" r="50" />\n</svg>')
+      })
+
+      it('returns an empty string if the file is not an SVG', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://thefifthworld.com' }
+        const actual = await page.renderSVG()
+        expect(actual).to.be.equal('')
+      })
+    })
+
+    describe('renderAudio', () => {
+      it('returns an empty string if the page has no file', async () => {
+        const { page } = await createTestDocs(model)
+        expect(page.renderAudio()).to.be.equal('')
+      })
+
+      it('renders an audio tag', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://example.com/test.mp3' }
+        expect(page.renderAudio()).to.be.equal('<figure class="audio">\n<figcaption>Test Page</figcaption>\n<audio controls src="https://example.com/test.mp3">\n<p>Your browser does not support the HTML <code>audio</code> element.</p>\n</audio>\n</figure>')
+      })
+
+      it('can accept a caption', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://example.com/test.mp3' }
+        expect(page.renderAudio('Caption')).to.be.equal('<figure class="audio">\n<figcaption>Caption</figcaption>\n<audio controls src="https://example.com/test.mp3">\n<p>Your browser does not support the HTML <code>audio</code> element.</p>\n</audio>\n</figure>')
+      })
+    })
+
+    describe('renderVideo', () => {
+      it('returns an empty string if the page has no file', async () => {
+        const { page } = await createTestDocs(model)
+        expect(page.renderVideo()).to.be.equal('')
+      })
+
+      it('returns an empty string if the page\'s file has no MIME type', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://example.com/test.webm' }
+        expect(page.renderVideo()).to.be.equal('')
+      })
+
+      it('renders a video tag', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://example.com/test.webm', mimetype: 'video/webm' }
+        expect(page.renderVideo()).to.be.equal('<video controls>\n<source src="https://example.com/test.webm type="video/webm" />\n<p>Your browser does not support the HTML <code>video</code> element.</p>\n</video>')
+      })
+    })
+
+    describe('renderDownload', () => {
+      it('returns an empty string if the page has no file', async () => {
+        const { page } = await createTestDocs(model)
+        expect(page.renderDownload()).to.be.equal('')
+      })
+
+      it('returns an empty string if the page\'s file has no URL', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { mimetype: 'plain/text', size: 42 }
+        expect(page.renderDownload()).to.be.equal('')
+      })
+
+      it('returns an empty string if the page\'s file has no MIME type', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://exmaple.com/test.txt', size: 42 }
+        expect(page.renderDownload()).to.be.equal('')
+      })
+
+      it('returns an empty string if the page\'s file has no size', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://exmaple.com/test.txt', mimetype: 'plain/text' }
+        expect(page.renderDownload()).to.be.equal('')
+      })
+
+      it('renders a download link', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://exmaple.com/test.txt', mimetype: 'plain/text', size: 123456 }
+        expect(page.renderDownload()).to.be.equal('<a href="https://exmaple.com/test.txt" class="download">\n<span class="name">Test Page</span>\n<small>plain/text; 123.5 kB</small>\n</a>')
+      })
+
+      it('accepts a title', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://exmaple.com/test.txt', mimetype: 'plain/text', size: 123456 }
+        expect(page.renderDownload('Click Here')).to.be.equal('<a href="https://exmaple.com/test.txt" class="download">\n<span class="name">Click Here</span>\n<small>plain/text; 123.5 kB</small>\n</a>')
+      })
+    })
+
+    describe('renderFile', () => {
+      it('returns an empty string if the page has no file', async () => {
+        const { page } = await createTestDocs(model)
+        const actual = await page.renderFile()
+        expect(actual).to.be.equal('')
+      })
+
+      it('returns an empty string if the page\'s file has no MIME type', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://example.com/test.txt' }
+        const actual = await page.renderFile()
+        expect(actual).to.be.equal('')
+      })
+
+      it('returns an <img> tag for an image', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://example.com/test.jpg', mimetype: 'image/jpeg' }
+        const actual = await page.renderFile()
+        expect(actual).to.be.equal('<img src="https://example.com/test.jpg" alt="Test Page" />')
+      })
+
+      it('returns an <svg> tag for an SVG', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://lorevault-test.s3.us-east-2.wasabisys.com/test.svg', mimetype: 'image/svg+xml' }
+        const actual = await page.renderFile()
+        expect(actual).to.be.equal('<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">\n  <circle cx="50" cy="50" r="50" />\n</svg>')
+      })
+
+      it('returns an <audio> tag for an audio file', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://example.com/test.wav', mimetype: 'audio/wav' }
+        const actual = await page.renderFile()
+        expect(actual).to.be.equal('<figure class="audio">\n<figcaption>Test Page</figcaption>\n<audio controls src="https://example.com/test.wav">\n<p>Your browser does not support the HTML <code>audio</code> element.</p>\n</audio>\n</figure>')
+      })
+
+      it('returns a <video> tag for a video file', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://example.com/test.webm', mimetype: 'video/webm' }
+        const actual = await page.renderFile()
+        expect(actual).to.be.equal('<video controls>\n<source src="https://example.com/test.webm type="video/webm" />\n<p>Your browser does not support the HTML <code>video</code> element.</p>\n</video>')
+      })
+
+      it('returns a download link for other types of files', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://example.com/test.txt', mimetype: 'plain/text', size: 123456 }
+        const actual = await page.renderFile()
+        expect(actual).to.be.equal('<a href="https://example.com/test.txt" class="download">\n<span class="name">Test Page</span>\n<small>plain/text; 123.5 kB</small>\n</a>')
       })
     })
   })

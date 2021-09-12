@@ -3,6 +3,8 @@ import { diffWords } from 'diff'
 import Page from '../models/page.js'
 import getPage from '../middleware/getPage.js'
 import getMembers from '../middleware/getMembers.js'
+import getFileData from '../middleware/getFileData.js'
+import upload from '../middleware/upload.js'
 import { makeDiscreetQuery } from '../utils.js'
 import config from '../config/index.js'
 const router = Router()
@@ -20,10 +22,18 @@ router.get('/create', getMembers, async (req, res, next) => {
 })
 
 // POST /create
-router.post('/create', async (req, res) => {
+router.post('/create', upload.single('file'), getFileData, async (req, res) => {
   const { title, body, msg } = req.body
-  const page = await Page.create({ title, body, msg }, req.user)
+  const update = req.fileData ? { title, body, file: req.fileData, msg } : { title, body, msg }
+  const page = await Page.create(update, req.user)
   res.redirect(`/${page.path}`)
+})
+
+// GET /upload
+router.get('/upload', async (req, res, next) => {
+  req.viewOpts.title = 'Upload a File'
+  req.viewOpts.upload = true
+  res.render('page-create', req.viewOpts)
 })
 
 // GET /search
@@ -104,6 +114,7 @@ router.get('/*/edit', getPage, async (req, res, next) => {
   if (!req.viewOpts.page) return next()
   const curr = req.viewOpts.page.getCurr()
   req.viewOpts.body = curr.body
+  if (req.viewOpts.page.file?.url) req.viewOpts.upload = true
   res.render('page-edit', req.viewOpts)
 })
 

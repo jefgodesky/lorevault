@@ -24,6 +24,18 @@ const pickRandomNum = (...numbers) => {
 const pickRandom = arr => arr[pickRandomNum(0, arr.length - 1)]
 
 /**
+ * Round a number to a given number of decimal places.
+ * @param {number} num - The number to be rounded.
+ * @param {number} places - The number of decimal places to round `num` to.
+ * @returns {number} - `num` rounded to `places` decimal places.
+ */
+
+const round = (num, places) => {
+  const factor = 10 ** places
+  return Math.round(num * factor) / factor
+}
+
+/**
  * Returns the union of several arrays.
  * @param {...*[]} arr - One of the arrays to create a union from.
  * @returns {*[]} - An array that is the union of all arrays passed to the
@@ -168,6 +180,22 @@ const restoreBlocks = (str, blocks) => {
 }
 
 /**
+ * Translates a number of bytes into a human-readable file size.
+ * @param {number} bytes - A number of bytes.
+ * @returns {string} - A string communicating the number of bytes given in a
+ *   human-readable format.
+ */
+
+const getReadableFileSize = bytes => {
+  const kB = round(bytes / 1000, 1)
+  const MB = round(kB / 1000, 1)
+  const GB = round(MB / 1000, 1)
+  const val = kB < 1 ? bytes : MB < 1 ? kB : GB < 1 ? MB : GB
+  const unit = kB < 1 ? 'B' : MB < 1 ? 'kB' : GB < 1 ? 'MB' : 'GB'
+  return `${val} ${unit}`
+}
+
+/**
  * Checks to see if the subject (`subj`) appears within any of the secrets in
  * the string provided (`body`).
  * @param {object} subj - An object that provides data on the string we're
@@ -246,6 +274,7 @@ const getS3 = () => {
 export {
   pickRandomNum,
   pickRandom,
+  round,
   union,
   intersection,
   findOne,
@@ -253,6 +282,7 @@ export {
   match,
   saveBlocks,
   restoreBlocks,
+  getReadableFileSize,
   isInSecret,
   indexOfRegExp,
   alphabetize,

@@ -49,4 +49,13 @@ describe('getPage', () => {
     await getPage(req, {}, () => {})
     expect(req.viewOpts.categories).to.have.lengthOf(2)
   })
+
+  it('renders the page\'s file', async () => {
+    const { page, user } = await createTestDocs(model)
+    page.file = { url: 'https://example.com/test.txt', mimetype: 'plain/text', size: 123456 }
+    await page.save()
+    const req = { originalUrl: '/test-page', user, viewOpts: {} }
+    await getPage(req, {}, () => {})
+    expect(req.viewOpts.file).to.be.equal('<a href="https://example.com/test.txt" class="download">\n<span class="name">Test Page</span>\n<small>plain/text; 123.5 kB</small>\n</a>')
+  })
 })

@@ -5,6 +5,7 @@ import { createTestDocs } from './test-utils.js'
 import {
   pickRandomNum,
   pickRandom,
+  round,
   union,
   intersection,
   findOne,
@@ -12,6 +13,7 @@ import {
   match,
   saveBlocks,
   restoreBlocks,
+  getReadableFileSize,
   isInSecret,
   indexOfRegExp,
   alphabetize,
@@ -36,6 +38,15 @@ describe('pickRandom', () => {
     const arr = []
     for (let i = 1; i < len; i++) arr.push(i)
     expect(arr).to.include(pickRandom(arr))
+  })
+})
+
+describe('round', () => {
+  it('rounds a number to a set number of decimal places', () => {
+    const expected = [ 3, 3.1, 3.14, 3.142, 3.1416, 3.14159, 3.141593 ]
+    const places = pickRandomNum(1, 6)
+    const actual = round(3.14159265, places)
+    expect(actual).to.be.equal(expected[places])
   })
 })
 
@@ -180,6 +191,24 @@ describe('restoreBlocks', () => {
     const { str, blocks } = saveBlocks(orig, /Unit Testing/, 'REDACTED')
     const actual = restoreBlocks(str, blocks)
     expect(actual).to.be.equal(orig)
+  })
+})
+
+describe('getReadableFileSize', () => {
+  it('reports bytes', () => {
+    expect(getReadableFileSize(21)).to.be.equal('21 B')
+  })
+
+  it('reports kilobytes', () => {
+    expect(getReadableFileSize(4321)).to.be.equal('4.3 kB')
+  })
+
+  it('reports megabytes', () => {
+    expect(getReadableFileSize(7654321)).to.be.equal('7.7 MB')
+  })
+
+  it('reports gigabytes', () => {
+    expect(getReadableFileSize(9876543210)).to.be.equal('9.9 GB')
   })
 })
 

@@ -2,6 +2,7 @@ import smartquotes from 'smartquotes'
 
 import assignCodenames from '../transformers/assignCodenames.js'
 import renderLinks from '../transformers/renderLinks.js'
+import renderFiles from '../transformers/renderFiles.js'
 import renderMarkup from '../transformers/renderMarkup.js'
 import renderTags from '../transformers/renderTags.js'
 import Template from './template.js'
@@ -15,11 +16,13 @@ import {
   alphabetize,
   saveBlocks,
   restoreBlocks,
+  getReadableFileSize,
   getS3
 } from '../utils.js'
 
 import config from '../config/index.js'
 
+import axios from 'axios'
 import mongoose from 'mongoose'
 import slugger from 'mongoose-slug-generator'
 import dayjs from 'dayjs'
@@ -597,6 +600,7 @@ PageSchema.methods.update = async function (content, editor) {
   this.processSecrets(secrets, editor)
   content.title = smartquotes(content.title)
   content.body = this.write({ str, pov: editor.getPOV(), mode: 'full' })
+  if (content.file) this.file = content.file
   this.title = content.title
   this.versions.push(Object.assign({}, content, { editor: editor._id }))
   await this.save()
@@ -645,9 +649,113 @@ PageSchema.methods.render = async function (renderer, version = this.getCurr(), 
   str = str.replace(/\[\[Category:.*?(\|.*?)?\]\]/gm, '')
   str = await Template.render(str, renderer)
   const links = await renderLinks(str, this.getSecrets(pov), renderer)
-  str = restoreBlocks(links.str, pre.blocks)
+  str = await renderFiles(links.str)
+  str = restoreBlocks(str, pre.blocks)
   str = await renderMarkup(str)
   return str
+}
+
+/**
+ * Render the page's file in an HTML image tag.
+ * @param {string} [alt = this.title] - The alternative text to provide in the
+ *   image tag. (Default: the page's title).
+ * @returns {string} - An HTML image tag for the page's file if it has one, or
+ *   an empty string if it does not.
+ */
+
+PageSchema.methods.renderImage = function (alt = this.title) {
+  if (!this.file?.url) return ''
+  return `<img src="${this.file.url}" alt="${alt}" />`
+}
+
+/**
+ * Render the page's file as an HTML SVG tag.
+ * @returns {Promise<string>} - An HTML SVG tag for page's file if it has one
+ *   and the file it points to exists, can be loaded, and is an SVG file, or an
+ *   empty string if any of those conditions are not met.
+ */
+
+PageSchema.methods.renderSVG = async function () {
+  if (!this.file?.url) return ''
+  try {
+    const res = await axios.get(this.file.url)
+    if (res.status !== 200 || res.headers['content-type'] !== 'image/svg+xml') return ''
+    return res.data.substr(0, 6) === '<?xml '
+      ? res.data.substr(res.data.indexOf('<', 1))
+      : res.data
+  } catch (err) {
+    console.error(err)
+    return ''
+  }
+}
+
+/**
+ * Renders the page's file as an HTML audio tag.
+ * @param {string} [caption = this.title] - The caption to provide for the
+ *   audio. (Default: The page's title).
+ * @returns {string} - An HTML audio tag for playing the page's file.
+ */
+
+PageSchema.methods.renderAudio = function (caption = this.title) {
+  if (!this.file?.url) return ''
+  const notSupported = '<p>Your browser does not support the HTML <code>audio</code> element.</p>'
+  const audio = `<audio controls src="${this.file.url}">\n${notSupported}\n</audio>`
+  const figcaption = `<figcaption>${caption}</figcaption>`
+  const inside = [figcaption, audio].join('\n')
+  return `<figure class="audio">\n${inside}\n</figure>`
+}
+
+/**
+ * Renders the page's file as an HTML video tag.
+ * @returns {string} - An HTML video tag for playing the page's file.
+ */
+
+PageSchema.methods.renderVideo = function () {
+  if (!this.file?.url || !this.file?.mimetype) return ''
+  const { url, mimetype } = this.file
+  const notSupported = '<p>Your browser does not support the HTML <code>video</code> element.</p>'
+  const src = `<source src="${url} type="${mimetype}" />`
+  const inside = [src, notSupported].join('\n')
+  return `<video controls>\n${inside}\n</video>`
+}
+
+/**
+ * Renders the page's file as a download link.
+ * @param {string} [title = this.title] - The title to use on the download
+ *   link. (Default: The page's title)
+ * @returns {string} - A link to download the page's file.
+ */
+
+PageSchema.methods.renderDownload = function (title = this.title) {
+  if (!this.file?.url || !this.file?.mimetype || !this.file?.size) return ''
+  const { url, mimetype, size } = this.file
+  const heading = `<span class="name">${title}</span>`
+  const details = `<small>${mimetype}; ${getReadableFileSize(size)}</small>`
+  const inside = [heading, details].join('\n')
+  return `<a href="${url}" class="download">\n${inside}\n</a>`
+}
+
+/**
+ * Sort which rendering method should be used for the page's file based on its
+ * MIME type.
+ * @param {string} text - Override text to be used as alt text, a caption, or a
+ *   title, depending on how the file is to be rendered.
+ * @returns {Promise<string>} - A Promise that resolves with a string of HTML
+ *   rendering the page's file appropriately for its MIME type.
+ */
+
+PageSchema.methods.renderFile = async function (text) {
+  if (!this.file?.mimetype) return ''
+  const display = Object.keys(config.fileDisplay).includes(this.file.mimetype)
+    ? config.fileDisplay[this.file.mimetype]
+    : 'Download'
+  switch (display) {
+    case 'Image': return this.renderImage(text)
+    case 'SVG': return this.renderSVG()
+    case 'Audio': return this.renderAudio(text)
+    case 'Video': return this.renderVideo()
+    default: return this.renderDownload(text)
+  }
 }
 
 /**
