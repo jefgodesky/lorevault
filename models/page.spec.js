@@ -964,6 +964,15 @@ describe('Page', () => {
         expect(actual).to.be.equal('\n<p><a href="/test-page" title="Test Page">Alias</a></p>\n<p><a href="/create?title=New%20Page" class="new">Alias</a></p>\n')
       })
 
+      it('renders images', async () => {
+        const { user } = await createTestDocs(model)
+        const file = { url: 'https://example.com/test.jpg', mimetype: 'image/jpeg', size: 12345 }
+        await Page.create({ title: 'Image:Test JPEG Image', file }, user)
+        const p = await Page.create({ title: 'Test', body: '[[Image:Test JPEG Image|Alt text]]' }, user)
+        const actual = await p.render(user)
+        expect(actual).to.be.equal('\n<img src="https://example.com/test.jpg" alt="Alt text">\n')
+      })
+
       it('renders templates', async () => {
         const { page, user } = await createTestDocs(model)
         await Page.create({ title: 'Template:Test', body: '<noinclude>This should not be rendered.</noinclude>\n\n<includeonly>This should be rendered.</includeonly>' }, user)

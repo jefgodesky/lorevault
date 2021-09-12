@@ -2,6 +2,7 @@ import smartquotes from 'smartquotes'
 
 import assignCodenames from '../transformers/assignCodenames.js'
 import renderLinks from '../transformers/renderLinks.js'
+import renderFiles from '../transformers/renderFiles.js'
 import renderMarkup from '../transformers/renderMarkup.js'
 import renderTags from '../transformers/renderTags.js'
 import Template from './template.js'
@@ -648,7 +649,8 @@ PageSchema.methods.render = async function (renderer, version = this.getCurr(), 
   str = str.replace(/\[\[Category:.*?(\|.*?)?\]\]/gm, '')
   str = await Template.render(str, renderer)
   const links = await renderLinks(str, this.getSecrets(pov), renderer)
-  str = restoreBlocks(links.str, pre.blocks)
+  str = await renderFiles(links.str)
+  str = restoreBlocks(str, pre.blocks)
   str = await renderMarkup(str)
   return str
 }
