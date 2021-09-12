@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
-<%- include('./includes/head', { title, skin }) %>
+  <%- include('includes/head') %>
   <body>
-    <%- include('./includes/header', { isLoggedIn, char, title }) %>
-    <!-- Your User ID: <%= id %> -->
-    <main class="profile">
-      <% if (isLoggedIn) { %>
+    <%- include('includes/header') %>
+    <header class="page">
+      <h1>Your Profile</h1>
+    </header>
+    <main>
+      <section class="content-wrapper">
         <h2>Logins</h2>
         <p>You&rsquo;ll need to leave at least one of these services connected in order to log into your account in the future. Connecting an account simply lets you use it to log in.</p>
         <table>
@@ -19,80 +21,72 @@
           <tbody>
             <tr>
               <td>Google</td>
-              <% if (connectedGoogle) { %>
-              <td class="short">Connected</td>
-              <td class="actions"><a href="/disconnect/google" class="button">Disconnect Google</a></td>
-              <% } else { %>
-              <td class="short">Not connected</td>
-              <td class="actions"><a href="/login/google" class="button">Connect Google</a></td>
-              <% } %>
+              <td class="short"><%= connections.google.status %></td>
+              <td class="actions">
+                <a href="<%= connections.google.link %>" class="button"><%= connections.google.label %></a>
+              </td>
             </tr>
             <tr>
               <td>Discord</td>
-              <% if (connectedDiscord) { %>
-              <td class="short">Connected</td>
-              <td class="actions"><a href="/disconnect/discord" class="button">Disconnect Discord</a></td>
-              <% } else { %>
-              <td class="short">Not connected</td>
-              <td class="actions"><a href="/login/discord" class="button">Connect Discord</a></td>
-              <% } %>
+              <td class="short"><%= connections.discord.status %></td>
+              <td class="actions">
+                <a href="<%= connections.discord.link %>" class="button"><%= connections.discord.label %></a>
+              </td>
             </tr>
           </tbody>
         </table>
-        <% if (locals.loremaster) { %>
+      </section>
+      <% if (locals.isPotentialLoremaster) { %>
+      <section class="content-wrapper">
         <h2>Loremaster</h2>
         <p>
           In <strong>loremaster mode</strong>, you can see all of the secrets on the site.
-          <% if (locals.perspective === 'loremaster') { %> You are currently in loremaster mode.<% } %>
-          <% if (locals.perspective === 'character') { %> You are currently in character mode, which shows you only those secrets known to <a href="<%= char.path %>"><%= char.name %></a>.<% } %>
-          <% if (locals.perspective === 'public') { %> You are currently in public mode, showing you only what someone who hasn&rsquo;t even logged in would see.<% } %>
-          <p>
-          <% if (locals.perspective === 'loremaster') { %>
-            <a href="/toggle-loremaster" class="toggle on">Turn off loremaster mode</a>
-          <% } else { %>
-            <a href="/toggle-loremaster" class="toggle off">Turn on loremaster mode</a>
-          <% } %>
-          </p>
+          <% if (isLoremaster) { %>You are currently viewing the site as a loremaster.<% } %>
+          <% if (isAnonymous) { %>You are currently viewing the site anonymously, showing you only what someone who hasn&rsquo;t even logged in would see..<% } %>
+          <% if (isCharacter) { %>You are currently in character mode, which shows you only those secrets known to your active character &mdash; right now, that&rsquo;s <a href="<%= povLink %>"><%= pov %></a>.<% } %>
         </p>
-        <% } %>
-        <h2>Characters</h2>
         <p>
-        <% if (locals.charClaimMode) { %>
-          <a href="/toggle-char-claim-mode" class="toggle on">Turn off character claim mode</a>
-        <% } else { %>
-            <a href="/toggle-char-claim-mode" class="toggle off">Turn on character claim mode</a>
-        <% } %>
+          <a href="/profile/loremaster" class="button"><% if (isLoremaster) { %>Deactivate<% } else { %>Activate<% } %> Loremaster Mode</a>
         </p>
-        <% if (locals.characters && characters.length > 0) { %>
+      </section>
+      <% } %>
+      <section class="content-wrapper">
+        <h2>Characters</h2>
+        <% if (!locals.characters) { %>
+        <p><strong>You do not have any characters yet.</strong> Characters have to have pages first, so find your
+          character&rsquo;s page or, if one doesn&rsquo;t exist yet, <a href="/create">make one</a>. You&rsquo;ll need
+          the page&rsquo;s <em>path</em> (the part of the URL from the slash onward; for example, this page&rsquo;s
+          path is <code>/profile</code>). Once you have that, you&rsquo;re ready to
+          <a href="/profile/character">make a new character</a>.</p>
+        <% } else { %>
         <table>
           <thead>
-            <tr><th /><th>Character</th><th /></tr>
+            <tr>
+              <th />
+              <th>Character</th>
+              <th class="actions">Actions</th>
+            </tr>
           </thead>
           <tbody>
-          <% for (const char of characters) { %>
+            <% for (const char of characters) { %>
             <tr>
-              <td class="short">
-                <% if (char._id.toString() === locals.char?.id?.toString()) { %>
-                <span class="active-char">&starf;</span>
-                <% } %>
-              </td>
-              <td><a href="/<%= char.page.path %>"><%= char.page.title %></a></td>
+              <td class="short"><% if (char.isActive) { %>&#9733;<% } %></td>
+              <td><a href="/<%= char.path %>"><%= char.name %></a></td>
               <td class="actions">
-                <a href="/character/<%= char._id %>/update" class="button">Update</a>
-                <a href="/character/<%= char._id %>/select" class="button">Select</a>
-                <a href="/character/<%= char._id %>/release" class="button">Release</a>
+                <% if (!char.isActive) { %><a href="/profile/character/<%= char.id %>/activate" class="button">Activate</a><% } %>
+                <a href="/profile/character/<%= char.id %>" class="button">Edit</a>
+                <a href="/profile/character/<%= char.id %>/release" class="button">Release</a>
               </td>
             </tr>
-          <% } %>
+            <% } %>
           </tbody>
         </table>
-        <% } else { %>
-        <p><em>You don&rsquo;t have any characters right now. You can <a href="/create?body=%5B%5BType%3APerson%5D%5D">create a new page</a> with your character (don&rsquo;t forget to use the tag <strong>[[Type:Person]]</strong> to identify it as a page about a person, and thus a claimable character). If character claiming mode is on (see toggle above), then you will be able to claim that character.</em></p>
         <% } %>
-      <% } else { %>
-        <p>You&rsquo;ll need to log before you can see or edit your profile.</p>
-      <% } %>
+        <p>
+          <a href="/profile/character" class="button">+ Add New Character</a>
+        </p>
+      </section>
     </main>
-    <%- include('./includes/footer') %>
+    <%- include('includes/footer') %>
   </body>
 </html>

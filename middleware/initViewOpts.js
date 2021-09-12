@@ -1,4 +1,5 @@
-const { skin, footer } = require('../config')
+import config from '../config/index.js'
+const { name, skin, footer } = config
 
 /**
  * Express.js middleware that initializes a `viewOpts` object that can
@@ -9,18 +10,18 @@ const { skin, footer } = require('../config')
  */
 
 const initViewOpts = (req, res, next) => {
+  const pov = req.user?.getPOV()
   req.viewOpts = {
-    title: 'LoreVault',
+    wiki: name,
+    title: req.query?.title || name,
     skin,
     footer,
-    char: req.user?.activeChar
-      ? { id: req.user.activeChar._id, name: req.user.activeChar.page?.title, path: `/${req.user.activeChar.page?.path}` }
-      : undefined,
-    perspective: req.user?.perspective || 'public',
     isLoggedIn: Boolean(req.user),
-    charClaimMode: req.user?.charClaimMode
+    pov: !pov ? 'Anonymous' : pov === 'Loremaster' ? 'Loremaster' : pov.name || pov,
+    povLink: pov?.page?.path ? `/${pov.page.path}` : pov === 'loremaster' ? '/profile' : '/',
+    get: req.query
   }
   next()
 }
 
-module.exports = initViewOpts
+export default initViewOpts

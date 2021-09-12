@@ -1,0 +1,6 @@
+{
+  "reporter": "nyan",
+  "recursive": true,
+  "require": "./test-hooks.js",
+  "spec": "{,!(node_modules)/**}/*.spec.js"
+}

@@ -1,27 +1,28 @@
-const { Schema, model } = require('mongoose')
-const Character = require('./character')
+import mongoose from 'mongoose'
+const { Schema, model } = mongoose
 
 const UserSchema = new Schema({
-  googleID: String,
-  discordID: String,
-  charClaimMode: {
-    type: Boolean,
-    default: false
+  name: String,
+  login: {
+    google: String,
+    discord: String
   },
-  perspective: {
+  pov: {
     type: String,
-    default: 'public'
+    enum: ['Anonymous', 'Character', 'Loremaster'],
+    default: 'Anonymous'
   },
-  activeChar: {
-    type: Schema.Types.ObjectId,
-    ref: 'Character'
+  characters: {
+    active: {
+      type: Schema.Types.ObjectId,
+      ref: 'Character'
+    },
+    list: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Character'
+    }]
   }
 })
-
-const serviceKeys = {
-  google: 'googleID',
-  discord: 'discordID'
-}
 
 /**
  * Checks if removing the given service would leave the user without any OAuth
@@ -33,10 +34,10 @@ const serviceKeys = {
  */
 
 UserSchema.methods.isLastConnection = function (service) {
-  const cpy = JSON.parse(JSON.stringify(this))
-  cpy[serviceKeys[service]] = undefined
-  const all = Object.values(serviceKeys).map(key => Boolean(cpy[key]))
-  return !all.reduce((acc, curr) => acc || curr, false)
+  const { login } = this
+  const services = Object.keys(login)
+  const connections = services.filter(s => login[s] && typeof login[s] === 'string' && s !== service)
+  return connections.length === 0
 }
 
 /**
@@ -51,68 +52,76 @@ UserSchema.methods.isLastConnection = function (service) {
 
 UserSchema.methods.disconnect = async function (service) {
   if (this.isLastConnection(service)) return false
-  this[serviceKeys[service]] = undefined
+  this.login[service] = undefined
   await this.save()
   return true
 }
 
 /**
- * Sets the user's character claim mode flag to true.
- * @returns {Promise<void>} - A Promise that resolves when the user's character
- *   claim mode flag has been set to true, and the document has been saved to
- *   the database.
+ * Claims a character for the user.
+ * @param {Page|Schema.Types.ObjectId|string} page - The page for the character
+ *   to be claimed (or its ID, or the string representation of its ID).
+ * @param {{}} stats - An object with properties defining the values for the
+ *   character's statistics in the games defined in the configuration. For
+ *   example, `dnd5e-int` should provide the character's `int` statistic as
+ *   defined by the game `dnd5e`.
+ * @returns {Promise<boolean>} - A Promise that resolves with `false` if the
+ *   character could not be claimed (e.g., it's already been claimed by someone
+ *   else), or `true` once it's been claimed and added to your own characters
+ *   (and designated as your active character if you did not yet have one).
  */
 
-UserSchema.methods.enterCharClaimMode = async function () {
-  this.charClaimMode = true
+UserSchema.methods.claim = async function (page, stats) {
+  const Character = model('Character')
+  const claimed = await Character.isClaimed(page)
+  if (claimed) return false
+  const char = await Character.create(page, this, stats)
+  this.characters.list.addToSet(char)
+  this.characters.active = this.characters.active || char
+  if (this.pov === 'Anonymous') this.pov = 'Character'
   await this.save()
+  return true
 }
 
 /**
- * Sets the user's character claim mode flag to false.
- * @returns {Promise<void>} - A Promise that resolves when the user's character
- *   claim mode flag has been set to false, and the document has been saved to
- *   the database.
+ * Returns the user's current point of view (POV).
+ * @returns {Character|string} - The string `Anonymous` if that's the user's
+ *   current point of view, or the string `Loremaster` if that is, or the
+ *   user's active character, if hens current point of view is "Character."
  */
 
-UserSchema.methods.leaveCharClaimMode = async function () {
-  this.charClaimMode = false
-  await this.save()
+UserSchema.methods.getPOV = function () {
+  const selfDescriptive = [ 'Anonymous', 'Loremaster' ]
+  if (selfDescriptive.includes(this.pov)) return this.pov
+  return this.characters.active
 }
 
 /**
- * Toggles the user's character claim mode flag. If it was `false` before, this
- * method will set it to `true`; likewise, if it was `true` before, this method
- * will set it to `false`.
- * @returns {Promise<void>} - A Promise that resolves when the user's character
- *   claim mode flag has been set to the opposite of its previous value, and
- *   the document has been saved to the database.
+ * Release your claim on a character.
+ * @param {Character|Schema.Types.ObjectId|string} char - The character that
+ *   you would like to release (or its ID, or the string representation of
+ *   its ID).
+ * @returns {Promise<boolean>} - A Promise that resolves with your account once
+ *   the character record has been deleted, removed from your account, and all
+ *   changes have been saved to the database.
  */
 
-UserSchema.methods.toggleCharClaimMode = async function () {
-  this.charClaimMode = !this.charClaimMode
+UserSchema.methods.release = async function (char) {
+  const _id = char?._id || char
+  if (this.characters.active._id.toString() === _id.toString()) this.characters.active = undefined
+  this.characters.list.pull({ _id })
+
+  const inactive = this.characters.active === undefined
+  const noCharacters = this.characters.list.length < 1
+  const hasCharacterPOV = this.pov === 'Character'
+  if (inactive && !noCharacters) this.characters.active = this.characters.list[0]
+  if (inactive && noCharacters && hasCharacterPOV) this.pov = 'Anonymous'
+
+  const Character = model('Character')
+  await Character.deleteOne(_id)
+
   await this.save()
+  return this
 }
 
-/**
- * Deletes the character with the given ID. If it's the user's active
- * character, it also updates the user to remove hens active character.
- * @param {Schema.Types.ObjectID} id - The ID of the Character document to
- *   be deleted.
- * @returns {Promise<void>} - A Promise that resolves once the Character
- *   document identified by the given ID has been deleted, and the user's
- *   active character has been removed if it is that character.
- */
-
-UserSchema.methods.releaseCharacter = async function (id) {
-  const check = await Character.findOne({ _id: id, player: this._id, })
-  if (!check) return false
-  if (this.activeChar?.equals(id)) {
-    this.activeChar = null
-    if (this.perspective === 'character') this.perspective = 'public'
-    await this.save()
-  }
-  await Character.findByIdAndDelete(id)
-}
-
-module.exports = model('User', UserSchema)
+export default model('User', UserSchema)

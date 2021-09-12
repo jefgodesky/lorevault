@@ -1,10 +1,15 @@
-const fs = require('fs')
-const { renderSync } = require('sass')
-const program = require('commander')
-const pkg = require('./package.json')
-const { rules } = require('./config')
+import fs from 'fs'
+import { createRequire } from 'module'
+import sass from 'sass'
+import program from 'commander'
+import config from './config/index.js'
 
-program.version(pkg.version)
+const require = createRequire(import.meta.url)
+const { version } = require('./package.json')
+const { renderSync } = sass
+const { games } = config
+
+program.version(version)
 program.option('-s, --style <outputStyle>', 'Output style (`expanded` or `compressed`)')
 program.parse(process.argv)
 const options = program.opts()
@@ -34,12 +39,16 @@ for (const dir of styles) {
   const input = `./styles/${dir}/index.scss`
   if (fs.existsSync(input)) {
     const files = []
-    for (const system of rules) {
-      const path = `./rules/${system}/_${system}.scss`
+
+    // First we have to compile the games' Sass files
+    for (const game of games) {
+      const path = `./games/${game}/_${game}.scss`
       if (fs.existsSync(path)) files.push(path)
     }
     const lines = files.map(file => `@use '../.${file}';`)
-    fs.writeFileSync(`./styles/${dir}/rules.scss`, lines.join('\n'))
+    fs.writeFileSync(`./styles/${dir}/games.scss`, lines.join('\n'))
+
+    // Then we can compile the style Sass files
     const output = `./public/css/${dir}.css`
     compile(input, output, style)
   }

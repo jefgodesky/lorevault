@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <%- include('includes/head') %>
+  <body>
+    <%- include('includes/header') %>
+    <header class="page">
+      <h1>Editing <%= page.title %></h1>
+    </header>
+    <main>
+      <%- include('includes/page-tabs', { page, view: 'Edit' }) %>
+      <div class="content-wrapper">
+        <%- include('includes/form-page') %>
+      </div>
+    </main>
+    <%- include('includes/footer') %>
+  </body>
+</html>

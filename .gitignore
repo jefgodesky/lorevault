@@ -3,6 +3,8 @@ node_modules/*
 config/*.json
 !config/example.json
 public/js/*
+public/css/*
+styles/*/games.scss
 
 # IDE configurations and local settings
 .idea

@@ -12,19 +12,30 @@ label {
 
 input,
 textarea {
-  background: #fdf9ed;
-  border: 0;
-  font-family: Georgia, serif;
+  background: #fff;
+  border: 1px solid #ccc;
+  font-family: 'Trebuchet MS', serif;
+  font-size: 1em;
   padding: 1em;
 }
 
 input[type="file"] {
   background: transparent;
+  border: 0;
   padding: 1em 0;
 }
 
 textarea.body {
   height: 40vh;
+  line-height: 1.5;
+}
+
+.search {
+  display: flex;
+
+  input {
+    margin-right: 1em;
+  }
 }
 
 .upload textarea.body {

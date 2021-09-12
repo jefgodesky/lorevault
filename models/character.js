@@ -1,7 +1,33 @@
-const { Schema, model } = require('mongoose')
-const { rules } = require('../config')
+import mongoose from 'mongoose'
+const { Schema, model } = mongoose
 
-const CharacterSchemaDefinition = {
+import config from '../config/index.js'
+
+/**
+ * Adds character sheet statistics from the games specified in the
+ * configuration file to the given schema definition.
+ * @param {object} def - The starting schema definition.
+ * @returns {Promise<object>} - The original schema definition, with properties
+ *   added for the games specified in the configuration file and the character
+ *   sheet statistics used by each.
+ */
+
+const addGames = async def => {
+  for (const game of config.games) {
+    const { info } = await import(`../games/${game}/${game}.js`)
+    def[game] = {}
+    for (const stat of info.sheet) {
+      def[game][stat.id] = {
+        type: stat.type,
+        default: stat.default
+      }
+    }
+  }
+  return def
+}
+
+const CharacterSchema = new Schema(await addGames({
+  name: String,
   page: {
     type: Schema.Types.ObjectId,
     ref: 'Page'
@@ -10,69 +36,82 @@ const CharacterSchemaDefinition = {
     type: Schema.Types.ObjectId,
     ref: 'User'
   }
-}
-
-for (const system of rules) {
-  const stats = require(`../rules/${system}/sheet`)
-  CharacterSchemaDefinition[system] = {}
-  for (const stat of Object.keys(stats)) {
-    CharacterSchemaDefinition[system][stat] = stats[stat].type
-  }
-}
-
-const CharacterSchema = new Schema(CharacterSchemaDefinition)
+}))
 
 /**
- * Return all of a user's characters.
- * @param {User|Schema.Types.ObjectID|number} user - The user (or the ID of the
- *   user) whose characters you wish to return.
- * @returns {Promise<Character[]>} - A Promise tht resolves with the user's
- *   characters.
+ * Update the character and save hen to the database.
+ * @param {Page|Schema.Types.ObjectId|string} page - The character's page
+ *   document (or its ID, or the string representation of its ID).
+ * @param {User|Schema.Types.ObjectId|string} player - The user who plays this
+ *   character (or the user's ID, or the string representing hens ID).
+ * @param {{}} stats - An object with properties defining the values for the
+ *   character's statistics in the games defined in the configuration. For
+ *   example, `dnd5e-int` should provide the character's `int` statistic as
+ *   defined by the game `dnd5e`.
+ * @returns {Promise<Character>} - The Character once it has been created and
+ *   saved to the database.
  */
 
-CharacterSchema.statics.getCharacters = async function (user) {
-  const id = user._id ? user._id : user
-  return this.find({ player: id }).populate('page')
-}
+CharacterSchema.methods.update = async function (page, player, stats) {
+  this.page = page?._id || page
+  this.player = player?._id || player
 
-/**
- * Returns `true` if the page is one of the user's characters, or false if it
- * is not.
- * @param {Page|Schema.Types.ObjectID|number} page - The page to check (or the
- *   ID of the page to check).
- * @param {User|Schema.Types.ObjectID|number} user - The user to check (or the
- *   ID of the user to check).
- * @returns {Promise<boolean>} - A Promise that resolves with `true` if the
- *   page is that of one of the user's characters, or `false` if it is not.
- */
-
-CharacterSchema.statics.isYourCharacter = async function (page, user) {
-  const pid = page._id ? page._id : page
-  const uid = user._id ? user._id : user
-  const check = await this.findOne({ page: pid, player: uid })
-  return Boolean(check)
-}
-
-/**
- * Read the sort of form produced using the getSystemsDisplay utility and use
- * it to produce the values used in a Character instance.
- * @param {obj} form - An object with the results of a form created with the
- *   getSystemsDisplay utility method.
- * @returns {obj} - An object ready to be used in a Character instance.
- */
-
-CharacterSchema.statics.readForm = function (form) {
-  const obj = {}
-  for (const system of rules) {
-    obj[system] = {}
-    const stats = require(`../rules/${system}/sheet`)
-    for (const stat of Object.keys(stats)) {
-      obj[system][stat] = stats[stat].type === Number
-        ? parseInt(form[`${system}-${stat}`])
-        : form[`${system}-${stat}`]
+  for (const game of config.games) {
+    const { info } = await import(`../games/${game}/${game}.js`)
+    for (const stat of info.sheet) {
+      const s = stats ? stats[`${game}-${stat.id}`] : null
+      const isNum = stat.type === Number
+      const isValid = !s ? false : isNum ? !isNaN(parseInt(s)) : true
+      if (isValid) this[game][stat.id] = isNum ? parseInt(s) : s
     }
   }
-  return obj
+
+  await this.save()
+  return this
 }
 
-module.exports = model('Character', CharacterSchema)
+/**
+ * Checks to see if the given page belongs to a character. If so, the method
+ * returns the user who has claimed that character. If no one has claimed any
+ * character associated with this page, the method returns `false`.
+ * @param {Page|Schema.Types.ObjectId|string} page - The page for which you'd
+ *   like to check for any characters (or its ID, or the string representation
+ *   of its ID).
+ * @returns {Promise<User|boolean>} - The User who has claimed the character
+ *   associated with the given page, or `false` if no such user exists.
+ */
+
+CharacterSchema.statics.isClaimed = async function (page) {
+  const Character = model('Character')
+  const id = page?._id || page
+  if (!id) return false
+  const char = await Character.findOne({ page: id }).populate('player')
+  if (char) return char.player
+  return false
+}
+
+/**
+ * Create a new character.
+ * @param {Page|Schema.Types.ObjectId|string} page - The character's page
+ *   document (or its ID, or the string representation of its ID).
+ * @param {User|Schema.Types.ObjectId|string} player - The user who plays this
+ *   character (or the user's ID, or the string representing hens ID).
+ * @param {{}} stats - An object with properties defining the values for the
+ *   character's statistics in the games defined in the configuration. For
+ *   example, `dnd5e-int` should provide the character's `int` statistic as
+ *   defined by the game `dnd5e`.
+ * @returns {Promise<Character>} - The Character once it has been created and
+ *   saved to the database.
+ */
+
+CharacterSchema.statics.create = async function (page, player, stats) {
+  const Page = model('Page')
+  const fullpage = page?.title ? page : await Page.findById(page)
+  const Character = model('Character')
+  const char = new Character()
+  if (fullpage?.title) char.name = fullpage.title
+  await char.update(page, player, stats)
+  return char
+}
+
+export default model('Character', CharacterSchema)

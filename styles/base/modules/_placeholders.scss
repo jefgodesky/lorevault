@@ -1,3 +1,6 @@
+@use './mixins';
+@use './colors';
+
 %unformatted-list {
   list-style-type: none;
   margin: 0;
@@ -5,7 +8,7 @@
 }
 
 %blocklike {
-  background: rgba(245, 225, 166, 0.5);
+  background: rgba(255, 255, 255, 0.75);
   box-shadow: 0 0 1em rgba(0, 0, 0, 0.5);
 }
 
@@ -26,7 +29,7 @@
 }
 
 %box {
-  background: #f6e1a6;
+  background: #f1e8cb;
   margin: 2em -2em;
   padding: 2em;
 }
@@ -59,19 +62,52 @@
 }
 
 %left-circle-link {
-  background: rgba(245, 225, 166, 1);
+  background: #822000;
   border-radius: 50%;
   box-shadow: 0 0 0.25em rgba(0, 0, 0, 0.5);
   cursor: pointer;
+  display: block;
   float: left;
   height: 2rem;
-  margin: -0.333rem 0 0 -3rem;
+  margin: 0 0 0 -3.5rem;
   padding: 0.333rem;
   width: 2rem;
 
   img,
   svg {
+    display: block;
     height: 100%;
     width: 100%;
+  }
+
+  path {
+    fill: #fff;
+  }
+}
+
+%box-text {
+  background: #eee;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  margin: 1em -2em;
+  padding: 2em;
+
+  blockquote {
+    margin: 1em 0;
+  }
+}
+
+%message {
+  @include mixins.message(colors.$altbg);
+  margin: 1em -2em;
+  padding: 1em 2em;
+
+  p,
+  li {
+    font-size: 80%;
+  }
+
+  li {
+    margin: 0.5em 0;
   }
 }

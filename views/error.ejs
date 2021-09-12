@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html>
-  <%- include('includes/head', { title: `${error.status} ${message}`, skin }) %>
+<%- include('includes/head') %>
   <body>
-    <%- include('includes/header', { isLoggedIn, char, title: `${error.status} ${message}` }) %>
+    <%- include('includes/header') %>
+    <header class="page">
+      <h1><%= message %></h1>
+    </header>
     <main>
-      <p><%- resolution %></p>
-      <% if (locals.error?.stack) { %>
-      <div class="error-stack">
-        <pre><%= error.stack %></pre>
+      <div class="content-wrapper">
+        <p><%- resolution %></p>
       </div>
-      <% } %>
     </main>
     <%- include('includes/footer') %>
   </body>

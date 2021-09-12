@@ -1,6 +1,9 @@
-@forward '../modules/placeholders';
+@use '../modules/colors';
 
-.error-stack {
-  @extend %box;
-  overflow: auto;
+.error {
+  color: colors.$error;
+}
+
+input.error {
+  border-color: colors.$error;
 }

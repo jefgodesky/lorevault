@@ -1,20 +1,26 @@
 <!DOCTYPE html>
 <html>
-  <%- include('includes/head', { title, skin }) %>
+  <%- include('includes/head') %>
   <body>
-    <%- include('includes/header', { isLoggedIn, char, title, query }) %>
+    <%- include('includes/header') %>
+    <header class="page">
+      <h1><%- title %></h1>
+    </header>
     <main>
-      <% if (locals.searchResults && Array.isArray(searchResults) && searchResults.length > 0) { %>
-      <ol class="search-results">
-        <% for (const res of searchResults) { %>
-        <li>
-          <a href="/<%= res.path %>"><%= res.title %></a>
-        </li>
+      <div class="content-wrapper">
+        <% if (locals.searchResults && searchResults.length > 0) { %>
+        <p>Found <%= searchResults.length === 1 ? '1 entry' : `${searchResults.length} entries` %> for &ldquo;<strong><%= query %></strong>.&rdquo;</p>
+        <ul>
+          <% for (const result of searchResults) { %>
+          <li>
+            <a href="<%= result.path %>"><%= result.title %></a>
+          </li>
+          <% } %>
+        </ul>
+        <% } else { %>
+        <p>Sorry, we couldn&rsquo;t find any entries for &ldquo;<strong><%= query %></strong>.&rdquo;
         <% } %>
-      </ol>
-      <% } else { %>
-      <p><em>No results found for &ldquo;<%= query %>.&rdquo;</em></p>
-      <% } %>
+      </div>
     </main>
     <%- include('includes/footer') %>
   </body>

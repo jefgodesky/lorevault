@@ -1,0 +1,8 @@
+@forward '../modules/placeholders';
+@use '../modules/colors';
+@use '../modules/mixins';
+
+aside.warning {
+  @extend %message;
+  @include mixins.message(colors.$highlight);
+}

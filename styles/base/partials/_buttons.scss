@@ -1,6 +1,8 @@
+@use '../modules/colors';
+
 %button {
   appearance: none;
-  background: #545AA7;
+  background: colors.$button;
   border: 0;
   border-radius: 0.5em;
   box-shadow: 0 0 0.25em rgba(0, 0, 0, 0.5);
@@ -11,16 +13,23 @@
   font-size: 1rem;
   font-weight: bold;
   padding: 1em 2em;
+  text-align: center;
   text-decoration: none;
 
   &:hover {
-    background: #6469b1;
+    background: lighten(colors.$button, 5%);
+    color: #fff;
   }
 
   &:active {
-    background: #4b5196;
+    background: darken(colors.$button, 5%);
     box-shadow: 0 0 0.15em rgba(0, 0, 0, 0.5);
   }
+}
+
+.button-space {
+  display: inline-block;
+  padding: 1em;
 }
 
 button,

@@ -1,9 +1,0 @@
-@forward '../modules/placeholders';
-
-.header-anchor {
-  @extend %left-circle-link;
-
-  path {
-    fill: #000;
-  }
-}

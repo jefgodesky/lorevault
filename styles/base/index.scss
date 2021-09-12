@@ -1,25 +1,16 @@
 // Normalize CSS
-@use 'node_modules/normalize-scss/sass/normalize';
+@forward 'node_modules/normalize-scss/sass/normalize';
 
 @use 'partials/layout';
-@use 'partials/header';
-@use 'partials/footer';
-@use 'partials/headings';
+@use 'partials/typography';
 @use 'partials/buttons';
-@use 'partials/links';
 @use 'partials/form';
-@use 'partials/table';
-@use 'partials/aside';
-@use 'partials/images';
-@use 'partials/search';
-@use 'partials/page-nav';
-@use 'partials/history';
-@use 'partials/categories';
-@use 'partials/download';
+@use 'partials/tables';
+@use 'partials/page';
 @use 'partials/errors';
-@use 'partials/toggle';
-@use 'partials/reveal';
-@use 'partials/secret';
+@use 'partials/messages';
+@use 'partials/secrets';
 @use 'partials/sidebar';
 
-@use 'rules';
+// Import game-specific Sass
+@use 'games.scss';

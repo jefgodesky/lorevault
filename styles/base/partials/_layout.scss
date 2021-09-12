@@ -1,4 +1,5 @@
 @forward '../modules/placeholders';
+@use '../modules/colors';
 
 :root,
 * {
@@ -12,20 +13,207 @@ body {
 }
 
 body {
-  background: url(https://lorevault.s3.us-east-2.wasabisys.com/styles/base/bg.jpg) no-repeat center;
+  background: #fff url(https://lorevault.s3.us-east-2.wasabisys.com/styles/base/texture.jpg) no-repeat center;
+  background-attachment: fixed;
   background-size: cover;
   display: flex;
   flex-direction: column;
-  font-family: Georgia, serif;
   min-height: 100vh;
+
+  @media (min-width: 50em) { font-size: 1.1em; }
+  @media (min-width: 70em) { font-size: 1.2em; }
+  @media (min-width: 90em) { font-size: 1.3em; }
+  @media (min-width: 110em) { font-size: 1.4em; }
+  @media (min-width: 130em) { font-size: 1.5em; }
+  @media (min-width: 150em) { font-size: 1.6em; }
+  @media (min-width: 170em) { font-size: 1.7em; }
+  @media (min-width: 190em) { font-size: 1.8em; }
+  @media (min-width: 210em) { font-size: 1.9em; }
+  @media (min-width: 230em) { font-size: 2em; }
 }
 
-header nav,
+header.pov,
 main,
 footer {
   @extend %layout-block;
 }
 
+header.site,
+header.page {
+  @extend %layout-size;
+}
+
+header.pov {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 1em 2em;
+
+  & > a {
+    display: block;
+    text-decoration: none;
+
+    &:before {
+      content: 'Viewing as\2026';
+      display: block;
+      font-size: 80%;
+      font-style: italic;
+    }
+
+    &,
+    &:visited,
+    &:visited:hover {
+      color: colors.$text;
+    }
+  }
+
+  & > nav {
+    ul {
+      @extend %unformatted-list;
+      margin-bottom: 1em;
+
+      li {
+        margin: 0.25em 0;
+      }
+
+      a {
+        display: block;
+        width: 100%;
+      }
+    }
+  }
+
+  @media (min-width: 40em) {
+    & > a {
+      float: left;
+    }
+
+    & > nav {
+      float: right;
+
+      ul {
+        margin-bottom: 0;
+      }
+
+      li {
+        display: inline-block;
+        width: auto;
+      }
+    }
+  }
+}
+
+header.site {
+  margin-top: 1em;
+  margin-bottom: 0;
+  padding-left: 2em;
+  padding-right: 2em;
+
+  & > h1 {
+    font-size: 1.25em;
+    margin: 0 0 1em 0;
+
+    a {
+      text-decoration: none;
+
+      &,
+      &:visited,
+      &:visited:hover {
+        color: colors.$text;
+      }
+    }
+  }
+
+  .search {
+    font-size: 75%;
+  }
+
+  @media (min-width: 40em) {
+    & > h1 {
+      float: left;
+      margin: 0.3333em 0;
+    }
+
+    .search {
+      float: right;
+    }
+  }
+}
+
+header.page {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  padding-left: 2em;
+  padding-right: 2em;
+}
+
 main {
+  display: flex;
+  flex-direction: column;
   flex-grow: 1;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0;
+}
+
+.content-wrapper {
+  flex-grow: 1;
+  padding: 2em;
+}
+
+.categories {
+  background: colors.$altbg;
+  margin: 0;
+  padding: 1em 2em;
+
+  &:before {
+    content: 'Categories: ';
+    font-style: italic;
+  }
+
+  ul {
+    @extend %unformatted-list;
+  }
+
+  li {
+    display: inline;
+  }
+
+  li + li:before {
+    content: ' | ';
+  }
+}
+
+footer {
+  background: transparent;
+  box-shadow: none;
+  margin-top: 0;
+  margin-bottom: 0;
+
+  nav {
+    ul {
+      @extend %unformatted-list;
+    }
+
+    li {
+      margin: 0 0 0.5em 0;
+    }
+
+    a {
+      width: 100%;
+    }
+
+    @media (min-width: 40em) {
+      float: right;
+      margin: 0.3333em 0 2em 2em;
+
+      li {
+        display: inline-block;
+        margin: 0;
+      }
+
+      a {
+        width: auto;
+      }
+    }
+  }
 }

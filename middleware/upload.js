@@ -1,7 +1,15 @@
-const multer = require('multer')
-const multerS3 = require('multer-s3')
-const { getS3 } = require('../utils')
-const { bucket } = require('../config').aws
+import multer from 'multer'
+import multerS3 from 'multer-s3'
+import { getS3 } from '../utils.js'
+import config from '../config/index.js'
+const { bucket } = config.aws
+
+/**
+ * Express.js middleware that handles uploading files.
+ * @param {object} req - The Express.js request object.
+ * @param {object} res - The Express.js response object.
+ * @param {function} next - The next function to call.
+ */
 
 const upload = multer({
   storage: multerS3({
@@ -17,4 +25,4 @@ const upload = multer({
   })
 })
 
-module.exports = upload
+export default upload
