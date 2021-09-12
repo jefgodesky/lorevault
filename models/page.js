@@ -734,6 +734,29 @@ PageSchema.methods.renderDownload = function (title = this.title) {
 }
 
 /**
+ * Sort which rendering method should be used for the page's file based on its
+ * MIME type.
+ * @param {string} text - Override text to be used as alt text, a caption, or a
+ *   title, depending on how the file is to be rendered.
+ * @returns {Promise<string>} - A Promise that resolves with a string of HTML
+ *   rendering the page's file appropriately for its MIME type.
+ */
+
+PageSchema.methods.renderFile = async function (text) {
+  if (!this.file?.mimetype) return ''
+  const display = Object.keys(config.fileDisplay).includes(this.file.mimetype)
+    ? config.fileDisplay[this.file.mimetype]
+    : 'Download'
+  switch (display) {
+    case 'Image': return this.renderImage(text)
+    case 'SVG': return this.renderSVG()
+    case 'Audio': return this.renderAudio(text)
+    case 'Video': return this.renderVideo()
+    default: return this.renderDownload(text)
+  }
+}
+
+/**
  * Delete the file associated with the page.
  * @returns {Promise<void>} - A Promise that resolves once the page's file has
  *   been deleted from the CDN. If the page has no file, nothing happens.
