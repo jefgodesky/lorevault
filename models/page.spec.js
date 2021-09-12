@@ -979,6 +979,25 @@ describe('Page', () => {
         expect(actual).to.be.equal('\n<p>This should be rendered.</p>\n')
       })
     })
+
+    describe('renderImage', () => {
+      it('returns an empty string if the page has no file', async () => {
+        const { page } = await createTestDocs(model)
+        expect(page.renderImage()).to.be.equal('')
+      })
+
+      it('renders an image tag', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://example.com/test.jpg' }
+        expect(page.renderImage()).to.be.equal('<img src="https://example.com/test.jpg" alt="Test Page" />')
+      })
+
+      it('can accept alt text', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://example.com/test.jpg' }
+        expect(page.renderImage('Alt text')).to.be.equal('<img src="https://example.com/test.jpg" alt="Alt text" />')
+      })
+    })
   })
 
   describe('statics', () => {

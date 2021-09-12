@@ -652,6 +652,19 @@ PageSchema.methods.render = async function (renderer, version = this.getCurr(), 
 }
 
 /**
+ * Render the page's file in an HTML image tag.
+ * @param {string} [alt = this.title] - The alternative text to provide in the
+ *   image tag. (Default: the page's title).
+ * @returns {string} - An HTML image tag for the page's file if it has one, or
+ *   an empty string if it does not.
+ */
+
+PageSchema.methods.renderImage = function (alt = this.title) {
+  if (!this.file?.url) return ''
+  return `<img src="${this.file.url}" alt="${alt}" />`
+}
+
+/**
  * Delete the file associated with the page.
  * @returns {Promise<void>} - A Promise that resolves once the page's file has
  *   been deleted from the CDN. If the page has no file, nothing happens.
