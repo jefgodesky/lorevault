@@ -15,6 +15,7 @@ import {
   alphabetize,
   saveBlocks,
   restoreBlocks,
+  getReadableFileSize,
   getS3
 } from '../utils.js'
 
@@ -714,6 +715,22 @@ PageSchema.methods.renderVideo = function () {
   const src = `<source src="${url} type="${mimetype}" />`
   const inside = [src, notSupported].join('\n')
   return `<video controls>\n${inside}\n</video>`
+}
+
+/**
+ * Renders the page's file as a download link.
+ * @param {string} [title = this.title] - The title to use on the download
+ *   link. (Default: The page's title)
+ * @returns {string} - A link to download the page's file.
+ */
+
+PageSchema.methods.renderDownload = function (title = this.title) {
+  if (!this.file?.url || !this.file?.mimetype || !this.file?.size) return ''
+  const { url, mimetype, size } = this.file
+  const heading = `<span class="name">${title}</span>`
+  const details = `<small>${mimetype}; ${getReadableFileSize(size)}</small>`
+  const inside = [heading, details].join('\n')
+  return `<a href="${url}" class="download">\n${inside}\n</a>`
 }
 
 /**

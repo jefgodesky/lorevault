@@ -1052,6 +1052,43 @@ describe('Page', () => {
         expect(page.renderVideo()).to.be.equal('<video controls>\n<source src="https://example.com/test.webm type="video/webm" />\n<p>Your browser does not support the HTML <code>video</code> element.</p>\n</video>')
       })
     })
+
+    describe('renderDownload', () => {
+      it('returns an empty string if the page has no file', async () => {
+        const { page } = await createTestDocs(model)
+        expect(page.renderDownload()).to.be.equal('')
+      })
+
+      it('returns an empty string if the page\'s file has no URL', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { mimetype: 'plain/text', size: 42 }
+        expect(page.renderDownload()).to.be.equal('')
+      })
+
+      it('returns an empty string if the page\'s file has no MIME type', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://exmaple.com/test.txt', size: 42 }
+        expect(page.renderDownload()).to.be.equal('')
+      })
+
+      it('returns an empty string if the page\'s file has no size', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://exmaple.com/test.txt', mimetype: 'plain/text' }
+        expect(page.renderDownload()).to.be.equal('')
+      })
+
+      it('renders a download link', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://exmaple.com/test.txt', mimetype: 'plain/text', size: 123456 }
+        expect(page.renderDownload()).to.be.equal('<a href="https://exmaple.com/test.txt" class="download">\n<span class="name">Test Page</span>\n<small>plain/text; 123.5 kB</small>\n</a>')
+      })
+
+      it('accepts a title', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://exmaple.com/test.txt', mimetype: 'plain/text', size: 123456 }
+        expect(page.renderDownload('Click Here')).to.be.equal('<a href="https://exmaple.com/test.txt" class="download">\n<span class="name">Click Here</span>\n<small>plain/text; 123.5 kB</small>\n</a>')
+      })
+    })
   })
 
   describe('statics', () => {
