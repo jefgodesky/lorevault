@@ -114,6 +114,7 @@ router.get('/*/edit', getPage, async (req, res, next) => {
   if (!req.viewOpts.page) return next()
   const curr = req.viewOpts.page.getCurr()
   req.viewOpts.body = curr.body
+  if (req.viewOpts.page.file?.url) req.viewOpts.upload = true
   res.render('page-edit', req.viewOpts)
 })
 
