@@ -1014,6 +1014,25 @@ describe('Page', () => {
         expect(actual).to.be.equal('')
       })
     })
+
+    describe('renderAudio', () => {
+      it('returns an empty string if the page has no file', async () => {
+        const { page } = await createTestDocs(model)
+        expect(page.renderAudio()).to.be.equal('')
+      })
+
+      it('renders an audio tag', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://example.com/test.mp3' }
+        expect(page.renderAudio()).to.be.equal('<figure class="audio">\n<figcaption>Test Page</figcaption>\n<audio controls src="https://example.com/test.mp3">\n<p>Your browser does not support the HTML <code>audio</code> element.</p>\n</audio>\n</figure>')
+      })
+
+      it('can accept a caption', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://example.com/test.mp3' }
+        expect(page.renderAudio('Caption')).to.be.equal('<figure class="audio">\n<figcaption>Caption</figcaption>\n<audio controls src="https://example.com/test.mp3">\n<p>Your browser does not support the HTML <code>audio</code> element.</p>\n</audio>\n</figure>')
+      })
+    })
   })
 
   describe('statics', () => {

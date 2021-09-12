@@ -687,6 +687,22 @@ PageSchema.methods.renderSVG = async function () {
 }
 
 /**
+ * Renders the page's file as an HTML audio tag.
+ * @param {string} [caption = this.title] - The caption to provide for the
+ *   audio. (Default: The page's title).
+ * @returns {string} - An HTML audio tag for playing the page's file.
+ */
+
+PageSchema.methods.renderAudio = function (caption = this.title) {
+  if (!this.file?.url) return ''
+  const notSupported = '<p>Your browser does not support the HTML <code>audio</code> element.</p>'
+  const audio = `<audio controls src="${this.file.url}">\n${notSupported}\n</audio>`
+  const figcaption = `<figcaption>${caption}</figcaption>`
+  const inside = [figcaption, audio].join('\n')
+  return `<figure class="audio">\n${inside}\n</figure>`
+}
+
+/**
  * Delete the file associated with the page.
  * @returns {Promise<void>} - A Promise that resolves once the page's file has
  *   been deleted from the CDN. If the page has no file, nothing happens.
