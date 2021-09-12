@@ -19,6 +19,7 @@
     <main>
       <%- include('includes/page-tabs', { page, view: locals.version?.isOld ? 'History' : 'Read' }) %>
       <div class="content-wrapper">
+        <%- file %>
         <%- page.markup %>
         <%- include('includes/members-category') %>
       </div>
