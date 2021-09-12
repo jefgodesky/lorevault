@@ -998,6 +998,22 @@ describe('Page', () => {
         expect(page.renderImage('Alt text')).to.be.equal('<img src="https://example.com/test.jpg" alt="Alt text" />')
       })
     })
+
+    describe('renderSVG', () => {
+      it('returns the XML of a remote SVG', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://lorevault-test.s3.us-east-2.wasabisys.com/test.svg' }
+        const actual = await page.renderSVG()
+        expect(actual).to.be.equal('<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">\n  <circle cx="50" cy="50" r="50" />\n</svg>')
+      })
+
+      it('returns an empty string if the file is not an SVG', async () => {
+        const { page } = await createTestDocs(model)
+        page.file = { url: 'https://thefifthworld.com' }
+        const actual = await page.renderSVG()
+        expect(actual).to.be.equal('')
+      })
+    })
   })
 
   describe('statics', () => {

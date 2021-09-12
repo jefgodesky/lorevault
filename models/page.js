@@ -20,6 +20,7 @@ import {
 
 import config from '../config/index.js'
 
+import axios from 'axios'
 import mongoose from 'mongoose'
 import slugger from 'mongoose-slug-generator'
 import dayjs from 'dayjs'
@@ -662,6 +663,27 @@ PageSchema.methods.render = async function (renderer, version = this.getCurr(), 
 PageSchema.methods.renderImage = function (alt = this.title) {
   if (!this.file?.url) return ''
   return `<img src="${this.file.url}" alt="${alt}" />`
+}
+
+/**
+ * Render the page's file as an HTML SVG tag.
+ * @returns {Promise<string>} - An HTML SVG tag for page's file if it has one
+ *   and the file it points to exists, can be loaded, and is an SVG file, or an
+ *   empty string if any of those conditions are not met.
+ */
+
+PageSchema.methods.renderSVG = async function () {
+  if (!this.file?.url) return ''
+  try {
+    const res = await axios.get(this.file.url)
+    if (res.status !== 200 || res.headers['content-type'] !== 'image/svg+xml') return ''
+    return res.data.substr(0, 6) === '<?xml '
+      ? res.data.substr(res.data.indexOf('<', 1))
+      : res.data
+  } catch (err) {
+    console.error(err)
+    return ''
+  }
 }
 
 /**
