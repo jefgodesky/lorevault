@@ -12,6 +12,19 @@ const formatDate = (date, format) => {
   return d.format(format)
 }
 
+/**
+ * If the string beings with "Category:", return the substring that follows
+ * after that. If not, return the string unchanged.
+ * @param {string} str - The string to process.
+ * @returns {string} - The string with the starting substring "Category:"
+ *   removed (if it was present to begin with).
+ */
+
+const hideCategory = str => {
+  return str.startsWith('Category:') ? str.substr(9) : str
+}
+
 export default {
-  formatDate
+  formatDate,
+  hideCategory
 }
