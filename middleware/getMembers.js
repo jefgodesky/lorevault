@@ -11,7 +11,9 @@ import Page from '../models/page.js'
 
 const getSort = (categorization, category) => {
   const filtered = categorization.page.categories.filter(c => `Category:${c.name}` === category)
-  return filtered.length > 0 ? filtered[0].sort : null
+  return filtered.length > 0
+    ? filtered[0].sort.startsWith('Category:') ? filtered[0].sort.substr(9) : filtered[0].sort
+    : null
 }
 
 /**

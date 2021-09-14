@@ -39,9 +39,13 @@ describe('getMembers', () => {
     expect(req.viewOpts.category.subcategories[0]._id).to.be.eql(page._id)
   })
 
-  const makeAnimals = async (user) => {
+  const makeAnimals = async (user, category = false) => {
     const animals = ['Aardvark', 'Akita', 'Albatross', 'Anteater', 'Antelope', 'Ape', 'Armadillo', 'Awk', 'Axolotl', 'Baboon', 'Badger']
-    for (const animal of animals) await Page.create({ title: animal, body: '[[Category:Animals]]'}, user)
+    if (category) {
+      for (const animal of animals) await Page.create({title: `Category:${animal}`, body: '[[Category:Animals]]'}, user)
+    } else {
+      for (const animal of animals) await Page.create({title: animal, body: '[[Category:Animals]]'}, user)
+    }
   }
 
   it('sorts pages by letter', async () => {
@@ -50,6 +54,14 @@ describe('getMembers', () => {
     const req = { viewOpts: { title: 'Category:Animals' } }
     await getMembers(req, {}, () => {})
     expect(req.viewOpts.category.pages.a).to.have.lengthOf(9)
+  })
+
+  it('sorts categories by letter', async () => {
+    const { user } = await createTestDocs(model)
+    await makeAnimals(user, true)
+    const req = { viewOpts: { title: 'Category:Animals' } }
+    await getMembers(req, {}, () => {})
+    expect(req.viewOpts.category.subcategories.a).to.have.lengthOf(9)
   })
 
   it('sorts pages that start with special characters', async () => {
