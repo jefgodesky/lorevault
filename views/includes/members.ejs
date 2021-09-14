@@ -1,4 +1,4 @@
-<% if (members && members.length > 0) { %>
+<% if (members && (members.length > 0 || Object.keys(members).length > 0)) { %>
 <section class="<%= className %>">
   <h2><%- title %></h2>
   <p><%- intro %></p>
