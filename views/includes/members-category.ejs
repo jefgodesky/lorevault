@@ -1,23 +1,31 @@
 <% if (locals.category) { %>
 <%
-  const subcats = {
+  const { subcategories, pages } = category
+  const subcatsCount = Array.isArray(subcategories)
+    ? subcategories.length
+    : Object.keys(subcategories).reduce((acc, curr) => acc + subcategories[curr].length, 0)
+  const pagesCount = Array.isArray(pages)
+      ? pages.length
+      : Object.keys(pages).reduce((acc, curr) => acc + pages[curr].length, 0)
+
+  const subcatsRender = {
     className: 'category-subcategories',
     title: 'Subcategories',
-    intro: category.subcategories.length === 1
+    intro: subcatsCount === 1
       ? 'This category contains only the following subcategory.'
-      : `This category has the following ${category.subcategories.length} subcategories.`,
-    members: category.subcategories.map(p => p.page)
+      : `This category has the following ${subcatsCount} subcategories.`,
+    members: subcategories
   }
 
-  const pages = {
+  const pagesRender = {
     className: 'category-pages',
     title: `Pages in category &ldquo;${title.substring(9)}&rdquo;`,
-    intro: category.pages.length === 1
+    intro: pagesCount === 1
         ? 'This category contains only the following page.'
-        : `This category has the following ${category.pages.length} pages.`,
-    members: category.pages.map(p => p.page)
+        : `This category has the following ${pagesCount} pages.`,
+    members: pages
   }
 %>
-<%- include('members', subcats) %>
-<%- include('members', pages) %>
+<%- include('members', subcatsRender) %>
+<%- include('members', pagesRender) %>
 <% } %>
