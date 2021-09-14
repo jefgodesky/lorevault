@@ -28,7 +28,7 @@ describe('getMembers', () => {
     await page.update({ title: 'Test Page', body: '[[Category:Tests]]' }, user)
     const req = { viewOpts: { title: 'Category:Tests' } }
     await getMembers(req, {}, () => {})
-    expect(req.viewOpts.category.pages[0].page._id).to.be.eql(page._id)
+    expect(req.viewOpts.category.pages[0]._id).to.be.eql(page._id)
   })
 
   it('adds member categories', async () => {
@@ -36,7 +36,7 @@ describe('getMembers', () => {
     await page.update({ title: 'Category:Unit Tests', body: '[[Category:Tests]]' }, user)
     const req = { viewOpts: { title: 'Category:Tests' } }
     await getMembers(req, {}, () => {})
-    expect(req.viewOpts.category.subcategories[0].page._id).to.be.eql(page._id)
+    expect(req.viewOpts.category.subcategories[0]._id).to.be.eql(page._id)
   })
 
   const makeAnimals = async (user) => {

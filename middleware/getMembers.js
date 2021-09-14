@@ -41,12 +41,12 @@ const alphabetizeMembers = (arr, category) => {
   // Letters
   for (const letter of alphabet) {
     const members = arr.filter(el => getSort(el, category).substr(0, 1).toLowerCase() === letter)
-    if (members.length > 0) obj[letter] = members
+    if (members.length > 0) obj[letter] = members.map(m => m.page)
   }
 
   // Numbers
   const numbers = arr.filter(el => !isNaN(parseInt(getSort(el, category).substring(0, 1))))
-  if (numbers.length > 0) obj.numbers = numbers
+  if (numbers.length > 0) obj.numbers = numbers.map(m => m.page)
 
   // Other characters
   const other = arr.filter(el => {
@@ -54,7 +54,7 @@ const alphabetizeMembers = (arr, category) => {
     const first = sort?.substring(0, 1).toLowerCase()
     return sort ? !alphabet.includes(first) && isNaN(parseInt(first)) : false
   })
-  if (other.length > 0) obj.other = other
+  if (other.length > 0) obj.other = other.map(m => m.page)
 
   return obj
 }
@@ -79,8 +79,12 @@ const getMembers = async (req, res, next) => {
   const { pages, subcategories } = await Page.findMembers(title.substring(9), req.user)
   if (pages.length < 1 && subcategories.length < 1) return next()
   req.viewOpts.category = {
-    pages: pages.length < alphabetizedThreshold ? pages : alphabetizeMembers(pages, title),
-    subcategories: subcategories.length < alphabetizedThreshold ? subcategories : alphabetizeMembers(subcategories, title)
+    pages: pages.length < alphabetizedThreshold
+      ? pages.map(p => p.page)
+      : alphabetizeMembers(pages, title),
+    subcategories: subcategories.length < alphabetizedThreshold
+      ? subcategories.map(c => c.page)
+      : alphabetizeMembers(subcategories, title)
   }
   return next()
 }
