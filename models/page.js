@@ -556,22 +556,13 @@ PageSchema.methods.write = async function (params = {}) {
   const reading = !full && !editing
 
   for (const secret of secrets) {
-    let { content } = secret
-    for (const game of config.games) {
-      const { info } = await import(`../games/${game}/${game}.js`)
-      for (const stat of info.sheet) {
-        const matches = match(content, stat.regex)
-        for (const m of matches) content = content.replace(m.str, '').trim()
-      }
-    }
-
-
+    const s = await this.renderSecret(secret.codename, params.pov)
     const txt = full || (editing && secret.known)
-      ? `||::${secret.codename}:: ${content}||`
+      ? `||::${secret.codename}:: ${secret.content}||`
       : editing && !secret.known
         ? `||::${secret.codename}::||`
-        : reading && secret.known
-          ? `<span class="secret" data-codename="${secret.codename}">${content} <a href="/${this.path}/reveal/${secret.codename}">[Reveal]</a></span>`
+        : reading && secret.known && s
+          ? `<span class="secret" data-codename="${secret.codename}">${s.render} <a href="/${this.path}/reveal/${secret.codename}">[Reveal]</a></span>`
           : ''
 
     const regex = new RegExp(`\\|\\|::${secret.codename}::\\s*?.*?\\|\\|`, 'gm')
