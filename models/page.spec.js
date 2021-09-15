@@ -1170,6 +1170,26 @@ describe('Page', () => {
         expect(actual).to.be.equal('<a href="https://example.com/test.txt" class="download">\n<span class="name">Test Page</span>\n<small>plain/text; 123.5 kB</small>\n</a>')
       })
     })
+
+    describe('renderSecret', () => {
+      it('returns null if the secret doesn\'t exist', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = await page.renderSecret('Wombat', user)
+        expect(actual).to.be.null
+      })
+
+      it('returns null if the user doesn\'t know that secret', async () => {
+        const { page, other } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const actual = await page.renderSecret('Wombat', other)
+        expect(actual).to.be.null
+      })
+
+      it('renders the secret', async () => {
+        const { page, user } = await createTestDocs(model, '||::Wombat:: [Intelligence (Arcana) DC 20] This is a secret.||')
+        const actual = await page.renderSecret('Wombat', user)
+        expect(actual.render).to.be.equal('This is a secret.')
+      })
+    })
   })
 
   describe('statics', () => {

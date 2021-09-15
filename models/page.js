@@ -769,6 +769,30 @@ PageSchema.methods.renderFile = async function (text) {
 }
 
 /**
+ * Returns the secret identified by the `codename` (or `null` if the `user`
+ * doesn't know it) with an added `render` property which strips out any game
+ * tags that may occur in the secret's content.
+ * @param {string} codename - The codename of the secret to render.
+ * @param {User} user - The user that we're rendering for.
+ * @returns {Promise<Secret|null>} - The secret requested, with an additional
+ *   `render` property, or `null` if the user doesn't know it.
+ */
+
+PageSchema.methods.renderSecret = async function (codename, user) {
+  const secret = this.findSecret(codename)
+  if (!secret || !this.knows(user?.getPOV() || user, codename)) return null
+  secret.render = secret.content
+  for (const game of config.games) {
+    const { info } = await import(`../games/${game}/${game}.js`)
+    for (const stat of info.sheet) {
+      const matches = match(secret.render, stat.regex)
+      for (const m of matches) secret.render = secret.render.replace(m.str, '').trim()
+    }
+  }
+  return secret
+}
+
+/**
  * Delete the file associated with the page.
  * @returns {Promise<void>} - A Promise that resolves once the page's file has
  *   been deleted from the CDN. If the page has no file, nothing happens.
