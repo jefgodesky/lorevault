@@ -1,0 +1,38 @@
+@use '../modules/colors';
+
+.category-subcategories,
+.category-pages {
+  margin-top: 2em;
+
+  .columned {
+    columns: 2;
+    column-gap: 4em;
+  }
+
+  h3 {
+    position: relative;
+    text-align: center;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    &:before,
+    &:after {
+      border-bottom: 1px solid colors.$altborder;
+      content: '';
+      display: inline-block;
+      height: 50%;
+      position: absolute;
+      width: calc(50% - 1.5em);
+    }
+
+    &:before {
+      left: 0;
+    }
+
+    &:after {
+      right: 0;
+    }
+  }
+}

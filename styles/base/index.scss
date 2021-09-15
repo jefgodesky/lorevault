@@ -11,6 +11,7 @@
 @use 'partials/messages';
 @use 'partials/secrets';
 @use 'partials/sidebar';
+@use 'partials/categories';
 
 // Import game-specific Sass
 @use 'games.scss';
