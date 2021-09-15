@@ -773,14 +773,18 @@ PageSchema.methods.renderFile = async function (text) {
  * doesn't know it) with an added `render` property which strips out any game
  * tags that may occur in the secret's content.
  * @param {string} codename - The codename of the secret to render.
- * @param {User} user - The user that we're rendering for.
+ * @param {Character|string} [pov = 'Anonymous'] - The point of view from which
+ *   the secret should be rendered. If this is the string `Loremaster,` then
+ *   all secrets are shown. If this is the string `Anonymous` (which it is by
+ *   default), then no secrets are shown. If given a Character, only those
+ *   secrets which are known to that character are shown.
  * @returns {Promise<Secret|null>} - The secret requested, with an additional
  *   `render` property, or `null` if the user doesn't know it.
  */
 
-PageSchema.methods.renderSecret = async function (codename, user) {
+PageSchema.methods.renderSecret = async function (codename, pov = 'Anonymous') {
   const secret = this.findSecret(codename)
-  if (!secret || !this.knows(user?.getPOV() || user, codename)) return null
+  if (!secret || !this.knows(pov, codename)) return null
   secret.render = secret.content
   for (const game of config.games) {
     const { info } = await import(`../games/${game}/${game}.js`)

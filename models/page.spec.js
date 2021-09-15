@@ -1174,19 +1174,19 @@ describe('Page', () => {
     describe('renderSecret', () => {
       it('returns null if the secret doesn\'t exist', async () => {
         const { page, user } = await createTestDocs(model)
-        const actual = await page.renderSecret('Wombat', user)
+        const actual = await page.renderSecret('Wombat', user.getPOV())
         expect(actual).to.be.null
       })
 
       it('returns null if the user doesn\'t know that secret', async () => {
         const { page, other } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
-        const actual = await page.renderSecret('Wombat', other)
+        const actual = await page.renderSecret('Wombat', other.getPOV())
         expect(actual).to.be.null
       })
 
       it('renders the secret', async () => {
         const { page, user } = await createTestDocs(model, '||::Wombat:: [Intelligence (Arcana) DC 20] This is a secret.||')
-        const actual = await page.renderSecret('Wombat', user)
+        const actual = await page.renderSecret('Wombat', user.getPOV())
         expect(actual.render).to.be.equal('This is a secret.')
       })
     })
