@@ -546,7 +546,7 @@ PageSchema.methods.knows = function (char, codename) {
  * @returns {string} - The body written according to the parameters provided.
  */
 
-PageSchema.methods.write = function (params = {}) {
+PageSchema.methods.write = async function (params = {}) {
   const { pov = 'Anonymous', mode = 'reading', version = this.getCurr() } = params
   const secrets = this.getSecrets(pov)
   let str = params.str || version?.body || ''
@@ -556,18 +556,28 @@ PageSchema.methods.write = function (params = {}) {
   const reading = !full && !editing
 
   for (const secret of secrets) {
+    let { content } = secret
+    for (const game of config.games) {
+      const { info } = await import(`../games/${game}/${game}.js`)
+      for (const stat of info.sheet) {
+        const matches = match(content, stat.regex)
+        for (const m of matches) content = content.replace(m.str, '').trim()
+      }
+    }
+
+
     const txt = full || (editing && secret.known)
-      ? `||::${secret.codename}:: ${secret.content}||`
+      ? `||::${secret.codename}:: ${content}||`
       : editing && !secret.known
         ? `||::${secret.codename}::||`
         : reading && secret.known
-          ? `<span class="secret" data-codename="${secret.codename}">${secret.content} <a href="/${this.path}/reveal/${secret.codename}">[Reveal]</a></span>`
+          ? `<span class="secret" data-codename="${secret.codename}">${content} <a href="/${this.path}/reveal/${secret.codename}">[Reveal]</a></span>`
           : ''
 
     const regex = new RegExp(`\\|\\|::${secret.codename}::\\s*?.*?\\|\\|`, 'gm')
-    const match = str.match(regex)
-    if (match) {
-      str = str.replace(match, txt)
+    const replace = str.match(regex)
+    if (replace) {
+      str = str.replace(replace, txt)
     } else if ((full || editing) && !secret.known) {
       str += `\n\n${txt}`
     }
@@ -599,7 +609,7 @@ PageSchema.methods.update = async function (content, editor) {
   const { str, secrets } = assignCodenames(body, codenamer)
   this.processSecrets(secrets, editor)
   content.title = smartquotes(content.title)
-  content.body = this.write({ str, pov: editor.getPOV(), mode: 'full' })
+  content.body = await this.write({ str, pov: editor.getPOV(), mode: 'full' })
   if (content.file) this.file = content.file
   this.title = content.title
   this.versions.push(Object.assign({}, content, { editor: editor._id }))
@@ -641,7 +651,7 @@ PageSchema.methods.rollback = async function (version, editor) {
 
 PageSchema.methods.render = async function (renderer, version = this.getCurr(), str) {
   const pov = renderer?.getPOV ? renderer.getPOV() : renderer
-  str = str || this.write({ pov, version })
+  str = str || await this.write({ pov, version })
   const pre = saveBlocks(str, /(```|<pre><code>)(\r|\n|.)*?(```|<\/code><\/pre>)/, 'PREBLOCK')
   str = pre.str
   str = renderTags(str, '<includeonly>')
