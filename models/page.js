@@ -261,7 +261,7 @@ PageSchema.methods.getCategories = async function (user) {
 
 PageSchema.methods.getCategorization = function (name, searcher) {
   const cat = findOne(this.categories, c => c.name === name)
-  if (!cat || (cat.secret && (searcher === 'Loremaster' || !this.knows(searcher.getPOV(), cat.codename)))) return false
+  if (!cat || (cat.secret && (searcher === 'Loremaster' || !this.knows(searcher?.getPOV(), cat.codename)))) return false
   return cat
 }
 
