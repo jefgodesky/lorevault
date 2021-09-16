@@ -66,6 +66,18 @@ describe('Page', () => {
         const { page } = await createTestDocs(model, '||::Wombat:: [[Category:Tests]]||')
         expect(page.categories[0].codename).to.be.eql('Wombat')
       })
+
+      it('doesn\'t include categories inside includeonly tags', async () => {
+        const { page } = await createTestDocs(model, '<includeonly>[[Category:Tests]]</includeonly>')
+        expect(page.categories).to.be.empty
+      })
+
+      it('includes categories from templates', async () => {
+        const { page, user } = await createTestDocs(model)
+        await Page.create({ title: 'Template:Categories', body: '[[Category:Tests]]' }, user)
+        await page.update({ title: page.title, body: '{{Categories}}' }, user)
+        expect(page.categories.map(c => c.name)).to.be.eql(['Tests'])
+      })
     })
 
     describe('Links', () => {

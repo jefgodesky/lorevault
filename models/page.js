@@ -131,8 +131,12 @@ PageSchema.pre('save', function (next) {
  * Pull categories from text each time the page is saved.
  */
 
-PageSchema.pre('save', function (next) {
-  const { body } = this.getCurr()
+PageSchema.pre('save', async function (next) {
+  let { body } = this.getCurr()
+  body = renderTags(body, '<noinclude>', true)
+  body = renderTags(body, '<includeonly>')
+  body = await Template.render(body, 'Loremaster')
+
   const regex = /\[\[Category:(.*?)(\|(.*?))?]]/im
   this.categories = match(body, regex).map(category => {
     const regexMatch = category.str.match(regex)
