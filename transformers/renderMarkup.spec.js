@@ -26,4 +26,9 @@ describe('renderMarkup', () => {
     const actual = await renderMarkup('## Test\n\nHello, world!')
     expect(actual).to.be.equal('\n<section>\n  <h2 id="test"><a aria-hidden="true" tabindex="-1" href="#test"><span class="icon icon-link"></span></a>Test</h2>\n  <p>Hello, world!</p>\n</section>\n')
   })
+
+  it('stems links', async () => {
+    const actual = await renderMarkup('<p><a href="/test">Test</a>s <a href="/test">Test</a>\'s <a href="/test">Test</a>’s</p>')
+    expect(actual).to.be.equal('\n<p><a href="/test">Tests</a> <a href="/test">Test\'s</a> <a href="/test">Test’s</a></p>\n')
+  })
 })
