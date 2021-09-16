@@ -31,4 +31,9 @@ describe('renderMarkup', () => {
     const actual = await renderMarkup('<p><a href="/test">Test</a>s <a href="/test">Test</a>\'s <a href="/test">Test</a>’s</p>')
     expect(actual).to.be.equal('\n<p><a href="/test">Tests</a> <a href="/test">Test\'s</a> <a href="/test">Test’s</a></p>\n')
   })
+
+  it('removes empty tags', async () => {
+    const actual = await renderMarkup('<p><strong><span><em>\n\n   \n      \n\n\n</em></span></strong></p>')
+    expect(actual).to.be.equal('\n\n\n\n')
+  })
 })

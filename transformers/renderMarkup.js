@@ -31,6 +31,20 @@ const stemLinks = str => {
 }
 
 /**
+ * This method recursively removes empty HTML tags from the string.
+ * @param {string} str - The string being rendered.
+ * @returns {string} - The string with any empty HTML tags removed.
+ */
+
+const trimEmptyTags = str => {
+  const empties = str.match(/<(.*?)>\s*?<\/\1>/gm)
+  if (empties) {
+    for (const empty of empties) str = str.replace(empty, '')
+  }
+  return empties && empties.length > 0 ? trimEmptyTags(str) : str
+}
+
+/**
  * Render Markdown to HTML.
  * @param {string} str - A string of Markdown text.
  * @returns {Promise<string>} - The original string `str` rendered to HTML.
@@ -57,6 +71,7 @@ const renderMarkup = async str => {
     .process(str)
   let markup = String(render)
   markup = stemLinks(markup)
+  markup = trimEmptyTags(markup)
   return markup
 }
 
