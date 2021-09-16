@@ -12,6 +12,25 @@ import prettify from 'rehype-format'
 import rehypeStringify from 'rehype-stringify'
 
 /**
+ * If a link is immediately followed by text that would form a continuous word
+ * (including an apostrophe), that text is pulled into the link.
+ * @param {string} str - The string in which we want to stem our links.
+ * @returns {string} - The original string, but with any links stemmed.
+ */
+
+const stemLinks = str => {
+  const matches = str.match(/<a(.*?)>(.*?)<\/a>[A-Za-z'’]+/gim)
+  if (matches) {
+    for (const match of matches) {
+      const elems = match.match(/<a(.*?)>(.*?)<\/a>([A-Za-z'’]+)/im)
+      if (elems.length < 4) continue
+      str = str.replace(match, `<a${elems[1]}>${elems[2]}${elems[3]}</a>`)
+    }
+  }
+  return str
+}
+
+/**
  * Render Markdown to HTML.
  * @param {string} str - A string of Markdown text.
  * @returns {Promise<string>} - The original string `str` rendered to HTML.
@@ -36,7 +55,9 @@ const renderMarkup = async str => {
     .use(prettify)
     .use(rehypeStringify)
     .process(str)
-  return String(render)
+  let markup = String(render)
+  markup = stemLinks(markup)
+  return markup
 }
 
 export default renderMarkup
