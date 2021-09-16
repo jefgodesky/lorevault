@@ -72,9 +72,9 @@ router.get('/*/reveal/:codename', getPage, async (req, res, next) => {
   const { codename } = req.params
   if (!req.viewOpts.page || !req.user) return next()
   const { page } = req.viewOpts
-  if (!page.knows(req.user.getPOV(), codename)) return res.redirect(`/${page.path}`)
-  const secret = page.findSecret(codename)
-  req.viewOpts.secret = await page.render(req.user, null, secret.content)
+  const secret = await page.renderSecret(codename, req.user.getPOV())
+  if (!secret) return res.redirect(`/${page.path}`)
+  req.viewOpts.secret = await page.render(req.user, null, secret.render)
   req.viewOpts.action = `/${page.path}/reveal/${codename}`
   res.render('page-reveal', req.viewOpts)
 })

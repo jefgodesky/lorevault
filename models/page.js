@@ -131,8 +131,12 @@ PageSchema.pre('save', function (next) {
  * Pull categories from text each time the page is saved.
  */
 
-PageSchema.pre('save', function (next) {
-  const { body } = this.getCurr()
+PageSchema.pre('save', async function (next) {
+  let { body } = this.getCurr()
+  body = renderTags(body, '<noinclude>', true)
+  body = renderTags(body, '<includeonly>')
+  body = await Template.render(body, 'Loremaster')
+
   const regex = /\[\[Category:(.*?)(\|(.*?))?]]/im
   this.categories = match(body, regex).map(category => {
     const regexMatch = category.str.match(regex)
@@ -546,7 +550,7 @@ PageSchema.methods.knows = function (char, codename) {
  * @returns {string} - The body written according to the parameters provided.
  */
 
-PageSchema.methods.write = function (params = {}) {
+PageSchema.methods.write = async function (params = {}) {
   const { pov = 'Anonymous', mode = 'reading', version = this.getCurr() } = params
   const secrets = this.getSecrets(pov)
   let str = params.str || version?.body || ''
@@ -556,18 +560,19 @@ PageSchema.methods.write = function (params = {}) {
   const reading = !full && !editing
 
   for (const secret of secrets) {
+    const s = await this.renderSecret(secret.codename, params.pov)
     const txt = full || (editing && secret.known)
       ? `||::${secret.codename}:: ${secret.content}||`
       : editing && !secret.known
         ? `||::${secret.codename}::||`
-        : reading && secret.known
-          ? `<span class="secret" data-codename="${secret.codename}">${secret.content} <a href="/${this.path}/reveal/${secret.codename}">[Reveal]</a></span>`
+        : reading && secret.known && s
+          ? `<span class="secret" data-codename="${secret.codename}">${s.render} <a href="/${this.path}/reveal/${secret.codename}">[Reveal]</a></span>`
           : ''
 
     const regex = new RegExp(`\\|\\|::${secret.codename}::\\s*?.*?\\|\\|`, 'gm')
-    const match = str.match(regex)
-    if (match) {
-      str = str.replace(match, txt)
+    const replace = str.match(regex)
+    if (replace) {
+      str = str.replace(replace, txt)
     } else if ((full || editing) && !secret.known) {
       str += `\n\n${txt}`
     }
@@ -599,7 +604,7 @@ PageSchema.methods.update = async function (content, editor) {
   const { str, secrets } = assignCodenames(body, codenamer)
   this.processSecrets(secrets, editor)
   content.title = smartquotes(content.title)
-  content.body = this.write({ str, pov: editor.getPOV(), mode: 'full' })
+  content.body = await this.write({ str, pov: editor.getPOV(), mode: 'full' })
   if (content.file) this.file = content.file
   this.title = content.title
   this.versions.push(Object.assign({}, content, { editor: editor._id }))
@@ -641,7 +646,7 @@ PageSchema.methods.rollback = async function (version, editor) {
 
 PageSchema.methods.render = async function (renderer, version = this.getCurr(), str) {
   const pov = renderer?.getPOV ? renderer.getPOV() : renderer
-  str = str || this.write({ pov, version })
+  str = str || await this.write({ pov, version })
   const pre = saveBlocks(str, /(```|<pre><code>)(\r|\n|.)*?(```|<\/code><\/pre>)/, 'PREBLOCK')
   str = pre.str
   str = renderTags(str, '<includeonly>')
@@ -756,6 +761,34 @@ PageSchema.methods.renderFile = async function (text) {
     case 'Video': return this.renderVideo()
     default: return this.renderDownload(text)
   }
+}
+
+/**
+ * Returns the secret identified by the `codename` (or `null` if the `user`
+ * doesn't know it) with an added `render` property which strips out any game
+ * tags that may occur in the secret's content.
+ * @param {string} codename - The codename of the secret to render.
+ * @param {Character|string} [pov = 'Anonymous'] - The point of view from which
+ *   the secret should be rendered. If this is the string `Loremaster,` then
+ *   all secrets are shown. If this is the string `Anonymous` (which it is by
+ *   default), then no secrets are shown. If given a Character, only those
+ *   secrets which are known to that character are shown.
+ * @returns {Promise<Secret|null>} - The secret requested, with an additional
+ *   `render` property, or `null` if the user doesn't know it.
+ */
+
+PageSchema.methods.renderSecret = async function (codename, pov = 'Anonymous') {
+  const secret = this.findSecret(codename)
+  if (!secret || !this.knows(pov, codename)) return null
+  secret.render = secret.content
+  for (const game of config.games) {
+    const { info } = await import(`../games/${game}/${game}.js`)
+    for (const stat of info.sheet) {
+      const matches = match(secret.render, stat.regex)
+      for (const m of matches) secret.render = secret.render.replace(m.str, '').trim()
+    }
+  }
+  return secret
 }
 
 /**
