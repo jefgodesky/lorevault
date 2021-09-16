@@ -31,6 +31,22 @@ const stemLinks = str => {
 }
 
 /**
+ * Clean up a string by removing any substring that matches a regular
+ * expression, and running it recursively until no matches are found.
+ * @param {string} str - The string to clean up.
+ * @param {RegExp} regex - The regular expression used to find substrings to
+ *   be removed.
+ * @returns {string} - The string with all substrings that match the regular
+ *   expression `regex` removed.
+ */
+
+const recursiveCleanup = (str, regex) => {
+  const matches = str.match(regex)
+  if (matches) { for (const match of matches) str = str.replace(match, '') }
+  return matches && matches.length > 0 ? recursiveCleanup(str, regex) : str
+}
+
+/**
  * Render Markdown to HTML.
  * @param {string} str - A string of Markdown text.
  * @returns {Promise<string>} - The original string `str` rendered to HTML.
@@ -57,6 +73,8 @@ const renderMarkup = async str => {
     .process(str)
   let markup = String(render)
   markup = stemLinks(markup)
+  markup = recursiveCleanup(markup, /<(.*?)>\s*?<\/\1>/gm) // Remove empty HTML tags
+  markup = recursiveCleanup(markup, /<section.*?>\s*?<h(\d).*?>.*?<\/h\1>\s*?<\/section>/gim) // Remove empty sections
   return markup
 }
 
