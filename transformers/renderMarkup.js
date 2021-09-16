@@ -31,17 +31,19 @@ const stemLinks = str => {
 }
 
 /**
- * This method recursively removes empty HTML tags from the string.
- * @param {string} str - The string being rendered.
- * @returns {string} - The string with any empty HTML tags removed.
+ * Clean up a string by removing any substring that matches a regular
+ * expression, and running it recursively until no matches are found.
+ * @param {string} str - The string to clean up.
+ * @param {RegExp} regex - The regular expression used to find substrings to
+ *   be removed.
+ * @returns {string} - The string with all substrings that match the regular
+ *   expression `regex` removed.
  */
 
-const trimEmptyTags = str => {
-  const empties = str.match(/<(.*?)>\s*?<\/\1>/gm)
-  if (empties) {
-    for (const empty of empties) str = str.replace(empty, '')
-  }
-  return empties && empties.length > 0 ? trimEmptyTags(str) : str
+const recursiveCleanup = (str, regex) => {
+  const matches = str.match(regex)
+  if (matches) { for (const match of matches) str = str.replace(match, '') }
+  return matches && matches.length > 0 ? recursiveCleanup(str, regex) : str
 }
 
 /**
@@ -71,7 +73,8 @@ const renderMarkup = async str => {
     .process(str)
   let markup = String(render)
   markup = stemLinks(markup)
-  markup = trimEmptyTags(markup)
+  markup = recursiveCleanup(markup, /<(.*?)>\s*?<\/\1>/gm) // Remove empty HTML tags
+  markup = recursiveCleanup(markup, /<section.*?>\s*?<h(\d).*?>.*?<\/h\1>\s*?<\/section>/gim) // Remove empty sections
   return markup
 }
 

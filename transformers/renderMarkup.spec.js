@@ -36,4 +36,9 @@ describe('renderMarkup', () => {
     const actual = await renderMarkup('<p><strong><span><em>\n\n   \n      \n\n\n</em></span></strong></p>')
     expect(actual).to.be.equal('\n\n\n\n')
   })
+
+  it('removes empty sections', async () => {
+    const actual = await renderMarkup('<section data-test="42"><h2>Second Level</h2><section><h3>Third Level</h3><p><strong><span><em>\n\n   \n      \n\n\n</em></span></strong></p></section></section>')
+    expect(actual).to.be.equal('\n\n\n')
+  })
 })
