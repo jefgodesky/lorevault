@@ -991,6 +991,14 @@ describe('Page', () => {
         expect(actual).to.be.equal('')
       })
 
+      it('removes category tags from templates', async () => {
+        const { page, user } = await createTestDocs(model)
+        await Page.create({ title: 'Template:Categories', body: '[[Category:Test]]' }, user)
+        await page.update({ title: page.title, body: '{{Categories}}' }, user)
+        const actual = await page.render(user)
+        expect(actual).to.be.equal('')
+      })
+
       it('renders links', async () => {
         const { user } = await createTestDocs(model)
         const p = await Page.create({ title: 'Test', body: '[[Test Page|Alias]]\n\n[[New Page|Alias]]' }, user)
