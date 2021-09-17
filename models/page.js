@@ -651,8 +651,8 @@ PageSchema.methods.render = async function (renderer, version = this.getCurr(), 
   str = pre.str
   str = renderTags(str, '<includeonly>')
   str = renderTags(str, '<noinclude>', true)
-  str = str.replace(/\[\[Category:.*?(\|.*?)?\]\]/gm, '')
   str = await Template.render(str, renderer)
+  str = str.replace(/\[\[Category:.*?(\|.*?)?\]\]/gm, '')
   const links = await renderLinks(str, this.getSecrets(pov), renderer)
   str = await renderFiles(links.str)
   str = restoreBlocks(str, pre.blocks)
