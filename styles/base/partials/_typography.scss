@@ -54,3 +54,34 @@ a.new {
     color: lighten(colors.$newlink, 10%);
   }
 }
+
+main {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    a,
+    a:hover,
+    a:visited,
+    a:visited:hover {
+      color: colors.$text;
+      text-decoration: none;
+    }
+
+    .icon {
+      background: url(https://lorevault.s3.stackpathstorage.com/icons/heading-anchor.svg) no-repeat center;
+      background-size: contain;
+      display: inline-block;
+      float: left;
+      height: 0.75em;
+      margin: 0.25em 0 0 -1em;
+      opacity: 0.1;
+      width: 0.75em;
+    }
+
+    a:hover .icon {
+      opacity: 1;
+    }
+  }
+}
