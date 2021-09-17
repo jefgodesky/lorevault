@@ -136,7 +136,7 @@ describe('Template', () => {
 
     it('renders #IF statements', async () => {
       const { user } = await createTestDocs(model)
-      await Page.create({title: 'Template:Test', body: '{{#IF|param|{{{param}}}|This is my template.}}'}, user)
+      await Page.create({title: 'Template:Test', body: '{{#IF|param}}{{{param}}}{{#ELSIF}}This is my template.{{#ENDIF}}'}, user)
       const t1 = new Template('{{Test}}')
       const t2 = new Template('{{Test|param=Hello, world!}}')
       const r1 = await t1.render(user)
@@ -233,22 +233,22 @@ describe('Template', () => {
 
   describe('renderIfs', () => {
     it('can handle an #IF testing if a parameter exists', async () => {
-      const actual = await Template.renderIfs('Hello, {{#IF|subject|{{{subject}}}|world}}!', { ordered: [], named: { subject: 'Tester' } })
+      const actual = await Template.renderIfs('Hello, {{#IF|subject}}{{{subject}}}{{#ELSIF}}world{{#ENDIF}}!', { ordered: [], named: { subject: 'Tester' } })
       expect(actual).to.be.equal('Hello, {{{subject}}}!')
     })
 
     it('can supply an else when an #IF testing if a parameter doesn\'t exist', async () => {
-      const actual = await Template.renderIfs('Hello, {{#IF|subject|{{{subject}}}|world}}!', { ordered: [], named: {} })
+      const actual = await Template.renderIfs('Hello, {{#IF|subject}}{{{subject}}}{{#ELSIF}}world{{#ENDIF}}!', { ordered: [], named: {} })
       expect(actual).to.be.equal('Hello, world!')
     })
 
     it('can handle an #IF testing if a parameter equals a particular value', async () => {
-      const actual = await Template.renderIfs('Hello, {{#IF|subject=Tester|{{{subject}}}|world}}!', { ordered: [], named: { subject: 'Tester' } })
+      const actual = await Template.renderIfs('Hello, {{#IF|subject=Tester}}{{{subject}}}{{#ELSIF}}world{{#ENDIF}}!', { ordered: [], named: { subject: 'Tester' } })
       expect(actual).to.be.equal('Hello, {{{subject}}}!')
     })
 
     it('can supply an else when an #IF testing if a parameter doesn\'t equal a particular value', async () => {
-      const actual = await Template.renderIfs('Hello, {{#IF|subject=Tester|{{{subject}}}|world}}!', { ordered: [], named: { subject: 'Someone Else' } })
+      const actual = await Template.renderIfs('Hello, {{#IF|subject=Tester}}{{{subject}}}{{#ELSIF}}world{{#ENDIF}}!', { ordered: [], named: { subject: 'Someone Else' } })
       expect(actual).to.be.equal('Hello, world!')
     })
   })
