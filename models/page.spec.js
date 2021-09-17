@@ -78,6 +78,11 @@ describe('Page', () => {
         await page.update({ title: page.title, body: '{{Categories}}' }, user)
         expect(page.categories.map(c => c.name)).to.be.eql(['Tests'])
       })
+
+      it('doesn\'t include categories inside preformatted blocks', async () => {
+        const { page } = await createTestDocs(model, '```\n\n[[Category:Test Type 1]]\n\n```\n\n<pre><code>\n\n[[Category:Test Type 2]]\n\n</code></pre>')
+        expect(page.categories).to.be.empty
+      })
     })
 
     describe('Links', () => {

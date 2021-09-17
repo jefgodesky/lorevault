@@ -133,7 +133,8 @@ PageSchema.pre('save', function (next) {
 
 PageSchema.pre('save', async function (next) {
   let { body } = this.getCurr()
-  body = renderTags(body, '<noinclude>', true)
+  const pre = saveBlocks(body, /(```|<pre><code>)(\r|\n|.)*?(```|<\/code><\/pre>)/, 'PREBLOCK')
+  body = renderTags(pre.str, '<noinclude>', true)
   body = renderTags(body, '<includeonly>')
   body = await Template.render(body, 'Loremaster')
 
