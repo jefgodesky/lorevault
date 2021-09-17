@@ -94,10 +94,10 @@ describe('Template', () => {
 
     it('renders ordered parameters', async () => {
       const { user } = await createTestDocs(model)
-      await Page.create({title: 'Template:Test', body: 'This is my {{{1}}}.'}, user)
+      await Page.create({title: 'Template:Test', body: '{{{1}}} {{{1}}} {{{1}}}'}, user)
       const template = new Template('{{Test|template}}')
       const actual = await template.render(user)
-      expect(actual).to.be.equal('This is my template.')
+      expect(actual).to.be.equal('template template template')
     })
 
     it('renders explicitly ordered parameters', async () => {
@@ -110,10 +110,10 @@ describe('Template', () => {
 
     it('renders named parameters', async () => {
       const { user } = await createTestDocs(model)
-      await Page.create({title: 'Template:Test', body: 'This is my {{{thing}}}.'}, user)
+      await Page.create({title: 'Template:Test', body: '{{{thing}}} {{{thing}}} {{{thing}}}'}, user)
       const template = new Template('{{Test|thing=template}}')
       const actual = await template.render(user)
-      expect(actual).to.be.equal('This is my template.')
+      expect(actual).to.be.equal('template template template')
     })
 
     it('renders nested templates', async () => {

@@ -83,10 +83,10 @@ class Template {
       body = Template.renderIfs(body, tpl.params)
 
       for (let i = 0; i < tpl.params.ordered.length; i++) {
-        body = body.replace(`{{{${i+1}}}}`, tpl.params.ordered[i])
+        body = body.replaceAll(`{{{${i+1}}}}`, tpl.params.ordered[i])
       }
       for (const key of Object.keys(tpl.params.named)) {
-        body = body.replace(`{{{${key}}}}`, tpl.params.named[key])
+        body = body.replaceAll(`{{{${key}}}}`, tpl.params.named[key])
       }
       str = str.replace(tpl.str, body)
     })
