@@ -119,7 +119,7 @@ router.get('/*/edit', getPage, async (req, res, next) => {
 })
 
 // POST /*/edit
-router.post('/*/edit', getPage, async (req, res, next) => {
+router.post('/*/edit', getPage, upload.single('file'), getFileData, async (req, res, next) => {
   if (!req.viewOpts.page) return next()
   await req.viewOpts.page.update(req.body, req.user)
   res.redirect(`/${req.viewOpts.page.path}`)
