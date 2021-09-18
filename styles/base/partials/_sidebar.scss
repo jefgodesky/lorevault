@@ -8,6 +8,21 @@
   position: relative;
   text-align: center;
 
+  .group,
+  .title,
+  .subtitle {
+    margin: 0.25em 0;
+  }
+
+  .title {
+    font-size: 1.5em;
+    font-weight: bold;
+  }
+
+  .subtitle {
+    font-weight: bold;
+  }
+
   dl {
     font-family: 'Trebuchet MS', serif;
     display: table;
