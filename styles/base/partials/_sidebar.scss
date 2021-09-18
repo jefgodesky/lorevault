@@ -29,6 +29,7 @@
 
   dl {
     font-family: 'Trebuchet MS', serif;
+    font-size: 75%;
     display: table;
     margin: 1em auto;
     text-align: left;
@@ -91,5 +92,6 @@
   @media (min-width: 50em) {
     float: right;
     margin: 0 -4em 2em 2em;
+    width: 50%;
   }
 }
