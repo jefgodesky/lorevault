@@ -49,15 +49,10 @@
     }
   }
 
-  .flair {
-    border: 0;
-    height: 0;
-  }
-
   &:before,
   &:after,
-  .flair:before,
-  .flair:after {
+  header:before,
+  header:after {
     content: '';
     display: block;
     height: 0;
@@ -73,21 +68,21 @@
   }
 
   &:before,
-  .flair:before {
+  header:before {
     border-right: 0.25em solid colors.$text;
     border-left: 0.25em solid transparent;
     left: 0;
   }
 
   &:after,
-  .flair:after {
+  header:after {
     border-right: 0.25em solid transparent;
     border-left: 0.25em solid colors.$text;
     right: 0;
   }
 
-  .flair:before,
-  .flair:after {
+  header:before,
+  header:after {
     border-top: 0.25em solid transparent;
     border-bottom: 0.25em solid colors.$text;
     top: -0.75em;
