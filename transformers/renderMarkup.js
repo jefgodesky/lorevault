@@ -57,7 +57,7 @@ const renderMarkup = async str => {
     attributes: {
       '*': ['className', 'data*'],
     },
-    tagNames: ['section', 'aside', 'figure', 'figcaption']
+    tagNames: ['header', 'section', 'aside', 'figure', 'figcaption', 'footer']
   })
   const render = await unified()
     .use(markdown)
