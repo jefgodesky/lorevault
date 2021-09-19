@@ -39,7 +39,12 @@ const getPage = async (req, res, next) => {
   if (!viewOpts.page) viewOpts.page = await Page.findByIdDiscreetly(req.body?.pageID, user)
   if (!viewOpts.page) viewOpts.page = await Page.findByPath(originalUrl, user)
   if (!viewOpts.page) return next()
-  if (req.user && `/${viewOpts.page.path}` === originalUrl) await viewOpts.page.checkSecrets(req.user?.getPOV() || 'Anonymous')
+
+  const pov = req.user?.getPOV() || 'Anonymous'
+  const hasChar = Boolean(pov._id)
+  const isReading = `/${viewOpts.page.path}` === originalUrl
+  if (hasChar && isReading) await viewOpts.page.checkSecrets(pov)
+
   const version = params?.version ? viewOpts.page.getVersion(params.version) : null
   viewOpts.title = viewOpts.page.title
   viewOpts.page.markup = await viewOpts.page.render(user, version || viewOpts.page.getCurr())
