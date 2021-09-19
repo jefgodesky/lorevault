@@ -68,6 +68,22 @@ describe('getPage', () => {
     expect(checked).to.contain(active._id.toString())
   })
 
+  it('won\'t check a loremaster', async () => {
+    const { loremaster } = await createTestDocs(model, '||::Wombat:: [Intelligence (Arcana) DC 10] This is a secret.||')
+    const req = { originalUrl: '/test-page', user: loremaster, viewOpts: {} }
+    await getPage(req, {}, () => {})
+    const { checked } = req.viewOpts.page.secrets.list[0]
+    expect(checked).to.be.empty
+  })
+
+  it('won\'t check an anonymous user', async () => {
+    await createTestDocs(model, '||::Wombat:: [Intelligence (Arcana) DC 10] This is a secret.||')
+    const req = { originalUrl: '/test-page', viewOpts: {} }
+    await getPage(req, {}, () => {})
+    const { checked } = req.viewOpts.page.secrets.list[0]
+    expect(checked).to.be.empty
+  })
+
   it('only checks the page\'s secrets if you\'re reading the page', async () => {
     const { user } = await createTestDocs(model, '||::Wombat:: [Intelligence (Arcana) DC 10] This is a secret.||')
     const req = { originalUrl: '/test-page/edit', user, viewOpts: {} }
