@@ -8,6 +8,12 @@ textarea {
 label {
   font-weight: bold;
   margin: 2em 0 0.5em 0;
+
+  .note {
+    font-size: 75%;
+    font-weight: normal;
+    margin-top: 0.5em;
+  }
 }
 
 input,
