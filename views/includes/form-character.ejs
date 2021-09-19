@@ -1,6 +1,9 @@
 <form action="<%= locals.character ? `/profile/character/${character._id}` : '/profile/character' %>" method="POST">
-  <label for="path"<% if (locals.errors && errors?.path) { %> class="error"<% } %>>Path</label>
-  <input type="text" id="path" name="path" placeholder="Enter the path for your character’s page" value="<%= locals.character ? `/${character.page?.path}` : locals.get?.path ? get.path : '' %>"<% if (locals.errors && errors?.path) { %> class="error"<% } %> />
+  <label for="path"<% if (locals.errors && errors?.path) { %> class="error"<% } %>>
+    Path
+    <p class="note">Before you can create a character, your character must have a page. Take the URL of that page. Its <em>path</em> is the part of the URL that appears after the domain. This part will look like <code>/character-name</code> (though just the <code>character-name</code> part, without the leading slash, will also work).</p>
+  </label>
+  <input type="text" id="path" name="path" placeholder="/character-name" value="<%= locals.character ? `/${character.page?.path}` : locals.get?.path ? get.path : '' %>"<% if (locals.errors && errors?.path) { %> class="error"<% } %> />
   <% if (locals.errors && errors?.path) { %><p class="error"><%- errors.path %></p><% } %>
   <% if (locals.games) { %>
   <% for (const game of Object.keys(games)) { %>
