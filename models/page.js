@@ -570,7 +570,7 @@ PageSchema.methods.write = async function (params = {}) {
           ? `<span class="secret" data-codename="${secret.codename}">${s.render} <a href="/${this.path}/reveal/${secret.codename}">[Reveal]</a></span>`
           : ''
 
-    const regex = new RegExp(`\\|\\|::${secret.codename}::\\s*?.*?\\|\\|`, 'gm')
+    const regex = new RegExp(`\\|\\|::${secret.codename}::[.\\s\\S]*?\\|\\|`, 'gm')
     const replace = str.match(regex)
     if (replace) {
       str = str.replace(replace, txt)
