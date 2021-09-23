@@ -645,6 +645,36 @@ describe('Page', () => {
       })
     })
 
+    describe('revealToNames', () => {
+      it('reveals to several names', async () => {
+        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        await Page.create({ title: 'Category:Adventurers', body: 'These are adventurers.' }, user)
+        await Page.create({ title: 'Category:Fighting Men', body: '[[Category:Adventurers]]' }, user)
+        await Page.create({ title: 'Category:Magic Users', body: '[[Category:Adventurers]]' }, user)
+        await Page.create({ title: 'Category:Sneaky Guys', body: '[[Category:Adventurers]]' }, user)
+        const larry = await Page.create({ title: 'Larry', body: 'This is about Larry.' }, user)
+        const fighter = await Page.create({ title: 'Fighting Man', body: '[[Category:Fighting Men]]' }, user)
+        const mage = await Page.create({ title: 'Magus Magickman', body: '[[Category:Magic Users]]' }, user)
+        const thief = await Page.create({ title: 'Sneak Sneakersson', body: '[[Category:Sneaky Guys]]' }, user)
+        user.claim(larry)
+        user.claim(fighter)
+        user.claim(mage)
+        user.claim(thief)
+        await page.revealToNames(`Adventurers, Larry`, 'Wombat')
+        const actual = user.characters.list.map(c => page.knows(c._id, 'Wombat'))
+        expect(actual).to.be.eql([true, false, true, true, true, true])
+      })
+
+      it('can also take a semicolon-separated list', async () => {
+        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const { list } = user.characters
+        await page.revealToNames(list.map(c => c.name).join(';'), 'Wombat')
+        const actual = page.secrets.list[0].knowers.map(id => id.toString())
+        const expected = list.map(c => c._id.toString())
+        expect(actual).to.be.eql(expected)
+      })
+    })
+
     describe('knows', () => {
       it('returns true for a loremaster', async () => {
         const { page } = await createTestDocs(model, '||::Wombat:: This is a secret.||')

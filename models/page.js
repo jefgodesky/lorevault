@@ -503,6 +503,29 @@ PageSchema.methods.revealToName = async function (name, codename = null) {
 }
 
 /**
+ * Reveal a secret to all of the characters named in the string `str`. This can
+ * be a list of names, separated by either commas or semicolons. Each name is
+ * passed to the `revealToName` method, so each one can by the name of just one
+ * character or the name of a category that contains several characters.
+ * @param {string} str - A string with one or more names (either of individual
+ *   characters or of categories that may contain characters), separated either
+ *   by commas or semicolons.
+ * @param {string} [codename = null] - The codename of the secret that you
+ *   would like to reveal. If the page itself is a secret, and you set this
+ *   argument to a falsy value (`false`, `null`, etc.) then the secret to
+ *   reveal is the existence of the page.
+ * @returns {Promise<void>} - A Promise that resolves when the secret has been
+ *   revealed to each of the characters named in the `str` argument.
+ */
+
+PageSchema.methods.revealToNames = async function (str, codename = null) {
+  const names = str.split(/[,;]/).map(el => el.trim())
+  for (const name of names) {
+    await this.revealToName(name, codename)
+  }
+}
+
+/**
  * Reports on whether the character `char` knows the secret identified by the
  * given `codename`.
  * @param {Character|Schema.Types.ObjectId|string} char - The character who
