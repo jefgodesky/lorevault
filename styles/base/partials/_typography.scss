@@ -85,3 +85,21 @@ main {
     }
   }
 }
+
+dl.vocabulary {
+  dt {
+    clear: left;
+    float: left;
+    font-weight: bold;
+    font-style: italic;
+
+    &:after {
+      content: ':';
+      margin-right: 0.3333em;
+    }
+  }
+
+  dd {
+    margin: 0.5em 0 0.5em 1em;
+  }
+}
