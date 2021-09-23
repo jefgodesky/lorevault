@@ -85,7 +85,7 @@ router.post('/*/reveal/:codename', getPage, async (req, res, next) => {
   if (!req.viewOpts.page || !req.user) return next()
   const { page } = req.viewOpts
   if (!page.knows(req.user.getPOV(), codename)) return res.redirect(`/${page.path}`)
-  await page.revealToName(req.body.revealto, codename)
+  await page.revealToNames(req.body.revealto, codename)
   res.redirect(`/${page.path}`)
 })
 
