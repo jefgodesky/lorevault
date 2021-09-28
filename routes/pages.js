@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { diffWords } from 'diff'
 import Page from '../models/page.js'
+import Character from '../models/character.js'
 import getPage from '../middleware/getPage.js'
 import getMembers from '../middleware/getMembers.js'
 import getFileData from '../middleware/getFileData.js'
@@ -128,6 +129,10 @@ router.post('/*/edit', getPage, upload.single('file'), getFileData, async (req, 
 // GET /*
 router.get('/*', getPage, getMembers, async (req, res, next) => {
   if (!req.viewOpts.page) return next()
+  if (req.user?.getPOV() === 'Loremaster') {
+    const char = await Character.getCharacter(req.viewOpts.page)
+    if (char) req.viewOpts.page.charId = char._id.toString()
+  }
   res.render('page-read', req.viewOpts)
 })
 

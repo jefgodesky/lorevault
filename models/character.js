@@ -71,6 +71,22 @@ CharacterSchema.methods.update = async function (page, player, stats) {
 }
 
 /**
+ * Return the character associated with a given page.
+ * @param {Page|Schema.Types.ObjectId|string} page - The page for which you'd
+ *   like to find a character record (or its ID, or the string representation
+ *   of its ID).
+ * @returns {Character|null>} - The character associated with that page, or
+ *   `null` if no such character exists.
+ */
+
+CharacterSchema.statics.getCharacter = function (page) {
+  const Character = model('Character')
+  const id = page?._id || page
+  if (!id) return null
+  return Character.findOne({ page: id }).populate('player')
+}
+
+/**
  * Checks to see if the given page belongs to a character. If so, the method
  * returns the user who has claimed that character. If no one has claimed any
  * character associated with this page, the method returns `false`.
@@ -83,9 +99,7 @@ CharacterSchema.methods.update = async function (page, player, stats) {
 
 CharacterSchema.statics.isClaimed = async function (page) {
   const Character = model('Character')
-  const id = page?._id || page
-  if (!id) return false
-  const char = await Character.findOne({ page: id }).populate('player')
+  const char = await Character.getCharacter(page)
   if (char) return char.player
   return false
 }
