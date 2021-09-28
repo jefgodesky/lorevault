@@ -1,3 +1,5 @@
+@use '../modules/colors';
+
 label,
 input,
 textarea {
@@ -46,4 +48,60 @@ textarea.body {
 
 .upload textarea.body {
   height: 20vh;
+}
+
+.toggle {
+  margin: 1em 0;
+
+  input[type="checkbox"] {
+    appearance: none;
+    background: colors.$altbg;
+    border: 1px solid colors.$altborder;
+    border-radius: 1em;
+    cursor: pointer;
+    display: inline-block;
+    height: 2em;
+    margin-right: 1em;
+    outline: none;
+    padding: 0;
+    position: relative;
+    transition: background-color 0.3s;
+    width: 4em;
+    vertical-align: middle;
+
+    &:focus {
+      border-color: colors.$button;
+
+      &:before {
+        border-color: colors.$button;
+      }
+    }
+
+    &:checked {
+      background: colors.$ins;
+    }
+
+    &:before {
+      background: colors.$bg;
+      border: 1px solid colors.$altborder;
+      border-radius: 0.8em;
+      content: '';
+      display: block;
+      height: 1.6em;
+      left: 0.1em;
+      position: absolute;
+      top: 0.1em;
+      transition: left 0.3s;
+      width: 1.6em;
+    }
+
+    &:checked:before {
+      left: 2.1em;
+    }
+  }
+
+  label {
+    display: inline-block;
+    width: auto;
+  }
 }
