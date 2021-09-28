@@ -624,20 +624,26 @@ PageSchema.methods.write = async function (params = {}) {
 PageSchema.methods.update = async function (content, editor) {
   const codenamer = this.findCodename.bind(this)
   let { body, secret } = content
+  const pov = editor.getPOV()
+
   body = body && body.length > 0 ? smartquotes(content.body) : ''
   const tags = body.match(/<.*? (.*?=“.*?”)*?>/gm)
   if (tags) { for (const tag of tags) body = body.replace(tag, tag.replace(/[“|”]/g, '"')) }
-  if (secret === true || secret === 'on') {
-    this.secrets.existence = true
-    this.secrets.knowers.addToSet(editor.id)
-  }
+
+  const makeSecret = secret === true || secret === 'on'
+  this.secrets.existence = makeSecret
+  if (makeSecret && typeof pov !== 'string') this.secrets.knowers.addToSet(pov._id)
+  if (!makeSecret) this.secrets.knowers = []
+
   const { str, secrets } = assignCodenames(body, codenamer)
   this.processSecrets(secrets, editor)
+
   content.title = smartquotes(content.title)
-  content.body = await this.write({ str, pov: editor.getPOV(), mode: 'full' })
+  content.body = await this.write({ str, pov, mode: 'full' })
   if (content.file) this.file = content.file
   this.title = content.title
   this.versions.push(Object.assign({}, content, { editor: editor._id }))
+
   await this.save()
   return this
 }
