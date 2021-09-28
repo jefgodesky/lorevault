@@ -1,3 +1,5 @@
+@use '../modules/colors';
+
 label,
 input,
 textarea {
@@ -48,39 +50,58 @@ textarea.body {
   height: 20vh;
 }
 
-.secret-form {
+.toggle {
   margin: 1em 0;
 
-  input[name="number"] {
-    margin: 0 0 0.5em 0;
-    width: 6em;
-  }
-}
-
-.sortable-list.initialized {
-  .secret-form {
-    padding-left: 2em;
+  input[type="checkbox"] {
+    appearance: none;
+    background: colors.$altbg;
+    border: 1px solid colors.$altborder;
+    border-radius: 1em;
+    cursor: pointer;
+    display: inline-block;
+    height: 2em;
+    margin-right: 1em;
+    outline: none;
+    padding: 0;
     position: relative;
+    transition: background-color 0.3s;
+    width: 4em;
+    vertical-align: middle;
 
-    .handle {
-      cursor: grab;
-      height: 1em;
-      left: 0;
-      margin-top: -0.5em;
+    &:focus {
+      border-color: colors.$button;
+
+      &:before {
+        border-color: colors.$button;
+      }
+    }
+
+    &:checked {
+      background: colors.$ins;
+    }
+
+    &:before {
+      background: colors.$bg;
+      border: 1px solid colors.$altborder;
+      border-radius: 0.8em;
+      content: '';
+      display: block;
+      height: 1.6em;
+      left: 0.1em;
       position: absolute;
-      top: 50%;
-      width: 1em;
+      top: 0.1em;
+      transition: left 0.3s;
+      width: 1.6em;
     }
 
-    .in-sorting {
-      background-color: rgba(245, 225, 166, 1);
-      cursor: grabbing;
-      opacity: 0.6666;
+    &:checked:before {
+      left: 2.1em;
     }
+  }
 
-    input[name="secret-order"] {
-      position: absolute;
-      transform: scale(0);
-    }
+  label {
+    display: inline-block;
+    width: auto;
   }
 }
