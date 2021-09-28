@@ -99,9 +99,7 @@ CharacterSchema.statics.getCharacter = function (page) {
 
 CharacterSchema.statics.isClaimed = async function (page) {
   const Character = model('Character')
-  const id = page?._id || page
-  if (!id) return false
-  const char = await Character.findOne({ page: id }).populate('player')
+  const char = await Character.getCharacter(page)
   if (char) return char.player
   return false
 }
