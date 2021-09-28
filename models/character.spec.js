@@ -43,6 +43,25 @@ describe('Character', () => {
   })
 
   describe('statics', () => {
+    describe('getCharacter', () => {
+      it('returns the character', async () => {
+        const { user } = await createTestDocs(model)
+        const check = await Character.getCharacter(user.characters.active.page)
+        expect(check._id).to.be.eql(user.characters.active._id)
+      })
+
+      it('returns null if the page doesn\'t have a character', async () => {
+        const { page } = await createTestDocs(model)
+        const check = await Character.getCharacter(page)
+        expect(check).to.be.null
+      })
+
+      it('returns null if not given a page', async () => {
+        const check = await Character.getCharacter(false)
+        expect(check).to.be.null
+      })
+    })
+
     describe('isClaimed', () => {
       it('returns the character\'s player if there is a character', async () => {
         const { page, user } = await createTestDocs(model)

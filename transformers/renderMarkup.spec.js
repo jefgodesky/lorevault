@@ -28,8 +28,8 @@ describe('renderMarkup', () => {
   })
 
   it('stems links', async () => {
-    const actual = await renderMarkup('<p><a href="/test">Test</a>s <a href="/test">Test</a>\'s <a href="/test">Test</a>’s</p>')
-    expect(actual).to.be.equal('\n<p><a href="/test">Tests</a> <a href="/test">Test\'s</a> <a href="/test">Test’s</a></p>\n')
+    const actual = await renderMarkup('<p><a href="/test">Test</a>s <a href="/test">Test</a>\'s <em><a href="/test">Test</a>’s</em></p>')
+    expect(actual).to.be.equal('\n<p><a href="/test">Tests</a> <a href="/test">Test\'s</a> <em><a href="/test">Test’s</a></em></p>\n')
   })
 
   it('removes empty tags', async () => {

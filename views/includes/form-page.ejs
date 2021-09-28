@@ -13,6 +13,10 @@
   <input type="text" id="title" name="title" placeholder="Enter the title for this page here" value="<%= locals.page ? page.title : locals.get?.title ? get.title : '' %>" />
   <label for="body">Body</label>
   <textarea id="body" name="body" class="body"><% if (locals.body) { %><%= body %><% } else if (locals.get?.body) { %><%= get.body %><% } %></textarea>
+  <div class="toggle">
+    <input type="checkbox"<% if (locals.page?.secrets?.existence) { %> checked="checked"<% } %> id="secret" name="secret" />
+    <label for="secret" class="toggle">This page is a secret.</label>
+  </div>
   <label for="msg">Message</label>
   <input type="text" id="msg" name="msg" placeholder="A short description of the change that you’re making" value="<%= locals.get?.msg ? get.msg : locals.page ? null : 'Initial text' %>" />
   <p class="actions">

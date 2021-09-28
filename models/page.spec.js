@@ -937,6 +937,38 @@ describe('Page', () => {
         await page.update({ title: page.title, body: 'This is some updated text.' }, other)
         expect(page.getCurr().body).to.be.equal('This is some updated text.\n\n||::Wombat:: This is a secret.||')
       })
+
+      it('makes the page itself a secret when given true', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = await page.update({ title: page.title, body: 'This is updated text.', secret: true }, user)
+        expect(actual.secrets.existence).to.be.true
+      })
+
+      it('makes the page itself a secret when given \'on\'', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = await page.update({ title: page.title, body: 'This is updated text.', secret: 'on' }, user)
+        expect(actual.secrets.existence).to.be.true
+      })
+
+      it('makes the page no longer a secret when given any other value', async () => {
+        const { page, user } = await createTestDocs(model)
+        await page.update({ title: page.title, body: 'This is updated text.', secret: true }, user)
+        const actual = await page.update({ title: page.title, body: 'This is updated text.', secret: 42 }, user)
+        expect(actual.secrets.existence).to.be.false
+      })
+
+      it('adds the editors\' POV to those who know the secret', async () => {
+        const { page, user } = await createTestDocs(model)
+        const actual = await page.update({ title: page.title, body: 'This is updated text.', secret: 'on' }, user)
+        expect(actual.secrets.knowers).to.be.eql([user.characters.active._id])
+      })
+
+      it('blanks out who knows if it isn\'t a secret anymore', async () => {
+        const { page, user } = await createTestDocs(model)
+        await page.update({ title: page.title, body: 'This is updated text.', secret: true }, user)
+        const actual = await page.update({ title: page.title, body: 'This is updated text.', secret: 42 }, user)
+        expect(actual.secrets.knowers).to.be.eql([])
+      })
     })
 
     describe('rollback', () => {
