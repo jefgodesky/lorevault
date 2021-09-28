@@ -14,6 +14,7 @@
         </ul>
       </aside>
       <% } %>
+      <% if (page.charId) { %><a href="/profile/character/<%= page.charId %>" style="float: right" class="button">Edit Character</a><% } %>
       <h1><%= locals.version?.title || page.title %></h1>
     </header>
     <main>
