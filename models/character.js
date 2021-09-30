@@ -141,8 +141,8 @@ CharacterSchema.statics.getAllTags = async function () {
 
 CharacterSchema.statics.create = async function (page, player, stats, tags = []) {
   const Page = model('Page')
-  const fullpage = page?.title ? page : await Page.findById(page)
   const Character = model('Character')
+  const fullpage = page?.title ? page : await Page.findById(page)
   const char = new Character()
   if (fullpage?.title) char.name = fullpage.title
   await char.update(page, player, stats, tags)
