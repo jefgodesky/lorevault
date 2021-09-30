@@ -49,13 +49,17 @@ const CharacterSchema = new Schema(await addGames({
  *   character's statistics in the games defined in the configuration. For
  *   example, `dnd5e-int` should provide the character's `int` statistic as
  *   defined by the game `dnd5e`.
+ * @param {string[]} [tags = []] - The tags to assign to the character. Any tag
+ *   that the character had before that is not included in this array is
+ *   removed, and any new tag provided in this array is added. (Default: `[]`)
  * @returns {Promise<Character>} - The Character once it has been created and
  *   saved to the database.
  */
 
-CharacterSchema.methods.update = async function (page, player, stats) {
+CharacterSchema.methods.update = async function (page, player, stats, tags = []) {
   this.page = page?._id || page
   this.player = player?._id || player
+  this.tags = tags
 
   for (const game of config.games) {
     const { info } = await import(`../games/${game}/${game}.js`)
