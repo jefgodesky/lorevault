@@ -84,6 +84,20 @@ describe('Character', () => {
       })
     })
 
+    describe('getAllTags', () => {
+      it('returns all tags used by characters', async () => {
+        const { user } = await createTestDocs(model)
+        const char1 = await Page.create({ title: 'Test Character 1', body: 'This is about Test Character 1.' }, user)
+        const char2 = await Page.create({ title: 'Test Character 2', body: 'This is about Test Character 2.' }, user)
+        const char3 = await Page.create({ title: 'Test Character 3', body: 'This is about Test Character 3.' }, user)
+        await Character.create(char1, user, {}, ['Test', 'First'])
+        await Character.create(char2, user, {}, ['Test', 'Second'])
+        await Character.create(char3, user, {})
+        const actual = await Character.getAllTags()
+        expect(actual).to.be.eql(['First', 'Second', 'Test'])
+      })
+    })
+
     describe('create', () => {
       it('it creates a new character', async () => {
         const char = await Character.create()

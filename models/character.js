@@ -110,6 +110,20 @@ CharacterSchema.statics.isClaimed = async function (page) {
 }
 
 /**
+ * Return an alphabetized list of all tags used by any character.
+ * @returns {Promise<any[]>} - A Promise that resolves with an alphabetized,
+ *   deduplicated list of all tags used by any character.
+ */
+
+CharacterSchema.statics.getAllTags = async function () {
+  const Character = model('Character')
+  const characters = await Character.find({})
+  const all = characters.flatMap(c => c.tags)
+  const deduped = [...new Set(all)]
+  return deduped.sort((a, b) => a.localeCompare(b))
+}
+
+/**
  * Create a new character.
  * @param {Page|Schema.Types.ObjectId|string} page - The character's page
  *   document (or its ID, or the string representation of its ID).
