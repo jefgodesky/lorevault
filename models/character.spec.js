@@ -113,6 +113,12 @@ describe('Character', () => {
         const char = await Character.create(page, user, { 'dnd5e-int': '3' })
         expect(char.dnd5e.int).to.be.equal(3)
       })
+
+      it('sets the character\'s tags', async () => {
+        const { page, user } = await createTestDocs(model)
+        const char = await Character.create(page, user, {}, ['test'])
+        expect(char.tags).to.be.eql(['test'])
+      })
     })
   })
 })

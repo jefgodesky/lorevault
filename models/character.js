@@ -119,17 +119,19 @@ CharacterSchema.statics.isClaimed = async function (page) {
  *   character's statistics in the games defined in the configuration. For
  *   example, `dnd5e-int` should provide the character's `int` statistic as
  *   defined by the game `dnd5e`.
+ * @param {string[]} [tags = []] - An array of strings with which to tag
+ *   this character. (Default: `[]`)
  * @returns {Promise<Character>} - The Character once it has been created and
  *   saved to the database.
  */
 
-CharacterSchema.statics.create = async function (page, player, stats) {
+CharacterSchema.statics.create = async function (page, player, stats, tags = []) {
   const Page = model('Page')
   const fullpage = page?.title ? page : await Page.findById(page)
   const Character = model('Character')
   const char = new Character()
   if (fullpage?.title) char.name = fullpage.title
-  await char.update(page, player, stats)
+  await char.update(page, player, stats, tags)
   return char
 }
 
