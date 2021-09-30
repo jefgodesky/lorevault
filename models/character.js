@@ -35,7 +35,8 @@ const CharacterSchema = new Schema(await addGames({
   player: {
     type: Schema.Types.ObjectId,
     ref: 'User'
-  }
+  },
+  tags: [String]
 }))
 
 /**
