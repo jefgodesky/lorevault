@@ -29,8 +29,9 @@ const processCharacterForm = async (req, res, next) => {
     return next()
   }
 
+  const tags = req.body?.tags?.split(/[,;]/).map(el => el.trim()) || []
   if (character) {
-    await character.update(character.page, character.player, req.body)
+    await character.update(character.page, character.player, req.body, tags)
   } else {
     const stats = {}
     for (const game of config.games) {
@@ -40,7 +41,7 @@ const processCharacterForm = async (req, res, next) => {
         stats[`${game}-${stat.id}`] = req.body[`${game}-${stat.id}`]
       }
     }
-    await user.claim(page, stats)
+    await user.claim(page, stats, tags)
   }
 
   res.redirect('/profile')

@@ -93,6 +93,18 @@ describe('User', () => {
         await other.claim(page)
         expect(other.pov).to.be.equal('Anonymous')
       })
+
+      it('can set your stats', async () => {
+        const { page, other } = await createTestDocs(model)
+        await other.claim(page, { dnd5e: { int: 0 } })
+        expect(other.characters.active.dnd5e.int).to.be.equal(0)
+      })
+
+      it('can set tags', async () => {
+        const { page, other } = await createTestDocs(model)
+        await other.claim(page, {}, ['Test'])
+        expect(other.characters.active.tags).to.be.eql(['Test'])
+      })
     })
 
     describe('getPOV', () => {

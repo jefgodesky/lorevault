@@ -24,6 +24,11 @@
   </section>
   <% } %>
   <% } %>
+  <label for="tags">
+    Tags
+    <p class="note">Provide a comma- or semicolon-separated list of tags for this character.</p>
+  </label>
+  <input type="text" name="tags" id="tags" value="<%= character?.tags?.join('; ') || '' %>" />
   <p class="actions">
     <button><%= locals.character ? `Edit ${character.page.title}` : 'Create Character' %></button>
     <a href="/profile" class="button-space">Cancel</a>
