@@ -66,6 +66,17 @@ describe('processCharacterForm', () => {
     expect(actual.dnd5e.int).to.be.equal(3)
   })
 
+  it('sets the new character\'s game tags', async () => {
+    const { user } = await createTestDocs(model)
+    const page = await Page.create({ title: 'New Character', body: 'Hello, world!' }, user)
+    const req = { user, viewOpts: {}, body: { path: `/${page.path}`, tags: 'Test; Another tag, unit test' } }
+    const res = { redirect: url => res.url = url }
+    await processCharacterForm(req, res, () => {})
+    const after = await User.findById(user._id).populate('characters.list')
+    const actual = after.characters.list[2]
+    expect(actual.tags).to.be.eql(['Test', 'Another tag', 'unit test'])
+  })
+
   it('updates an existing character\'s game stats', async () => {
     const { user } = await createTestDocs(model)
     const { active } = user.characters
@@ -76,5 +87,17 @@ describe('processCharacterForm', () => {
     const after = await User.findById(user._id).populate('characters.active')
     const actual = after.characters.active
     expect(actual.dnd5e.int).to.be.equal(3)
+  })
+
+  it('updates an existing character\'s tags', async () => {
+    const { user } = await createTestDocs(model)
+    const { active } = user.characters
+    const page = await Page.findById(active.page)
+    const req = { user, viewOpts: {}, body: { path: `/${page.path}`, tags: 'Test; Another tag, unit test' } }
+    const res = { redirect: url => res.url = url }
+    await processCharacterForm(req, res, () => {})
+    const after = await User.findById(user._id).populate('characters.active')
+    const actual = after.characters.active
+    expect(actual.tags).to.be.eql(['Test', 'Another tag', 'unit test'])
   })
 })

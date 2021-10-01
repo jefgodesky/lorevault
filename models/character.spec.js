@@ -39,6 +39,13 @@ describe('Character', () => {
         await char.update(page, user, { 'dnd5e-int': '3' })
         expect(char.dnd5e.int).to.be.equal(3)
       })
+
+      it('can change the character\'s tags', async () => {
+        const { page, user } = await createTestDocs(model)
+        const char = await Character.create(page, user)
+        await char.update(page, user, {}, ['test'])
+        expect(char.tags).to.be.eql(['test'])
+      })
     })
   })
 
@@ -77,6 +84,20 @@ describe('Character', () => {
       })
     })
 
+    describe('getAllTags', () => {
+      it('returns all tags used by characters', async () => {
+        const { user } = await createTestDocs(model)
+        const char1 = await Page.create({ title: 'Test Character 1', body: 'This is about Test Character 1.' }, user)
+        const char2 = await Page.create({ title: 'Test Character 2', body: 'This is about Test Character 2.' }, user)
+        const char3 = await Page.create({ title: 'Test Character 3', body: 'This is about Test Character 3.' }, user)
+        await Character.create(char1, user, {}, ['Test', 'First'])
+        await Character.create(char2, user, {}, ['Test', 'Second'])
+        await Character.create(char3, user, {})
+        const actual = await Character.getAllTags()
+        expect(actual).to.be.eql(['First', 'Second', 'Test'])
+      })
+    })
+
     describe('create', () => {
       it('it creates a new character', async () => {
         const char = await Character.create()
@@ -105,6 +126,12 @@ describe('Character', () => {
         const { page, user } = await createTestDocs(model)
         const char = await Character.create(page, user, { 'dnd5e-int': '3' })
         expect(char.dnd5e.int).to.be.equal(3)
+      })
+
+      it('sets the character\'s tags', async () => {
+        const { page, user } = await createTestDocs(model)
+        const char = await Character.create(page, user, {}, ['test'])
+        expect(char.tags).to.be.eql(['test'])
       })
     })
   })

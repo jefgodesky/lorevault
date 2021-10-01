@@ -65,17 +65,19 @@ UserSchema.methods.disconnect = async function (service) {
  *   character's statistics in the games defined in the configuration. For
  *   example, `dnd5e-int` should provide the character's `int` statistic as
  *   defined by the game `dnd5e`.
+ * @param {string[]} [tags = []] - An array of strings with which to tag
+ *   this character. (Default: `[]`)
  * @returns {Promise<boolean>} - A Promise that resolves with `false` if the
  *   character could not be claimed (e.g., it's already been claimed by someone
  *   else), or `true` once it's been claimed and added to your own characters
  *   (and designated as your active character if you did not yet have one).
  */
 
-UserSchema.methods.claim = async function (page, stats) {
+UserSchema.methods.claim = async function (page, stats, tags = []) {
   const Character = model('Character')
   const claimed = await Character.isClaimed(page)
   if (claimed) return false
-  const char = await Character.create(page, this, stats)
+  const char = await Character.create(page, this, stats, tags)
   this.characters.list.addToSet(char)
   this.characters.active = this.characters.active || char
   if (this.pov === 'Anonymous') this.pov = 'Character'

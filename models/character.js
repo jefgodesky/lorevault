@@ -35,7 +35,8 @@ const CharacterSchema = new Schema(await addGames({
   player: {
     type: Schema.Types.ObjectId,
     ref: 'User'
-  }
+  },
+  tags: [String]
 }))
 
 /**
@@ -48,13 +49,17 @@ const CharacterSchema = new Schema(await addGames({
  *   character's statistics in the games defined in the configuration. For
  *   example, `dnd5e-int` should provide the character's `int` statistic as
  *   defined by the game `dnd5e`.
+ * @param {string[]} [tags = []] - The tags to assign to the character. Any tag
+ *   that the character had before that is not included in this array is
+ *   removed, and any new tag provided in this array is added. (Default: `[]`)
  * @returns {Promise<Character>} - The Character once it has been created and
  *   saved to the database.
  */
 
-CharacterSchema.methods.update = async function (page, player, stats) {
+CharacterSchema.methods.update = async function (page, player, stats, tags = []) {
   this.page = page?._id || page
   this.player = player?._id || player
+  this.tags = tags
 
   for (const game of config.games) {
     const { info } = await import(`../games/${game}/${game}.js`)
@@ -105,6 +110,20 @@ CharacterSchema.statics.isClaimed = async function (page) {
 }
 
 /**
+ * Return an alphabetized list of all tags used by any character.
+ * @returns {Promise<any[]>} - A Promise that resolves with an alphabetized,
+ *   deduplicated list of all tags used by any character.
+ */
+
+CharacterSchema.statics.getAllTags = async function () {
+  const Character = model('Character')
+  const characters = await Character.find({})
+  const all = characters.flatMap(c => c.tags)
+  const deduped = [...new Set(all)]
+  return deduped.sort((a, b) => a.localeCompare(b))
+}
+
+/**
  * Create a new character.
  * @param {Page|Schema.Types.ObjectId|string} page - The character's page
  *   document (or its ID, or the string representation of its ID).
@@ -114,17 +133,19 @@ CharacterSchema.statics.isClaimed = async function (page) {
  *   character's statistics in the games defined in the configuration. For
  *   example, `dnd5e-int` should provide the character's `int` statistic as
  *   defined by the game `dnd5e`.
+ * @param {string[]} [tags = []] - An array of strings with which to tag
+ *   this character. (Default: `[]`)
  * @returns {Promise<Character>} - The Character once it has been created and
  *   saved to the database.
  */
 
-CharacterSchema.statics.create = async function (page, player, stats) {
+CharacterSchema.statics.create = async function (page, player, stats, tags = []) {
   const Page = model('Page')
-  const fullpage = page?.title ? page : await Page.findById(page)
   const Character = model('Character')
+  const fullpage = page?.title ? page : await Page.findById(page)
   const char = new Character()
   if (fullpage?.title) char.name = fullpage.title
-  await char.update(page, player, stats)
+  await char.update(page, player, stats, tags)
   return char
 }
 
