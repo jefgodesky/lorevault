@@ -9,13 +9,30 @@ class Secret {
   }
 
   /**
+   * Checks if a character knows this secret.
+   * @param {User|Character|Schema.Types.ObjectId|string} char - The character
+   *   that we're checking. If given a user, we find that user's active
+   *   character. If given a string or an ObjectId, we look for that directly
+   *   as the character's ID.
+   * @returns {boolean} - `true` if the character given knows the secret, or
+   *   `false` if hen does not.
+   */
+
+  knows (char) {
+    const isStr = typeof char === 'string'
+    const isID = char.constructor.name === 'ObjectId'
+    const id = isStr || isID ? char : char.characters?.active?._id || char._id
+    return id !== null && this.knowers.includes(id.toString())
+  }
+
+  /**
    * Parse <secret> tags from a string.
    * @param {string} str - The string to be parsed.
    * @param {function} codenamer - A function that produces codenames for those
    *   secrets that haven't set one.
    * @returns {Secret[]} - An array of secrets parsed from the given string.
    */
-  
+
   static parse (str, codenamer) {
     const tags = str.match(/<secret(.*?)>(.*?)<\/secret>/gmi)
     if (!tags) return []

@@ -1,5 +1,9 @@
 import { expect } from 'chai'
+import mongoose from 'mongoose'
+const { model } = mongoose
+
 import Secret from './secret.js'
+import { createTestDocs } from '../test-utils.js'
 
 describe('Secret', () => {
   let num = 0
@@ -59,6 +63,45 @@ describe('Secret', () => {
     it('defaults checked to an empty array', () => {
       const { checked } = new Secret({}, codenamer)
       expect(checked).to.be.eql([])
+    })
+  })
+
+  describe('Methods', () => {
+    describe('knows', () => {
+      it('tells you that a character knows', async () => {
+        const { user } = await createTestDocs(model)
+        const { active } = user.characters
+        const secret = new Secret({ knowers: [active._id.toString()] }, codenamer)
+        expect(secret.knows(active)).to.be.true
+      })
+
+      it('tells you that a character doesn\'t know', async () => {
+        const { user } = await createTestDocs(model)
+        const { active } = user.characters
+        const secret = new Secret({}, codenamer)
+        expect(secret.knows(active)).to.be.false
+      })
+
+      it('can take the user', async () => {
+        const { user } = await createTestDocs(model)
+        const { active } = user.characters
+        const secret = new Secret({ knowers: [active._id.toString()] }, codenamer)
+        expect(secret.knows(user)).to.be.true
+      })
+
+      it('can take the character\'s ID object', async () => {
+        const { user } = await createTestDocs(model)
+        const { active } = user.characters
+        const secret = new Secret({ knowers: [active._id.toString()] }, codenamer)
+        expect(secret.knows(active._id)).to.be.true
+      })
+
+      it('can take the character\'s ID as a string', async () => {
+        const { user } = await createTestDocs(model)
+        const { active } = user.characters
+        const secret = new Secret({ knowers: [active._id.toString()] }, codenamer)
+        expect(secret.knows(active._id.toString())).to.be.true
+      })
     })
   })
 
