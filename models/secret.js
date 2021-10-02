@@ -9,11 +9,21 @@ class Secret {
   }
 
   /**
+   * Reveal this secret to the character given (i.e., add the character's ID to
+   * the `knowers` array).
+   * @param {User|Character|ObjectId|string} char - The character that we're
+   *   revealing the secret to.
+   */
+
+  reveal (char) {
+    const id = Secret.getCharID(char)
+    this.knowers = [...new Set([...this.knowers, id])]
+  }
+
+  /**
    * Checks if a character knows this secret.
-   * @param {User|Character|Schema.Types.ObjectId|string} char - The character
-   *   that we're checking. If given a user, we find that user's active
-   *   character. If given a string or an ObjectId, we look for that directly
-   *   as the character's ID.
+   * @param {User|Character|ObjectId|string} char - The character that we're
+   *   checking.
    * @returns {boolean} - `true` if the character given knows the secret, or
    *   `false` if hen does not.
    */

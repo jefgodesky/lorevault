@@ -67,6 +67,25 @@ describe('Secret', () => {
   })
 
   describe('Methods', () => {
+    describe('reveal', () => {
+      it('reveals a secret to a character', async () => {
+        const { user } = await createTestDocs(model)
+        const { active } = user.characters
+        const secret = new Secret({ knowers: [] }, codenamer)
+        secret.reveal(active)
+        expect(secret.knowers).to.include(active._id.toString())
+      })
+
+      it('doesn\'t add duplicates', async () => {
+        const { user } = await createTestDocs(model)
+        const { active } = user.characters
+        const secret = new Secret({ knowers: [] }, codenamer)
+        secret.reveal(active)
+        secret.reveal(active)
+        expect(secret.knowers).to.have.lengthOf(1)
+      })
+    })
+
     describe('knows', () => {
       it('tells you that a character knows', async () => {
         const { user } = await createTestDocs(model)
@@ -80,27 +99,6 @@ describe('Secret', () => {
         const { active } = user.characters
         const secret = new Secret({}, codenamer)
         expect(secret.knows(active)).to.be.false
-      })
-
-      it('can take the user', async () => {
-        const { user } = await createTestDocs(model)
-        const { active } = user.characters
-        const secret = new Secret({ knowers: [active._id.toString()] }, codenamer)
-        expect(secret.knows(user)).to.be.true
-      })
-
-      it('can take the character\'s ID object', async () => {
-        const { user } = await createTestDocs(model)
-        const { active } = user.characters
-        const secret = new Secret({ knowers: [active._id.toString()] }, codenamer)
-        expect(secret.knows(active._id)).to.be.true
-      })
-
-      it('can take the character\'s ID as a string', async () => {
-        const { user } = await createTestDocs(model)
-        const { active } = user.characters
-        const secret = new Secret({ knowers: [active._id.toString()] }, codenamer)
-        expect(secret.knows(active._id.toString())).to.be.true
       })
     })
   })
