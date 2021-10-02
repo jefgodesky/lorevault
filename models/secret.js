@@ -1,3 +1,5 @@
+import { match } from '../utils.js'
+
 class Secret {
   constructor (obj = {}, codenamer) {
     const { codename = codenamer(), content = '', conditions = '', knowers = [], checked = [] } = obj
@@ -50,6 +52,36 @@ class Secret {
     const isID = param.constructor.name === 'ObjectId'
     const id = isStr || isID ? param : param.characters?.active?._id || param._id || param
     return id.toString()
+  }
+
+  /**
+   * Checks to see if the subject (`subj`) appears within any of the secrets in
+   * the string provided (`str`).
+   * @param {object} subj - An object that provides data on the string we're
+   *   looking for. An object like this is provided by the `match` utility.
+   * @param {number} subj.index - The index in the `str` string at which this
+   *   substring begins.
+   * @param {string} subj.str - The substring of `str` that this object provides
+   *   data about.
+   * @param {string} str - The full string.
+   * @returns {string|boolean} - The codename of the secret that `subj` appears
+   *   in, or `true` if it appears in a secret that doesn't have a codename, or
+   *   `false` if it doesn't appear in any secret at all.
+   */
+
+  static isInSecret (subj, str) {
+    const start = subj.index
+    const end = start + subj.str.length
+    const secrets = match(str, /<secret(.*?)>(.*?)<\/secret>/mi)
+    for (const secret of secrets) {
+      const secretStart = secret.index
+      const secretEnd = secret.index + secret.str.length
+      if (secretStart <= start && secretEnd >= end) {
+        const codenameMatch = secret.str.match(/ codename="(.*?)"[ >]/)
+        return codenameMatch && codenameMatch.length > 1 ? codenameMatch[1] : true
+      }
+    }
+    return false
   }
 
   /**

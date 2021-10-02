@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 const { model } = mongoose
 
 import Secret from './secret.js'
+import { match } from '../utils.js'
 import { createTestDocs } from '../test-utils.js'
 
 describe('Secret', () => {
@@ -131,6 +132,26 @@ describe('Secret', () => {
 
       it('returns the string of anything else', async () => {
         expect(Secret.getCharID({ test: 42 })).to.be.equal('[object Object]')
+      })
+    })
+
+    describe('isInSecret', () => {
+      it('returns false if the match is not in any secret', () => {
+        const str = 'This is a test.'
+        const actual = Secret.isInSecret(match(str, /test/)[0], str)
+        expect(actual).to.be.false
+      })
+
+      it('returns the codename of the secret that the match is in', () => {
+        const str = '<secret codename="Wombat">This is a test.</secret>'
+        const actual = Secret.isInSecret(match(str, /test/)[0], str)
+        expect(actual).to.be.equal('Wombat')
+      })
+
+      it('returns true if the match is in a secret with no codename', () => {
+        const str = '<secret>This is a test.</secret>'
+        const actual = Secret.isInSecret(match(str, /test/)[0], str)
+        expect(actual).to.be.true
       })
     })
 
