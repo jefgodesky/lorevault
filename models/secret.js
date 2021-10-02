@@ -19,10 +19,27 @@ class Secret {
    */
 
   knows (char) {
-    const isStr = typeof char === 'string'
-    const isID = char.constructor.name === 'ObjectId'
-    const id = isStr || isID ? char : char.characters?.active?._id || char._id
-    return id !== null && this.knowers.includes(id.toString())
+    return this.knowers.includes(Secret.getCharID(char))
+  }
+
+  /**
+   * This method normalizes unexpected input to the string representation of a
+   * character's ID. If given a Character, it returns the string representation
+   * of the character's ID. If given a User, it finds that user's active
+   * character and returns the string representation of that character's ID. If
+   * given a string, it returns that string, and if given an ObjectId, it
+   * returns the string representation of that ObjectId. If given something
+   * else altogether, it converts that into a string and returns that.
+   * @param {User|Character|ObjectId|string} param - The input to figure out.
+   * @returns {string} - The input normalized as best it can be into the string
+   *   representation of a character's ID.
+   */
+
+  static getCharID (param) {
+    const isStr = typeof param === 'string'
+    const isID = param.constructor.name === 'ObjectId'
+    const id = isStr || isID ? param : param.characters?.active?._id || param._id || param
+    return id.toString()
   }
 
   /**

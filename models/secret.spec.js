@@ -106,6 +106,36 @@ describe('Secret', () => {
   })
 
   describe('Statics', () => {
+    describe('getCharID', () => {
+      it('returns a character\'s ID', async () => {
+        const { user } = await createTestDocs(model)
+        const { active } = user.characters
+        expect(Secret.getCharID(active)).to.be.equal(active._id.toString())
+      })
+
+      it('returns a user\'s active character\'s ID', async () => {
+        const { user } = await createTestDocs(model)
+        const { active } = user.characters
+        expect(Secret.getCharID(user)).to.be.equal(active._id.toString())
+      })
+
+      it('returns the string form of a character\'s ID', async () => {
+        const { user } = await createTestDocs(model)
+        const { active } = user.characters
+        expect(Secret.getCharID(active._id)).to.be.equal(active._id.toString())
+      })
+
+      it('returns the string form of a character\'s ID when given that', async () => {
+        const { user } = await createTestDocs(model)
+        const { active } = user.characters
+        expect(Secret.getCharID(active._id.toString())).to.be.equal(active._id.toString())
+      })
+
+      it('returns the string of anything else', async () => {
+        expect(Secret.getCharID({ test: 42 })).to.be.equal('[object Object]')
+      })
+    })
+
     describe('parse', () => {
       it('parses a secret', () => {
         const str = 'A paragraph before.\n\nSome text before <secret>the terrible secret</secret>. Then some more text.\n\nAnd a paragraph below.'
