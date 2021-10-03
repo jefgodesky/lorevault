@@ -37,6 +37,29 @@ class Secret {
   }
 
   /**
+   * Return a string representation of the secret.
+   * @param {string} [mode = 'full'] - What kind of string do we want to
+   *   represent the secret? In `full` mode, the secret is rendered in the full
+   *   `<secret>` tag, with its codename and conditions. In `placeholder` mode,
+   *   it's just a `<secret>` tag with a codename, and no content. In `reading`
+   *   mode, the content of the secret is rendered without a `<secret>` tag.
+   *   (Default: `full`)
+   * @returns {string} - The rendered secret.
+   */
+
+  render (mode = 'full') {
+    const { codename, content, conditions } = this
+    const full = mode.toLowerCase() === 'full'
+    const placeholder = mode.toLowerCase() === 'placeholder'
+    const reading = mode.toLowerCase() === 'reading'
+
+    if (full && conditions?.length > 0) return `<secret codename="${codename}" conditions="${conditions}">${content}</secret>`
+    if (full) return `<secret codename="${codename}">${content}</secret>`
+    if (placeholder) return `<secret codename="${codename}"></secret>`
+    if (reading) return content
+  }
+
+  /**
    * This method normalizes unexpected input to the string representation of a
    * character's ID. If given a Character, it returns the string representation
    * of the character's ID. If given a User, it finds that user's active

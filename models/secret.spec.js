@@ -112,6 +112,33 @@ describe('Secret', () => {
         expect(secret.knows('Anonymous')).to.be.false
       })
     })
+
+    describe('render', () => {
+      it('renders the full secret', () => {
+        const secret = new Secret({ codename: 'Wombat', conditions: 'this and that', content: 'Hello world!' })
+        expect(secret.render()).to.be.equal('<secret codename="Wombat" conditions="this and that">Hello world!</secret>')
+      })
+
+      it('drops conditions if there are none', () => {
+        const secret = new Secret({ codename: 'Wombat', content: 'Hello world!' })
+        expect(secret.render()).to.be.equal('<secret codename="Wombat">Hello world!</secret>')
+      })
+
+      it('drops conditions if they\'re an empty string', () => {
+        const secret = new Secret({ codename: 'Wombat', conditions: '', content: 'Hello world!' })
+        expect(secret.render()).to.be.equal('<secret codename="Wombat">Hello world!</secret>')
+      })
+
+      it('can render a placeholder', () => {
+        const secret = new Secret({ codename: 'Wombat', content: 'Hello world!' })
+        expect(secret.render('placeholder')).to.be.equal('<secret codename="Wombat"></secret>')
+      })
+
+      it('can render the content', () => {
+        const secret = new Secret({ codename: 'Wombat', content: 'Hello world!' })
+        expect(secret.render('reading')).to.be.equal('Hello world!')
+      })
+    })
   })
 
   describe('Statics', () => {
