@@ -67,11 +67,11 @@ const transformCharacterSchema = schema => {
  */
 
 const updateCharacter = (character, update) => {
-  character.dnd5e.int = parseInt(update['dnd5e-int'])
-  character.dnd5e.arcana = parseInt(update['dnd5e-arcana'])
-  character.dnd5e.history = parseInt(update['dnd5e-history'])
-  character.dnd5e.nature = parseInt(update['dnd5e-nature'])
-  character.dnd5e.religion = parseInt(update['dnd5e-religion'])
+  character.dnd5e.int = parseInt(update['dnd5e-int']) || character.dnd5e.int
+  character.dnd5e.arcana = parseInt(update['dnd5e-arcana']) || character.dnd5e.arcana
+  character.dnd5e.history = parseInt(update['dnd5e-history']) || character.dnd5e.history
+  character.dnd5e.nature = parseInt(update['dnd5e-nature']) || character.dnd5e.nature
+  character.dnd5e.religion = parseInt(update['dnd5e-religion']) || character.dnd5e.religion
 }
 
 /**
