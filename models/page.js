@@ -939,7 +939,7 @@ PageSchema.statics.findMembers = async function (category, searcher) {
     arr.push({ page, sort })
   }
   members.subcategories = alphabetize(members.subcategories, el => el.sort)
-  members.page = alphabetize(members.pages, el => el.sort)
+  members.pages = alphabetize(members.pages, el => el.sort)
   return members
 }
 
