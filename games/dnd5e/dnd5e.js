@@ -26,6 +26,24 @@ const roll = (params = {}) => {
 }
 
 /**
+ * Adds elements needed for D&D 5E to the Page schema.
+ * @param {{}} schema - The original Page schema.
+ * @returns {{}} - The schema with elements needed for D&D 5E added to it.
+ */
+
+const transformPageSchema = schema => {
+  schema.dnd5e = [{
+    character: { type: Schema.Types.ObjectId, ref: 'Character' },
+    int: Number,
+    arcana: Number,
+    history: Number,
+    nature: Number,
+    religion: Number
+  }]
+  return schema
+}
+
+/**
  * Adds elements needed for D&D 5E to the Character schema.
  * @param {{}} schema - The original Character schema.
  * @returns {{}} - The schema with elements needed for D&D 5E added to it.
@@ -43,21 +61,37 @@ const transformCharacterSchema = schema => {
 }
 
 /**
- * Adds elements needed for D&D 5E to the Page schema.
- * @param {{}} schema - The original Page schema.
- * @returns {{}} - The schema with elements needed for D&D 5E added to it.
+ * Apply updates to a character.
+ * @param {Character} character - The character being updated.
+ * @param {{}} update - An object with updates to be applied.
  */
 
-const transformPageSchema = schema => {
-  schema.dnd5e = [{
-    character: { type: Schema.Types.ObjectId, ref: 'Character' },
-    int: Number,
-    arcana: Number,
-    history: Number,
-    nature: Number,
-    religion: Number
-  }]
-  return schema
+const updateCharacter = (character, update) => {
+  character.dnd5e.int = parseInt(update['dnd5e-int'])
+  character.dnd5e.arcana = parseInt(update['dnd5e-arcana'])
+  character.dnd5e.history = parseInt(update['dnd5e-history'])
+  character.dnd5e.nature = parseInt(update['dnd5e-nature'])
+  character.dnd5e.religion = parseInt(update['dnd5e-religion'])
+}
+
+/**
+ * Provide information for rendering the fields necessary to input the
+ * character's ability and skill modifiers.
+ * @param {Character?} character - A character. If provided, the character's
+ *   statistics will be supplied as the initial value. If not, each field
+ *   will default to zero.
+ * @returns {{name: string, type: string, default: any}[]} - An array of
+ *   objects that provide the information necessary to render
+ */
+
+const characterForm = character => {
+  return [
+    { name: 'dnd5e-int', label: 'Intelligence', detail: 'Intelligence Ability Modifier', type: 'number', default: character?.dnd5e?.int || 0 },
+    { name: 'dnd5e-arcana', label: 'Arcana', detail: 'Intelligence (Arcana) Modifier', type: 'number', default: character?.dnd5e?.arcana || 0 },
+    { name: 'dnd5e-history', label: 'History', detail: 'Intelligence (History) Modifier', type: 'number', default: character?.dnd5e?.history || 0 },
+    { name: 'dnd5e-nature', label: 'Nature', detail: 'Intelligence (Nature) Modifier', type: 'number', default: character?.dnd5e?.nature || 0 },
+    { name: 'dnd5e-religion', label: 'Religion', detail: 'Intelligence (Religion) Modifier', type: 'number', default: character?.dnd5e?.religion || 0 }
+  ]
 }
 
 /**
@@ -124,8 +158,10 @@ const info = {
 
 export {
   info,
-  transformCharacterSchema,
   transformPageSchema,
+  transformCharacterSchema,
+  updateCharacter,
+  characterForm,
   onPageView,
   evaluate
 }
