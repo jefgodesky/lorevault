@@ -66,6 +66,31 @@ class Secret {
   }
 
   /**
+   * Reveal a secret to the characters indicated by the string `names`. This
+   * is a comma- or semicolon-separated list of names. Each could be just one
+   * character, if `name` is the name of a single character. It could be
+   * several characters who share the same name. It could be a whole group, if
+   * `name` is the name of a category.
+   * @param {string} names - A comma- or semicolon-separated list of names
+   *   indicating who you'd like to reveal the secret to.
+   * @param {{}} models - An object that passes the necessary Mongoose models.
+   * @param {Model} models.Character - The Character model.
+   * @param {Model} models.Page - The Page model.
+   * @returns {Promise<void>} - A Promise that resolves when the secret has been
+   *   revealed to the characters indicated by the `names` argument.
+   */
+
+  async revealToNames (names, models) {
+    const { Page } = models
+    const n = names.split(/[,;]/).map(n => n.trim())
+    for (const name of n) {
+      await this.revealToCategory(name, models)
+      const pages = await Page.findByTitle(name, 'Loremaster')
+      for (const page of pages) await this.revealToPage(page, models)
+    }
+  }
+
+  /**
    * Checks if a character knows this secret.
    * @param {User|Character|ObjectId|string} char - The character that we're
    *   checking.
