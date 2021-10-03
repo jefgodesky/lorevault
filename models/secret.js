@@ -41,6 +41,31 @@ class Secret {
   }
 
   /**
+   * Reveal the secret to each character with a page in a given category. This
+   * is applied recursively, so that character in any category descended from
+   * this one also learns the secret.
+   * @param {string} name - The name of the category that the secret should be
+   *   revealed to.
+   * @param {{}} models - An object that passes the necessary Mongoose models.
+   * @param {Model} models.Character - The Character model.
+   * @param {Model} models.Page - The Page model.
+   * @returns {Promise<void>} - A Promise that resolves once the secret has
+   *   been revealed to all characters in the category or any of its
+   *   subcategories.
+   */
+
+  async revealToCategory (name, models) {
+    const { Page } = models
+    const { subcategories, pages } = await Page.findMembers(name, 'Loremaster')
+    for (const categorization of subcategories) {
+      const { title } = categorization.page
+      const name = title.startsWith('Category:') ? title.substring(9) : title
+      await this.revealToCategory(name, models)
+    }
+    for (const categorization of pages) await this.revealToPage(categorization.page, models)
+  }
+
+  /**
    * Checks if a character knows this secret.
    * @param {User|Character|ObjectId|string} char - The character that we're
    *   checking.

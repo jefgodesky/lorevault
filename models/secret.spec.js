@@ -96,6 +96,42 @@ describe('Secret', () => {
       })
     })
 
+    describe('revealToCategory', () => {
+      it('reveals the secret to every character in a category', async () => {
+        const Page = model('Page')
+        const Character = model('Character')
+        const { user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const c1 = await Page.findById(user.characters.list[0].page)
+        const c2 = await Page.findById(user.characters.list[1].page)
+        await c1.update({ title: 'Character 1', body: '[[Category:Adventuring Party]]' }, user)
+        await c2.update({ title: 'Character 2', body: '[[Category:Adventuring Party]]' }, user)
+        const secret = new Secret({ knowers: [] }, codenamer)
+        await secret.revealToCategory('Adventuring Party', { Page, Character })
+        const actual = user.characters.list.map(c => secret.knows(c))
+        expect(actual).to.be.eql([true, true])
+      })
+
+      it('is recursive', async () => {
+        const Page = model('Page')
+        const Character = model('Character')
+        const { user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        await Page.create({ title: 'Category:Adventurers', body: 'These are adventurers.' }, user)
+        await Page.create({ title: 'Category:Fighting Men', body: '[[Category:Adventurers]]' }, user)
+        await Page.create({ title: 'Category:Magic Users', body: '[[Category:Adventurers]]' }, user)
+        await Page.create({ title: 'Category:Sneaky Guys', body: '[[Category:Adventurers]]' }, user)
+        const fighter = await Page.create({ title: 'Fighting Man', body: '[[Category:Fighting Men]]' }, user)
+        const mage = await Page.create({ title: 'Magus Magickman', body: '[[Category:Magic Users]]' }, user)
+        const thief = await Page.create({ title: 'Sneak Sneakersson', body: '[[Category:Sneaky Guys]]' }, user)
+        user.claim(fighter)
+        user.claim(mage)
+        user.claim(thief)
+        const secret = new Secret({ knowers: [] }, codenamer)
+        await secret.revealToCategory('Adventurers', { Page, Character })
+        const actual = user.characters.list.map(c => secret.knows(c))
+        expect(actual).to.be.eql([false, false, true, true, true])
+      })
+    })
+
     describe('knows', () => {
       it('tells you that a character knows', async () => {
         const { user } = await createTestDocs(model)
