@@ -2,12 +2,11 @@ import { match } from '../utils.js'
 
 class Secret {
   constructor (obj = {}, codenamer) {
-    const { codename = codenamer(), content = '', conditions = '', knowers = [], checked = [] } = obj
+    const { codename = codenamer(), content = '', conditions = '', knowers = [] } = obj
     this.codename = codename
     this.content = content
     this.conditions = conditions
     this.knowers = knowers
-    this.checked = checked
   }
 
   /**

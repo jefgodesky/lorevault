@@ -55,16 +55,6 @@ describe('Secret', () => {
       const { knowers } = new Secret({}, codenamer)
       expect(knowers).to.be.eql([])
     })
-
-    it('takes checked', () => {
-      const { checked } = new Secret({ checked: [1, 2, 3] }, codenamer)
-      expect(checked).to.be.eql([1, 2, 3])
-    })
-
-    it('defaults checked to an empty array', () => {
-      const { checked } = new Secret({}, codenamer)
-      expect(checked).to.be.eql([])
-    })
   })
 
   describe('Methods', () => {
@@ -201,7 +191,6 @@ describe('Secret', () => {
         expect(actual[0].content).to.be.equal('the terrible secret')
         expect(actual[0].conditions).to.be.equal('')
         expect(actual[0].knowers).to.be.eql([])
-        expect(actual[0].checked).to.be.eql([])
       })
 
       it('parses many secrets', () => {
