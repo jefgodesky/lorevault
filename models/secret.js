@@ -31,6 +31,8 @@ class Secret {
    */
 
   knows (char) {
+    if (typeof char === 'string' && char.toLowerCase() === 'anonymous') return false
+    if (typeof char === 'string' && char.toLowerCase() === 'loremaster') return true
     return this.knowers.includes(Secret.getCharID(char))
   }
 

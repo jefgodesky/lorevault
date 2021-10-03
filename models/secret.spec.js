@@ -101,6 +101,16 @@ describe('Secret', () => {
         const secret = new Secret({}, codenamer)
         expect(secret.knows(active)).to.be.false
       })
+
+      it('tells you that loremaster always knows', () => {
+        const secret = new Secret({}, codenamer)
+        expect(secret.knows('Loremaster')).to.be.true
+      })
+
+      it('tells you that anonymous never knows', () => {
+        const secret = new Secret({}, codenamer)
+        expect(secret.knows('Anonymous')).to.be.false
+      })
     })
   })
 
