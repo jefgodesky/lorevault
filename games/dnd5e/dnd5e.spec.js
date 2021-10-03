@@ -1,89 +1,103 @@
 import { expect } from 'chai'
-import {info, roll, check, checkSecret} from './dnd5e.js'
+import { info, transformCharacterSchema, transformPageSchema, onPageView, evaluate } from './dnd5e.js'
 
 describe('dnd5e', () => {
   describe('info', () => {
     it('exports basic game info', () => {
-      const { id, name, edition } = info
-      expect([id, name, edition]).to.be.eql(['dnd5e', 'Dungeons & Dragons',  '5th edition'])
+      const {id, name, edition} = info
+      expect([id, name, edition]).to.be.eql(['dnd5e', 'Dungeons & Dragons', '5th edition'])
+    })
+  })
+
+  describe('transformCharacterSchema', () => {
+    it('adds your intelligence modifier to the character schema', () => {
+      const actual = transformCharacterSchema({})
+      expect(actual.dnd5e.int.type).to.be.eql(Number)
+      expect(actual.dnd5e.int.default).to.be.equal(0)
     })
 
-    it('exports stat ID\'s', () => {
-      const { sheet } = info
-      expect(sheet.map(s => s.id)).to.be.eql(['int', 'arcana', 'history', 'nature', 'religion'])
+    it('adds your arcana modifier to the character schema', () => {
+      const actual = transformCharacterSchema({})
+      expect(actual.dnd5e.arcana.type).to.be.eql(Number)
+      expect(actual.dnd5e.arcana.default).to.be.equal(0)
     })
 
-    it('exports stat labels', () => {
-      const { sheet } = info
-      expect(sheet.map(s => s.label)).to.be.eql(['Intelligence', 'Arcana', 'History', 'Nature', 'Religion'])
+    it('adds your history modifier to the character schema', () => {
+      const actual = transformCharacterSchema({})
+      expect(actual.dnd5e.history.type).to.be.eql(Number)
+      expect(actual.dnd5e.history.default).to.be.equal(0)
     })
 
-    it('exports detailed stat labels', () => {
-      const { sheet } = info
-      const expected = [
-        'Intelligence Ability Modifier',
-        'Intelligence (Arcana) Modifier',
-        'Intelligence (History) Modifier',
-        'Intelligence (Nature) Modifier',
-        'Intelligence (Religion) Modifier'
+    it('adds your nature modifier to the character schema', () => {
+      const actual = transformCharacterSchema({})
+      expect(actual.dnd5e.nature.type).to.be.eql(Number)
+      expect(actual.dnd5e.nature.default).to.be.equal(0)
+    })
+
+    it('adds your religion modifier to the character schema', () => {
+      const actual = transformCharacterSchema({})
+      expect(actual.dnd5e.religion.type).to.be.eql(Number)
+      expect(actual.dnd5e.religion.default).to.be.equal(0)
+    })
+  })
+
+  describe('transformPageSchema', () => {
+    it('adds an array to the schema for tracking character rolls', () => {
+      const actual = transformPageSchema({})
+      expect(actual.dnd5e).to.have.lengthOf(1)
+      expect(actual.dnd5e[0].character.type.schemaName).to.be.equal('ObjectId')
+      expect(actual.dnd5e[0].character.ref).to.be.equal('Character')
+      expect(actual.dnd5e[0].int).to.be.eql(Number)
+      expect(actual.dnd5e[0].arcana).to.be.eql(Number)
+      expect(actual.dnd5e[0].history).to.be.eql(Number)
+      expect(actual.dnd5e[0].nature).to.be.eql(Number)
+      expect(actual.dnd5e[0].religion).to.be.eql(Number)
+    })
+  })
+
+  describe('onPageView', () => {
+    it('rolls dice and records the results', async () => {
+      const page = { dnd5e: [] }
+      page.dnd5e.addToSet = row => page.dnd5e = [...page.dnd5e, row]
+      const char = { _id: '12345', dnd5e: { int: 0, arcana: 0, history: 0, nature: 0, religion: 0 } }
+      onPageView(page, char)
+      expect(page.dnd5e).to.have.lengthOf(1)
+      expect(page.dnd5e[0].character).to.be.eql(char._id)
+    })
+
+    it('doesn\'t roll twice', async () => {
+      const page = { dnd5e: [] }
+      page.dnd5e.addToSet = row => page.dnd5e = [...page.dnd5e, row]
+      const char = { _id: '12345', dnd5e: { int: 0, arcana: 0, history: 0, nature: 0, religion: 0 } }
+      onPageView(page, char)
+      const { int, arcana, history, nature, religion } = page.dnd5e[0]
+      onPageView(page, char)
+      expect(page.dnd5e).to.have.lengthOf(1)
+      expect(page.dnd5e[0].int).to.be.equal(int)
+      expect(page.dnd5e[0].arcana).to.be.equal(arcana)
+      expect(page.dnd5e[0].history).to.be.equal(history)
+      expect(page.dnd5e[0].nature).to.be.equal(nature)
+      expect(page.dnd5e[0].religion).to.be.equal(religion)
+    })
+  })
+
+  describe('evaluate', () => {
+    it('evaluates intelligence ability checks', () => {
+      const page = { dnd5e: [{ character: '12345', int: 10, arcana: 10, history: 10, nature: 10, religion: 10 }] }
+      const character = { _id: '12345', dnd5e: { int: 0, arcana: 0, history: 0, nature: 0, religion: 0 } }
+      const actual = [
+        evaluate('Intelligence DC 8', { page, character }),
+        evaluate('Intelligence DC 12', { page, character }),
+        evaluate('Intelligence (Arcana) DC 8', { page, character }),
+        evaluate('Intelligence (Arcana) DC 12', { page, character }),
+        evaluate('Intelligence (History) DC 8', { page, character }),
+        evaluate('Intelligence (History) DC 12', { page, character }),
+        evaluate('Intelligence (Nature) DC 8', { page, character }),
+        evaluate('Intelligence (Nature) DC 12', { page, character }),
+        evaluate('Intelligence (Religion) DC 8', { page, character }),
+        evaluate('Intelligence (Religion) DC 12', { page, character })
       ]
-      expect(sheet.map(s => s.detail)).to.eql(expected)
-    })
-
-    it('exports stat types', () => {
-      const { sheet } = info
-      expect(sheet.map(s => s.type)).to.be.eql([Number, Number, Number, Number, Number])
-    })
-
-    it('exports default values', () => {
-      const { sheet } = info
-      expect(sheet.map(s => s.default)).to.be.eql([0, 0, 0, 0, 0])
-    })
-  })
-
-  describe('roll', () => {
-    it('rolls 1d20', () => {
-      const res = roll()
-      expect(res).to.be.least(1)
-      expect(res).to.be.most(20)
-    })
-
-    it('adds a modifier', () => {
-      const res = roll({ modifier: 3 })
-      expect(res).to.be.least(4)
-      expect(res).to.be.most(23)
-    })
-
-    it('can set a floor', () => {
-      const res = roll({ floor: 10 })
-      expect(res).to.be.least(10)
-      expect(res).to.be.most(20)
-    })
-  })
-
-  describe('check', () => {
-    it('returns true if you roll higher than or equal to the DC', () => {
-      expect(check(1)).to.be.true
-    })
-
-    it('returns false if you roll lower than the DC', () => {
-      expect(check(21)).to.be.false
-    })
-  })
-
-  describe('checkSecret', () => {
-    it('returns true if you should learn the secret', () => {
-      const char = { dnd5e: { int: 3 } }
-      const secret = '[Intelligence DC 3]'
-      const match = secret.match(info.sheet[0].regex)
-      expect(checkSecret(info.sheet[0], match, char)).to.be.true
-    })
-
-    it('returns false if you should not learn the secret', () => {
-      const char = { dnd5e: { int: 3 } }
-      const secret = '[Intelligence DC 24]'
-      const match = secret.match(info.sheet[0].regex)
-      expect(checkSecret(info.sheet[0], match, char)).to.be.false
+      expect(actual).to.be.eql([ true, false, true, false, true, false, true, false, true, false ])
     })
   })
 })
