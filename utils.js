@@ -271,6 +271,25 @@ const getS3 = () => {
   return new aws.S3()
 }
 
+/**
+ * Load information about games specified in the configuration.
+ * @returns {Promise<{}>} - A Promise that resolves with an object that
+ *   provides information about the games specified in the configuration.
+ *   Each game's ID is the property to an object with its information. Core
+ *   information for each game can be found in its `info` property, such as
+ *   its identifier (`id`), name (`name`), edition (`edition`), and character
+ *   sheet (`sheet`).
+ */
+
+const loadGames = async () => {
+  const games = {}
+  for (const game of config.games) {
+    const rules = await import(`./games/${game}/${game}.js`)
+    games[game] = rules
+  }
+  return games
+}
+
 export {
   pickRandomNum,
   pickRandom,
@@ -286,5 +305,6 @@ export {
   isInSecret,
   indexOfRegExp,
   alphabetize,
-  getS3
+  getS3,
+  loadGames
 }

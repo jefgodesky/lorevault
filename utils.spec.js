@@ -17,7 +17,8 @@ import {
   isInSecret,
   indexOfRegExp,
   alphabetize,
-  getS3
+  getS3,
+  loadGames
 } from './utils.js'
 
 describe('pickRandomNum', () => {
@@ -262,5 +263,12 @@ describe('getS3', () => {
   it('returns an S3 object', () => {
     const actual = getS3()
     expect(typeof actual.deleteObject).to.be.equal('function')
+  })
+})
+
+describe('loadGames', () => {
+  it('returns information about each game', async () => {
+    const games = await loadGames()
+    expect(games.dnd5e.info.sheet.length).to.be.equal(5)
   })
 })
