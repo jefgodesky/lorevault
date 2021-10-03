@@ -22,6 +22,25 @@ class Secret {
   }
 
   /**
+   * Reveal a secret to the character associated with a page.
+   * @param {Page} page - The page for the character that the secret is to be
+   *   revealed to.
+   * @param {{}} models - An object that passes the necessary Mongoose models.
+   * @param {Model} models.Character - The Character model.
+   * @returns {Promise<void>} - A Promise that resolves when the secret has
+   *   been revealed to the character associated with the given page. If the
+   *   given page does not have any character associated with it, then the
+   *   promise resolves without doing anything.
+   */
+
+  async revealToPage (page, models) {
+    const { Character } = models
+    if (Character.collection.modelName !== 'Character') return
+    const char = await Character.getCharacter(page)
+    if (char) this.reveal(char)
+  }
+
+  /**
    * Checks if a character knows this secret.
    * @param {User|Character|ObjectId|string} char - The character that we're
    *   checking.

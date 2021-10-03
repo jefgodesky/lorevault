@@ -77,6 +77,25 @@ describe('Secret', () => {
       })
     })
 
+    describe('revealToPage', async () => {
+      it('reveals to the page\'s character', async () => {
+        const Character = model('Character')
+        const { user } = await createTestDocs(model)
+        const { active } = user.characters
+        const secret = new Secret({ knowers: [] }, codenamer)
+        await secret.revealToPage(active.page, { Character })
+        expect(secret.knowers).to.include(active._id.toString())
+      })
+
+      it('does nothing if the page doesn\'t have a character', async () => {
+        const Character = model('Character')
+        const { page } = await createTestDocs(model)
+        const secret = new Secret({ knowers: [] }, codenamer)
+        await secret.revealToPage(page, { Character })
+        expect(secret.knowers).to.have.lengthOf(0)
+      })
+    })
+
     describe('knows', () => {
       it('tells you that a character knows', async () => {
         const { user } = await createTestDocs(model)
