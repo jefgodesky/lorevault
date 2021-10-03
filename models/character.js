@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 const { Schema, model } = mongoose
 
+import { loadGames } from '../utils.js'
 import config from '../config/index.js'
 
 /**
@@ -13,10 +14,10 @@ import config from '../config/index.js'
  */
 
 const addGames = async def => {
-  for (const game of config.games) {
-    const { info } = await import(`../games/${game}/${game}.js`)
+  const games = await loadGames()
+  for (const game of Object.keys(games)) {
     def[game] = {}
-    for (const stat of info.sheet) {
+    for (const stat of games[game].info.sheet) {
       def[game][stat.id] = {
         type: stat.type,
         default: stat.default
