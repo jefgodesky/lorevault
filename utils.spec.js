@@ -18,7 +18,8 @@ import {
   indexOfRegExp,
   alphabetize,
   getS3,
-  loadGames
+  loadGames,
+  transformSchema
 } from './utils.js'
 
 describe('pickRandomNum', () => {
@@ -270,5 +271,22 @@ describe('loadGames', () => {
   it('returns information about each game', async () => {
     const games = await loadGames()
     expect(games.dnd5e.info.sheet.length).to.be.equal(5)
+  })
+})
+
+describe('transformSchema', () => {
+  it('transforms a Character schema', async () => {
+    const actual = await transformSchema({}, 'Character')
+    expect(JSON.stringify(actual)).not.to.be.equal(JSON.stringify({}))
+  })
+
+  it('transforms a Page schema', async () => {
+    const actual = await transformSchema({}, 'Page')
+    expect(JSON.stringify(actual)).not.to.be.equal(JSON.stringify({}))
+  })
+
+  it('does nothing to anything else', async () => {
+    const actual = await transformSchema({}, 'Nope')
+    expect(JSON.stringify(actual)).to.be.equal(JSON.stringify({}))
   })
 })

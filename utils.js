@@ -290,6 +290,29 @@ const loadGames = async () => {
   return games
 }
 
+/**
+ * Apply the correct transformation methods to a schema from each game
+ * specified in the configuration.
+ * @param {{}} schema - The schema to be transformed.
+ * @param {string} type - The type of schema being transformed. Valid options
+ *   are `Character` or `Page`.
+ * @returns {Promise<{}>} - A Promise that resolves with the transformed
+ *   schema. If `type` is not a valid option, the Promise resolves with the
+ *   original schema, unchanged.
+ */
+
+const transformSchema = async (schema, type) => {
+  const games = await loadGames()
+  for (const game of Object.keys(games)) {
+    if (type === 'Character') {
+      schema = games[game].transformCharacterSchema(schema)
+    } else if (type === 'Page') {
+      schema = games[game].transformPageSchema(schema)
+    }
+  }
+  return schema
+}
+
 export {
   pickRandomNum,
   pickRandom,
@@ -306,5 +329,6 @@ export {
   indexOfRegExp,
   alphabetize,
   getS3,
-  loadGames
+  loadGames,
+  transformSchema
 }
