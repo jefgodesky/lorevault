@@ -59,15 +59,6 @@ describe('getPage', () => {
     expect(req.viewOpts.file).to.be.equal('<a href="https://example.com/test.txt" class="download">\n<span class="name">Test Page</span>\n<small>plain/text; 123.5 kB</small>\n</a>')
   })
 
-  it('checks the page\'s secrets if you\'re reading the page', async () => {
-    const { user } = await createTestDocs(model, '||::Wombat:: [Intelligence (Arcana) DC 10] This is a secret.||')
-    const req = { originalUrl: '/test-page', user, viewOpts: {} }
-    await getPage(req, {}, () => {})
-    const { active } = user.characters
-    const { checked } = req.viewOpts.page.secrets.list[0]
-    expect(checked).to.contain(active._id.toString())
-  })
-
   it('won\'t check a loremaster', async () => {
     const { loremaster } = await createTestDocs(model, '||::Wombat:: [Intelligence (Arcana) DC 10] This is a secret.||')
     const req = { originalUrl: '/test-page', user: loremaster, viewOpts: {} }
