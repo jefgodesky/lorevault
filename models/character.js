@@ -43,16 +43,6 @@ CharacterSchema.methods.update = async function (page, player, stats, tags = [])
   }
   await this.save()
   return this
-
-  /**for (const game of config.games) {
-    const { info } = await import(`../games/${game}/${game}.js`)
-    for (const stat of info.sheet) {
-      const s = stats ? stats[`${game}-${stat.id}`] : null
-      const isNum = stat.type === Number
-      const isValid = !s ? false : isNum ? !isNaN(parseInt(s)) : true
-      if (isValid) this[game][stat.id] = isNum ? parseInt(s) : s
-    }
-  }**/
 }
 
 /**
