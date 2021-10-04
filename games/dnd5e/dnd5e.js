@@ -86,11 +86,11 @@ const updateCharacter = (character, update) => {
 
 const characterForm = character => {
   return [
-    { name: 'dnd5e-int', label: 'Intelligence', detail: 'Intelligence Ability Modifier', type: 'number', default: character?.dnd5e?.int || 0 },
-    { name: 'dnd5e-arcana', label: 'Arcana', detail: 'Intelligence (Arcana) Modifier', type: 'number', default: character?.dnd5e?.arcana || 0 },
-    { name: 'dnd5e-history', label: 'History', detail: 'Intelligence (History) Modifier', type: 'number', default: character?.dnd5e?.history || 0 },
-    { name: 'dnd5e-nature', label: 'Nature', detail: 'Intelligence (Nature) Modifier', type: 'number', default: character?.dnd5e?.nature || 0 },
-    { name: 'dnd5e-religion', label: 'Religion', detail: 'Intelligence (Religion) Modifier', type: 'number', default: character?.dnd5e?.religion || 0 }
+    { id: 'dnd5e-int', label: 'Intelligence', detail: 'Intelligence Ability Modifier', type: 'number', val: character?.dnd5e?.int || 0 },
+    { id: 'dnd5e-arcana', label: 'Arcana', detail: 'Intelligence (Arcana) Modifier', type: 'number', val: character?.dnd5e?.arcana || 0 },
+    { id: 'dnd5e-history', label: 'History', detail: 'Intelligence (History) Modifier', type: 'number', val: character?.dnd5e?.history || 0 },
+    { id: 'dnd5e-nature', label: 'Nature', detail: 'Intelligence (Nature) Modifier', type: 'number', val: character?.dnd5e?.nature || 0 },
+    { id: 'dnd5e-religion', label: 'Religion', detail: 'Intelligence (Religion) Modifier', type: 'number', val: character?.dnd5e?.religion || 0 }
   ]
 }
 
