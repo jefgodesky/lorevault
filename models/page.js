@@ -17,7 +17,8 @@ import {
   saveBlocks,
   restoreBlocks,
   getReadableFileSize,
-  getS3
+  getS3,
+  transformSchema
 } from '../utils.js'
 
 import config from '../config/index.js'
@@ -58,7 +59,7 @@ const SecretSchema = new Schema({
   }]
 })
 
-const PageSchema = new Schema({
+const PageSchema = new Schema(await transformSchema({
   title: String,
   path: {
     type: String,
@@ -114,7 +115,7 @@ const PageSchema = new Schema({
     strength: 1,
     numericOrdering: true
   }
-})
+}, 'Page'))
 
 PageSchema.plugin(slugger)
 
