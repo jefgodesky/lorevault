@@ -523,35 +523,6 @@ describe('Page', () => {
       })
     })
 
-    describe('checkSecrets', () => {
-      it('reveals secrets to characters according to rules set by game modules', async () => {
-        const { page, other } = await createTestDocs(model, '||::Wombat:: [Intelligence DC 1] This is a secret.||')
-        const charPage = await Page.create({ title: 'New Character', body: 'This is about New Character.' }, other)
-        await other.claim(charPage)
-        const { active } = other.characters
-        await page.checkSecrets(active)
-        expect(page.secrets.list[0].knowers).to.include(active._id)
-      })
-
-      it('doesn\'t reveal secrets to characters according to rules set by game modules', async () => {
-        const { page, other } = await createTestDocs(model, '||::Wombat:: [Intelligence DC 21] This is a secret.||')
-        const charPage = await Page.create({ title: 'New Character', body: 'This is about New Character.' }, other)
-        await other.claim(charPage)
-        const { active } = other.characters
-        await page.checkSecrets(active)
-        expect(page.secrets.list[0].knowers).not.to.include(active._id)
-      })
-
-      it('adds the character to the checked list regardless', async () => {
-        const { page, other } = await createTestDocs(model, '||::Wombat:: [Intelligence DC 10] This is a secret.||')
-        const charPage = await Page.create({ title: 'New Character', body: 'This is about New Character.' }, other)
-        await other.claim(charPage)
-        const { active } = other.characters
-        await page.checkSecrets(active)
-        expect(page.secrets.list[0].checked).to.include(active._id)
-      })
-    })
-
     describe('reveal', () => {
       it('reveals a secret to a character', async () => {
         const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
@@ -777,15 +748,6 @@ describe('Page', () => {
         await page.reveal(pov, 'Wombat')
         const expected = `This is the updated text. <span class="secret" data-codename="Wombat">This is a secret. <a href="/test-page/reveal/Wombat">[Reveal]</a></span>`
         const actual = await page.write({ pov: user.getPOV() })
-        expect(actual).to.be.equal(expected)
-      })
-
-      it('strips out game tags', async () => {
-        const { page, user } = await createTestDocs(model)
-        await page.update({ title: 'Test Page', body: 'This is the updated text. ||[Intelligence DC 10] This is a secret.||' }, user)
-        const codename = page.secrets.list[0].codename
-        const expected = `This is the updated text. <span class="secret" data-codename="${codename}">This is a secret. <a href="/test-page/reveal/${codename}">[Reveal]</a></span>`
-        const actual = await page.write({ pov: 'Loremaster' })
         expect(actual).to.be.equal(expected)
       })
 
@@ -1274,7 +1236,7 @@ describe('Page', () => {
       it('renders the secret', async () => {
         const { page, user } = await createTestDocs(model, '||::Wombat:: [Intelligence (Arcana) DC 20] This is a secret.||')
         const actual = await page.renderSecret('Wombat', user.getPOV())
-        expect(actual.render).to.be.equal('This is a secret.')
+        expect(actual.render).to.be.equal('[Intelligence (Arcana) DC 20] This is a secret.')
       })
     })
   })

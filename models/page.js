@@ -398,31 +398,6 @@ PageSchema.methods.getSecrets = function (pov = 'Anonymous') {
 }
 
 /**
- * Use game modules to determine if any secrets should be revealed to this
- * character. Each character only has one chance to check each secret.
- * @param {Character} char - The character being checked.
- * @returns {Promise<void>} - A Promise that resolves once all checks have been
- *   made and recorded, and the document has been saved to the database.
- */
-
-PageSchema.methods.checkSecrets = async function (char) {
-  for (const secret of this.secrets.list) {
-    if (secret.checked.includes(char._id)) continue
-    for (const game of config.games) {
-      const { info, checkSecret } = await import(`../games/${game}/${game}.js`)
-      for (const stat of info.sheet) {
-        const match = secret.content.match(stat.regex)
-        if (match && checkSecret(stat, match, char)) {
-          await this.reveal(char, secret.codename)
-        }
-      }
-    }
-    secret.checked.addToSet(char._id)
-  }
-  await this.save()
-}
-
-/**
  * Reveal a secret to a character.
  * @param {Character|Schema.Types.ObjectId|string} char - The character that
  *   you would like to reveal the secret to (or hens ID, or the string
@@ -818,13 +793,6 @@ PageSchema.methods.renderSecret = async function (codename, pov = 'Anonymous') {
   const secret = this.findSecret(codename)
   if (!secret || !this.knows(pov, codename)) return null
   secret.render = secret.content
-  for (const game of config.games) {
-    const { info } = await import(`../games/${game}/${game}.js`)
-    for (const stat of info.sheet) {
-      const matches = match(secret.render, stat.regex)
-      for (const m of matches) secret.render = secret.render.replace(m.str, '').trim()
-    }
-  }
   return secret
 }
 
