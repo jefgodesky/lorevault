@@ -203,6 +203,46 @@ class Secret {
     }
     return secrets
   }
+
+  /**
+   * Render the secrets in a string.
+   * @param {string} str - The string to render.
+   * @param {Secret[]} secrets - An array of the secrets in the string.
+   * @param {{}} [params = {}] - An object providing parameters for how the
+   *   string should be rendered.
+   * @param {Character|string} [params.pov = 'Anonymous'] - The point of view
+   *   from which the string should be rendered. If this is the string
+   *   `Loremaster,` then all secrets are shown. If this is the string
+   *   `Anonymous` (which it is by default), then no secrets are shown. If
+   *   given a Character, only those secrets which are known to that character
+   *   are shown.
+   * @param {string} [params.mode = 'reading'] - The mode in which we are
+   *   rendering the string. In `editing` mode, codenames are used to create
+   *   placeholders for where secrets appear in the text for points of view
+   *   that are not privy to those secrets. In `reading` mode, no indication is
+   *   made of any secrets that the point of view is not privy to. Acceptable
+   *   strings for this parameter are `editing` or `reading`.
+   *   (Default: `reading`)
+   * @return {string} - The rendered string.
+   */
+
+  static render (str, secrets, params = {}) {
+    const { pov = 'Anonymous', mode = 'reading' } = params
+    for (const secret of secrets) {
+      const { codename } = secret
+      const knows = secret.knows(pov)
+      const match = str.match(new RegExp(`<secret.*? codename="${codename}".*?>[\\s\\S]*?<\\/secret>`))
+      let replacement = ''
+      if (mode === 'editing') {
+        replacement = knows ? secret.render('full') : secret.render('placeholder')
+      } else {
+        replacement = knows ? secret.render('reading') : ''
+      }
+      if (match && match.length > 0) str = str.replace(match[0], replacement)
+    }
+
+    return str
+  }
 }
 
 export default Secret

@@ -344,5 +344,35 @@ describe('Secret', () => {
         expect(actual[0].conditions).to.be.equal('[Volaarun-speaker]')
       })
     })
+
+    describe('render', () => {
+      it('removes secrets that you don\'t know', () => {
+        const str = '<secret codename="Wombat">This is a secret.</secret>'
+        const secrets = Secret.parse(str, codenamer)
+        const actual = Secret.render(str, secrets)
+        expect(actual).to.be.equal('')
+      })
+
+      it('renders secrets that you know', () => {
+        const str = '<secret codename="Wombat">This is a secret.</secret>'
+        const secrets = Secret.parse(str, codenamer)
+        const actual = Secret.render(str, secrets, { pov: 'Loremaster' })
+        expect(actual).to.be.equal('This is a secret.')
+      })
+
+      it('leaves placeholders for secrets that you don\'t know in editing mode', () => {
+        const str = '<secret codename="Wombat">This is a secret.</secret>'
+        const secrets = Secret.parse(str, codenamer)
+        const actual = Secret.render(str, secrets, { mode: 'editing' })
+        expect(actual).to.be.equal('<secret codename="Wombat"></secret>')
+      })
+
+      it('fully renders secrets that you know in editing mode', () => {
+        const str = '<secret codename="Wombat">This is a secret.</secret>'
+        const secrets = Secret.parse(str, codenamer)
+        const actual = Secret.render(str, secrets, { pov: 'Loremaster', mode: 'editing' })
+        expect(actual).to.be.equal(str)
+      })
+    })
   })
 })
