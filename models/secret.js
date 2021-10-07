@@ -1,4 +1,4 @@
-import { match } from '../utils.js'
+import { match, loadGames } from '../utils.js'
 
 class Secret {
   constructor (obj = {}, codenamer) {
@@ -126,6 +126,27 @@ class Secret {
     if (placeholder) return `<secret codename="${codename}"></secret>`
     if (reading) return content
   }
+
+  /**
+   * Evaluate a condition using the rules of each game specified in the
+   * configuration.
+   * @param {string} condition - The condition being evaluated.
+   * @param {{}} context - The context in which the condition should
+   *   be evaluated.
+   * @param {Character} context.character - The character that we're evaluating
+   *   the secret for.
+   * @param {Page} context.page - The page that the secret appears on.
+   * @returns {Promise<boolean>} - `true` if one or more of the games specified
+   *   in the configuration returns `true`, or `false` if they all return
+   *   `false`.
+   */
+
+  async evaluateGames (condition, context) {
+    const games = await loadGames()
+    const checks = Object.keys(games).map(game => games[game].evaluate(condition, context))
+    return checks.reduce((acc, curr) => acc || curr, false)
+  }
+
 
   /**
    * This method normalizes unexpected input to the string representation of a

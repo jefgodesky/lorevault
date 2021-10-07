@@ -262,6 +262,16 @@ describe('Secret', () => {
         expect(secret.render('reading')).to.be.equal('Hello world!')
       })
     })
+
+    describe('evaluateGames', () => {
+      it('returns true if any game returns true', async () => {
+        const secret = new Secret({ codename: 'Wombat', content: 'Hello world!' })
+        const page = { dnd5e: [{ character: '12345', int: 10, arcana: 10, history: 10, nature: 10, religion: 10 }] }
+        const character = { _id: '12345', dnd5e: { int: 0, arcana: 0, history: 0, nature: 0, religion: 0 } }
+        const actual = await secret.evaluateGames('Intelligence DC 8', { page, character })
+        expect(actual).to.be.true
+      })
+    })
   })
 
   describe('Statics', () => {
