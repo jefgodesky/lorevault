@@ -290,11 +290,11 @@ describe('Secret', () => {
         expect(secret.evaluateOtherSecret('Dingo', { page })).to.be.false
       })
 
-      it('returns true if the page has no such secret', () => {
+      it('returns false if the page has no such secret', () => {
         const secret = new Secret({ codename: 'Wombat', content: 'Hello world!' })
         const page = { secrets: [] }
         const character = { _id: '12345' }
-        expect(secret.evaluateOtherSecret('Dingo', { page, character })).to.be.true
+        expect(secret.evaluateOtherSecret('Dingo', { page, character })).to.be.false
       })
 
       it('returns false if the page has that secret but the character doesn\'t know it', () => {

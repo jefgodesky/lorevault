@@ -151,16 +151,14 @@ class Secret {
    * @param {Character} context.character - The character that we're evaluating
    *   the secret for.
    * @param {Page} context.page - The page that the secret appears on.
-   * @returns {boolean} - `true` if the character in this context already knows
-   *   the secret with the codename specified by the condition or the page has
-   *   no secret with that codename, or `false` if the page has a secret with
-   *   that codename but the character doesn't know it.
+   * @returns {boolean} - `true` if the page has a secret with this codename
+   *   and the character in this context knows it, or `false` if otherwise.
    */
 
   evaluateOtherSecret (condition, context) {
     const { page, character } = context
     if (!page || !character) return false
-    if (page.secrets.filter(s => s.codename === condition).length <= 0) return true
+    if (page.secrets.filter(s => s.codename === condition).length <= 0) return false
     return page.knows(character, condition)
   }
 
