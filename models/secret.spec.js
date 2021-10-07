@@ -263,6 +263,20 @@ describe('Secret', () => {
       })
     })
 
+    describe('evaluateTag', () => {
+      it('returns true if it\'s a tag that the character has', () => {
+        const secret = new Secret({ codename: 'Wombat', content: 'Hello world!' })
+        const character = { _id: '12345', tags: ['Test'] }
+        expect(secret.evaluateTag('Test', { character })).to.be.true
+      })
+
+      it('returns false if it isn\'t a tag that the character has', () => {
+        const secret = new Secret({ codename: 'Wombat', content: 'Hello world!' })
+        const character = { _id: '12345', tags: ['Test'] }
+        expect(secret.evaluateTag('Something else', { character })).to.be.false
+      })
+    })
+
     describe('evaluateGames', () => {
       it('returns true if any game returns true', async () => {
         const secret = new Secret({ codename: 'Wombat', content: 'Hello world!' })

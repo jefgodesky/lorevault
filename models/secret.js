@@ -128,6 +128,21 @@ class Secret {
   }
 
   /**
+   * Evaluate a condition based on a character's tags.
+   * @param {string} condition - The condition being evaluated.
+   * @param {{}} context - The context in which the condition should
+   *   be evaluated.
+   * @param {Character} context.character - The character that we're evaluating
+   *   the secret for.
+   * @returns {boolean} - `true` if the condition given is a tag that the
+   *   character in this context has, or `false` if it is not.
+   */
+
+  evaluateTag (condition, context) {
+    return context?.character?.tags?.includes(condition) || false
+  }
+
+  /**
    * Evaluate a condition using the rules of each game specified in the
    * configuration.
    * @param {string} condition - The condition being evaluated.
