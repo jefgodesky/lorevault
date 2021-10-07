@@ -143,6 +143,28 @@ class Secret {
   }
 
   /**
+   * Evaluates a condition based on whether a character already knows another
+   * secret on the page.
+   * @param {string} condition - The condition being evaluated.
+   * @param {{}} context - The context in which the condition should
+   *   be evaluated.
+   * @param {Character} context.character - The character that we're evaluating
+   *   the secret for.
+   * @param {Page} context.page - The page that the secret appears on.
+   * @returns {boolean} - `true` if the character in this context already knows
+   *   the secret with the codename specified by the condition or the page has
+   *   no secret with that codename, or `false` if the page has a secret with
+   *   that codename but the character doesn't know it.
+   */
+
+  evaluateOtherSecret (condition, context) {
+    const { page, character } = context
+    if (!page || !character) return false
+    if (page.secrets.filter(s => s.codename === condition).length <= 0) return true
+    return page.knows(character, condition)
+  }
+
+  /**
    * Evaluate a condition using the rules of each game specified in the
    * configuration.
    * @param {string} condition - The condition being evaluated.

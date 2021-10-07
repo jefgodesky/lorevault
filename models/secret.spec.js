@@ -277,6 +277,45 @@ describe('Secret', () => {
       })
     })
 
+    describe('evaluateOtherSecret', () => {
+      it('returns false if not given enough a page', () => {
+        const secret = new Secret({ codename: 'Wombat', content: 'Hello world!' })
+        const character = { _id: '12345' }
+        expect(secret.evaluateOtherSecret('Dingo', { character })).to.be.false
+      })
+
+      it('returns false if not given enough a character', () => {
+        const secret = new Secret({ codename: 'Wombat', content: 'Hello world!' })
+        const page = { secrets: [] }
+        expect(secret.evaluateOtherSecret('Dingo', { page })).to.be.false
+      })
+
+      it('returns true if the page has no such secret', () => {
+        const secret = new Secret({ codename: 'Wombat', content: 'Hello world!' })
+        const page = { secrets: [] }
+        const character = { _id: '12345' }
+        expect(secret.evaluateOtherSecret('Dingo', { page, character })).to.be.true
+      })
+
+      it('returns false if the page has that secret but the character doesn\'t know it', () => {
+        const s1 = new Secret({ codename: 'Wombat', content: 'This is a secret.' })
+        const s2 = new Secret({ codename: 'Armadillo', content: 'This is also a secret.' })
+        const page = { secrets: [s1, s2] }
+        page.knows = () => false
+        const character = { _id: '12345' }
+        expect(s1.evaluateOtherSecret('Armadillo', { page, character })).to.be.false
+      })
+
+      it('returns true if the page has that secret and the character knows it', () => {
+        const s1 = new Secret({ codename: 'Wombat', content: 'This is a secret.' })
+        const s2 = new Secret({ codename: 'Armadillo', content: 'This is also a secret.' })
+        const page = { secrets: [s1, s2] }
+        page.knows = () => true
+        const character = { _id: '12345' }
+        expect(s1.evaluateOtherSecret('Armadillo', { page, character })).to.be.true
+      })
+    })
+
     describe('evaluateGames', () => {
       it('returns true if any game returns true', async () => {
         const secret = new Secret({ codename: 'Wombat', content: 'Hello world!' })
