@@ -120,6 +120,9 @@ const onPageView = (page, char) => {
  * @param {string} condition - A string expression of a condition.
  * @param {{}} context - The context in which the condition should
  *   be evaluated.
+ * @param {Character} context.character - The character that we're evaluating
+ *   the secret for.
+ * @param {Page} context.page - The page that the secret appears on.
  * @returns {boolean} - `true` if the condition is true according to the rules
  *   of D&D 5E in the given context, or `false` if it is not (or if the
  *   condition has nothing to do with the rules of D&D 5E).
