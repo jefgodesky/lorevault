@@ -181,7 +181,7 @@ class Secret {
 
   async evaluateOtherPage (condition, context, models) {
     const { Page } = models
-    const page = await Page.find({ path: condition.substr(1) })
+    const page = await Page.findOne({ path: condition.substr(1) })
     if (!page) return false
     return page && page.knows(context.character)
   }
