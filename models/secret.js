@@ -165,6 +165,30 @@ class Secret {
   }
 
   /**
+   * Evaluates a condition based on whether or not the character knows about
+   * the page provided.
+   * @param {string} condition - The condition being evaluated.
+   * @param {{}} context - The context in which the condition should
+   *   be evaluated.
+   * @param {Character} context.character - The character that we're evaluating
+   *   the secret for.
+   * @param {{}} models - An object that passes the necessary Mongoose models.
+   * @param {Model} models.Page - The Page model.
+   * @returns {Promise<boolean>} - A Promise that resolves with `true` if the
+   *   condition provides the path of a page that exists and which the
+   *   character in this context knows about, or `false` if the condition does
+   *   not provide the path of any page, or if that page is a secret to the
+   *   character.
+   */
+
+  async evaluateOtherPage (condition, context, models) {
+    const { Page } = models
+    const page = await Page.find({ path: condition.substr(1) })
+    if (!page) return false
+    return page && page.knows(context.character)
+  }
+
+  /**
    * Evaluate a condition using the rules of each game specified in the
    * configuration.
    * @param {string} condition - The condition being evaluated.
