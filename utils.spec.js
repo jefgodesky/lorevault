@@ -222,7 +222,7 @@ describe('isInSecret', () => {
   })
 
   it('returns the codename of the secret that the match is in', () => {
-    const str = '||::Wombat:: This is a test.||'
+    const str = '<secret codename="Wombat">This is a test.</secret>'
     const actual = isInSecret(match(str, /test/)[0], str)
     expect(actual).to.be.equal('Wombat')
   })

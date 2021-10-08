@@ -212,10 +212,10 @@ const getReadableFileSize = bytes => {
 const isInSecret = (subj, body) => {
   const start = subj.index
   const end = start + subj.str.length
-  const secrets = match(body, /\|\|::.*?::\s*?.*?\|\|/m)
+  const secrets = match(body, /<secret[\s\S]*? codename="(.*?)"[\s\S]*?>([\s\S]*?)<\/secret>/im)
   for (const secret of secrets) {
     if (secret.index <= start && secret.index + secret.str.length >= end) {
-      const codenameMatch = secret.str.match(/::(.*?)::/)
+      const codenameMatch = secret.str.match(/\scodename="(.*?)"[ >]/)
       return codenameMatch && codenameMatch.length > 1 ? codenameMatch[1] : secret.str
     }
   }
