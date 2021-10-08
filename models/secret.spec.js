@@ -325,6 +325,18 @@ describe('Secret', () => {
         expect(actual).to.be.true
       })
     })
+
+    describe('evaluate', () => {
+      it('can evaluate complex logical conditions', async () => {
+        const Page = model('Page')
+        const secret = new Secret({ codename: 'Wombat', content: 'Hello world!', conditions: '[Intelligence DC 12]||([Tester]||[Armadillo])&&[/test]' })
+        const page = { dnd5e: [{ character: '12345', int: 10, arcana: 10, history: 10, nature: 10, religion: 10 }], secrets: [] }
+        page.knows = () => true
+        const character = { _id: '12345', dnd5e: { int: 0, arcana: 0, history: 0, nature: 0, religion: 0 }, tags: ['Tester'] }
+        const actual = await secret.evaluate({ page, character }, { Page })
+        expect(actual).to.be.false
+      })
+    })
   })
 
   describe('Statics', () => {

@@ -1,3 +1,4 @@
+import Parser from 'morph-expressions'
 import { match, loadGames } from '../utils.js'
 
 class Secret {
@@ -206,6 +207,39 @@ class Secret {
     return checks.reduce((acc, curr) => acc || curr, false)
   }
 
+  /**
+   * Evaluate a secret's conditions.
+   * @param {{}} context - The context in which the condition should
+   *   be evaluated.
+   * @param {Character} context.character - The character that we're evaluating
+   *   the secret for.
+   * @param {Page} context.page - The page that the secret appears on.
+   * @param {{}} models - An object that passes the necessary Mongoose models.
+   * @param {Model} models.Page - The Page model.
+   * @returns {Promise<boolean>} - A Promise that resolves with an evaluation
+   *   of the secret's conditions in the given context.
+   */
+
+  async evaluate (context, models) {
+    let expr = this.conditions
+    const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('')
+    const values = {}
+    const conditions = expr.match(/\[(.*?)\]/gm)
+    for (let i = 0; i < conditions.length; i++) {
+      const variable = alphabet[i]
+      const condition = conditions[i].substr(1, conditions[i].length - 2)
+      const evaluations = [
+        this.evaluateTag(condition, context),
+        this.evaluateOtherSecret(condition, context),
+        await this.evaluateGames(condition, context)
+      ]
+      if (condition.startsWith('/')) evaluations.push(await this.evaluateOtherPage(condition, context, models))
+      values[variable] = evaluations.reduce((acc, curr) => acc || curr, false)
+      expr = expr.replace(conditions[i], variable)
+    }
+    const parser = new Parser.default()
+    return parser.parseAndEval(expr, values)
+  }
 
   /**
    * This method normalizes unexpected input to the string representation of a
