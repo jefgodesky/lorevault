@@ -4,7 +4,7 @@ import mongoose from 'mongoose'
 const { model } = mongoose
 
 import { createTestDocs, codenamer } from '../test-utils.js'
-import assignCodenames from './assignCodenames.js'
+import Secret from '../models/secret.js'
 import renderLinks from './renderLinks.js'
 
 describe('renderLinks', () => {
@@ -58,8 +58,8 @@ describe('renderLinks', () => {
 
   it('returns the codename if the link is part of a secret', async () => {
     const { user } = await createTestDocs(model)
-    const str = '||::Wombat:: [[Test Page|Hello!]]||'
-    const { secrets } = await assignCodenames(str, codenamer)
+    const str = '<secret codename="Wombat">[[Test Page|Hello!]]</secret>>'
+    const secrets = Secret.parse(str, codenamer)
     const { links } = await renderLinks(str, secrets, user)
     expect(links[0].secret).to.be.equal('Wombat')
   })
