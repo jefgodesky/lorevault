@@ -368,18 +368,11 @@ PageSchema.methods.processSecrets = function (secrets, editor) {
  *   any of them. Given a Character object, whether or not you know the secret
  *   will depend on whether or not the given character is on the list of people
  *   who know this secret.
- * @returns {{codename: string, content: string, known: boolean}[]} - An array
- *   of the page's secrets. The `codename` property provides the codename used
- *   to identify the string. The `content` property provides the actual text of
- *   the secret. The `known` property is a boolean, which is `true` if the POV
- *   provided knows this secret, or `false` if hen does not.
+ * @returns {Secret[]} - An array of Secret instances with the page's secrets.
  */
 
 PageSchema.methods.getSecrets = function (pov = 'Anonymous') {
-  return this.secrets.map(secret => {
-    const { codename, content, knowers } = secret
-    return { codename, content, known: pov === 'Loremaster' || knowers.includes(pov?._id) }
-  })
+  return this.secrets.map(secret => new Secret(secret))
 }
 
 /**
