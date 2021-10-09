@@ -326,9 +326,7 @@ PageSchema.methods.findCodename = function () {
  */
 
 PageSchema.methods.findSecret = function (codename) {
-  const { existence, knowers } = this.secrets
-  if (!codename && existence) return { knowers }
-  return findOne(this.secrets.list, s => s.codename === codename)
+  return findOne(this.secrets, s => s.codename === codename)
 }
 
 /**
