@@ -428,53 +428,53 @@ describe('Page', () => {
     describe('processSecrets', () => {
       it('adds new secrets', async () => {
         const { page, user } = await createTestDocs(model)
-        await page.processSecrets({ Wombat: { content: 'This is a new secret.' } }, user)
+        await page.processSecrets([{ codename: 'Wombat', content: 'This is a new secret.' }], user)
         expect(page.secrets.list).to.have.lengthOf(1)
       })
 
       it('uses a new secret\'s codename', async () => {
         const { page, user } = await createTestDocs(model)
-        await page.processSecrets({ Wombat: { content: 'This is a new secret.' } }, user)
+        await page.processSecrets([{ codename: 'Wombat', content: 'This is a new secret.' }], user)
         expect(page.secrets.list[0].codename).to.be.equal('Wombat')
       })
 
       it('adds a new secret\'s contents to the list', async () => {
         const { page, user } = await createTestDocs(model)
-        await page.processSecrets({ Wombat: { content: 'This is a new secret.' } }, user)
+        await page.processSecrets([{ codename: 'Wombat', content: 'This is a new secret.' }], user)
         expect(page.secrets.list[0].content).to.be.equal('This is a new secret.')
       })
 
       it('starts off a new secret with the POV character of the person who wrote it knowing it', async () => {
         const { page, user } = await createTestDocs(model)
-        await page.processSecrets({ Wombat: { content: 'This is a new secret.' } }, user)
+        await page.processSecrets([{ codename: 'Wombat', content: 'This is a new secret.' }], user)
         expect(page.secrets.list[0].knowers.join(' ')).to.be.equal(user.getPOV()._id.toString())
       })
 
       it('updates the content of a secret if the editor knows the secret', async () => {
         const { page, user } = await createTestDocs(model)
-        await page.processSecrets({ Wombat: { content: 'This is a new secret.' } }, user)
-        await page.processSecrets({ Wombat: { content: 'Updated secret.' } }, user)
+        await page.processSecrets([{ codename: 'Wombat', content: 'This is a new secret.' }], user)
+        await page.processSecrets([{ codename: 'Wombat', content: 'Updated secret.' }], user)
         expect(page.secrets.list[0].content).to.be.equal('Updated secret.')
       })
 
       it('can delete a secret if the editor knows about it', async () => {
         const { page, user } = await createTestDocs(model)
-        await page.processSecrets({ Wombat: { content: 'This is a new secret.' } }, user)
-        await page.processSecrets({}, user)
+        await page.processSecrets([{ codename: 'Wombat', content: 'This is a new secret.' }], user)
+        await page.processSecrets([], user)
         expect(page.secrets.list).to.be.empty
       })
 
       it('doesn\'t change the secret if the editor doesn\'t know it', async () => {
         const { page, user, other } = await createTestDocs(model)
-        await page.processSecrets({ Wombat: { content: 'This is a new secret.' } }, user)
-        await page.processSecrets({ Wombat: { content: 'Updated secret.' } }, other)
+        await page.processSecrets([{ codename: 'Wombat', content: 'This is a new secret.' }], user)
+        await page.processSecrets([{ codename: 'Wombat', content: 'Updated secret.' }], other)
         expect(page.secrets.list[0].content).to.be.equal('This is a new secret.')
       })
 
       it('keeps secrets that an editor might delete if she doesn\'t know it', async () => {
         const { page, user, other } = await createTestDocs(model)
-        await page.processSecrets({ Wombat: { content: 'This is a new secret.' } }, user)
-        await page.processSecrets({}, other)
+        await page.processSecrets([{ codename: 'Wombat', content: 'This is a new secret.' }], user)
+        await page.processSecrets([], other)
         expect(page.secrets.list[0].content).to.be.equal('This is a new secret.')
       })
     })

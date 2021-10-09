@@ -357,16 +357,17 @@ PageSchema.methods.processSecrets = function (secrets, editor) {
   const codenames = union(this.secrets.list.map(s => s.codename), updatedCodenames)
   for (const codename of codenames) {
     const existing = this.findSecret(codename)
+    const inList = existing ? findOne(this.secrets.list, secret => secret.codename === codename) : null
     const inUpdate = updatedCodenames.includes(codename)
     const editorKnows = existing && existing.knows(pov)
-    if (existing && inUpdate && editorKnows) {
-      existing.content = secrets[codename].content
-    } else if (existing && !inUpdate && editorKnows) {
-      this.secrets.list.pull({ _id: existing._id })
-    } else if (!existing) {
+    const secret = findOne(secrets, secret => secret.codename === codename)
+    if (secret && inList && inUpdate && editorKnows) {
+      inList.content = secret.content
+    } else if (inList && !inUpdate && editorKnows) {
+      this.secrets.list.pull({ _id: inList._id })
+    } else if (secret && !existing) {
       const knowers = pov === 'Loremaster' ? [editor._id] : pov._id ? [pov._id] : []
-      const secret = findOne(secrets, secret => secret.codename === codename)
-      if (secret) this.secrets.list.addToSet({ codename, content: secret.content, knowers })
+      this.secrets.list.addToSet({ codename, content: secret.content, knowers })
     }
   }
 }
@@ -375,16 +376,10 @@ PageSchema.methods.processSecrets = function (secrets, editor) {
  * Return a mapping of all of the page's secrets. Each object has a `codename`
  * property, but it will only have a `content` property if the point of view
  * (`pov`) provided is one that knows the secret.
- * @param {Character|string} [pov = 'Anonymous'] - The point of view of the
- *   person asking for the secrets. If given the string `Loremaster`, you'll
- *   know all of the secrets. If given the string `Anonymous`, you won't know
- *   any of them. Given a Character object, whether or not you know the secret
- *   will depend on whether or not the given character is on the list of people
- *   who know this secret.
  * @returns {Secret[]} - An array of Secret instances with the page's secrets.
  */
 
-PageSchema.methods.getSecrets = function (pov = 'Anonymous') {
+PageSchema.methods.getSecrets = function () {
   return this.secrets.list.map(secret => new Secret(secret))
 }
 
@@ -393,14 +388,15 @@ PageSchema.methods.getSecrets = function (pov = 'Anonymous') {
  * @param {Character|Schema.Types.ObjectId|string} char - The character that
  *   you would like to reveal the secret to (or hens ID, or the string
  *   representation of hens ID).
- * @param {string} codename - The codename of the secret that you would like to
- *   reveal to the character `char`.
+ * @param {string} [codename = '#'] - The codename of the secret that you would
+ *   like to reveal to the character `char`. Defaults to `#`, which is a
+ *   special codename for the page itself being a secret. (Default: `#`)
  * @returns {Promise<boolean>} - A Promise that resolves with `true` once the
  *   character has been added to the list of those who know the secret
  *   indicated, or `false` if there is no such secret to reveal.
  */
 
-PageSchema.methods.reveal = async function (char, codename) {
+PageSchema.methods.reveal = async function (char, codename = '#') {
   const id = char?._id || char
   const secret = codename ? this.findSecret(codename) : null
   const knowers = secret ? secret.knowers : null
@@ -506,7 +502,7 @@ PageSchema.methods.revealToNames = async function (str, codename = null) {
 
 PageSchema.methods.knows = function (char, codename) {
   const secret = this.findSecret(codename)
-  return secret && secret.knows(char)
+  return secret ? secret.knows(char) : true
 }
 
 /**
