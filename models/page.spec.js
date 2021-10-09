@@ -650,7 +650,6 @@ describe('Page', () => {
 
       it('returns false if the character doesn\'t know the secret', async () => {
         const { page, other } = await createTestDocs(model, '<secret codename="Wombat">This is a secret.</secret>')
-        console.log(other.getPOV())
         expect(page.knows(other.getPOV(), 'Wombat')).to.be.false
       })
 
