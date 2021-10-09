@@ -693,14 +693,14 @@ describe('Page', () => {
 
       it('hides all secrets from anonymous', async () => {
         const { page, user } = await createTestDocs(model)
-        await page.update({ title: 'Test Page', body: 'This is the updated text. ||This is a secret.||' }, user)
+        await page.update({ title: 'Test Page', body: 'This is the updated text. <secret>This is a secret.</secret>' }, user)
         const actual = await page.write()
         expect(actual).to.be.equal('This is the updated text.')
       })
 
       it('reveals all secrets to a loremaster', async () => {
         const { page, user } = await createTestDocs(model)
-        await page.update({ title: 'Test Page', body: 'This is the updated text. ||This is a secret.||' }, user)
+        await page.update({ title: 'Test Page', body: 'This is the updated text. <secret>This is a secret.</secret>' }, user)
         const codename = page.secrets.list[0].codename
         const expected = `This is the updated text. <span class="secret" data-codename="${codename}">This is a secret. <a href="/test-page/reveal/${codename}">[Reveal]</a></span>`
         const actual = await page.write({ pov: 'Loremaster' })
@@ -709,7 +709,7 @@ describe('Page', () => {
 
       it('hides secrets from characters who don\'t know them', async () => {
         const { page, user, other } = await createTestDocs(model)
-        await page.update({ title: 'Test Page', body: 'This is the updated text. ||This is a secret.||' }, user)
+        await page.update({ title: 'Test Page', body: 'This is the updated text. <secret>This is a secret.</secret>' }, user)
         const actual = await page.write({ pov: other.getPOV() })
         expect(actual).to.be.equal('This is the updated text.')
       })
@@ -717,7 +717,7 @@ describe('Page', () => {
       it('reveals secrets to characters who know them', async () => {
         const { page, user } = await createTestDocs(model)
         const pov = user.getPOV()
-        await page.update({ title: 'Test Page', body: 'This is the updated text. ||::Wombat:: This is a secret.||' }, user)
+        await page.update({ title: 'Test Page', body: 'This is the updated text. <secret codename="Wombat">This is a secret.</secret>' }, user)
         await page.reveal(pov, 'Wombat')
         const expected = `This is the updated text. <span class="secret" data-codename="Wombat">This is a secret. <a href="/test-page/reveal/Wombat">[Reveal]</a></span>`
         const actual = await page.write({ pov: user.getPOV() })
@@ -726,9 +726,9 @@ describe('Page', () => {
 
       it('leaves a placeholder for secrets hidden from characters who don\'t know them in editing mode', async () => {
         const { page, user, other } = await createTestDocs(model)
-        await page.update({ title: 'Test Page', body: 'This is the updated text. ||::Wombat:: This is a secret.||' }, user)
+        await page.update({ title: 'Test Page', body: 'This is the updated text. <secret codename="Wombat">This is a secret.</secret>' }, user)
         const actual = await page.write({ pov: other.getPOV(), mode: 'editing' })
-        expect(actual).to.be.equal('This is the updated text. ||::Wombat::||')
+        expect(actual).to.be.equal('This is the updated text. <secret codename="Wombat"></secret>')
       })
 
       it('reveals secrets to characters who know them in editing mode', async () => {
