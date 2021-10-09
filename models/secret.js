@@ -304,7 +304,7 @@ class Secret {
 
   static parse (str, codenamer, rewrite = false) {
     const tags = str.match(/<secret(.*?)>(.*?)<\/secret>/gmi)
-    if (!tags) return []
+    if (!tags) return rewrite ? str : []
     const secrets = []
     for (const tag of tags) {
       const elems = tag.match(/<secret(.*?)>(.*?)<\/secret>/i)
