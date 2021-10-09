@@ -1432,6 +1432,12 @@ describe('Page', () => {
         const page = await Page.create({ title: 'Test Page', body: 'This is the original text.', msg: 'First!' }, user)
         expect(page.versions[0].msg).to.be.equal('First!')
       })
+
+      it('assigns codenames to secrets that don\'t have one', async () => {
+        const user = await User.create({ name: 'Editor' })
+        const page = await Page.create({ title: 'Test Page', body: '<secret>This is a secret.</secret>' }, user)
+        expect(page.secrets.list[0].codename).not.to.be.undefined
+      })
     })
   })
 })
