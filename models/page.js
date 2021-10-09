@@ -89,7 +89,17 @@ const PageSchema = new Schema(await transformSchema({
     type: Date,
     default: Date.now
   },
-  secrets: [SecretSchema],
+  secrets: {
+    list: [SecretSchema],
+    existence: {
+      type: Boolean,
+      default: false
+    },
+    knowers: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Character'
+    }]
+  },
   file: {
     url: String,
     mimetype: String,
