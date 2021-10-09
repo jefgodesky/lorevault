@@ -118,14 +118,10 @@ class Secret {
 
   render (mode = 'full') {
     const { codename, content, conditions } = this
-    const full = mode.toLowerCase() === 'full'
-    const placeholder = mode.toLowerCase() === 'placeholder'
-    const reading = mode.toLowerCase() === 'reading'
-
-    if (full && conditions?.length > 0) return `<secret codename="${codename}" conditions="${conditions}">${content}</secret>`
-    if (full) return `<secret codename="${codename}">${content}</secret>`
-    if (placeholder) return `<secret codename="${codename}"></secret>`
-    if (reading) return content
+    if (mode.toLowerCase() === 'full' && conditions?.length > 0) return `<secret codename="${codename}" conditions="${conditions}">${content}</secret>`
+    if (mode.toLowerCase() === 'full') return `<secret codename="${codename}">${content}</secret>`
+    if (mode.toLowerCase() === 'placeholder') return `<secret codename="${codename}"></secret>`
+    return content
   }
 
   /**
