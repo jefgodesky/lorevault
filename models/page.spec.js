@@ -58,12 +58,12 @@ describe('Page', () => {
       })
 
       it('records if it\'s a secret.', async () => {
-        const { page } = await createTestDocs(model, '||::Wombat:: [[Category:Tests]]||')
+        const { page } = await createTestDocs(model, '<secret>[[Category:Tests]]</secret>')
         expect(page.categories[0].secret).to.be.true
       })
 
       it('records the codename if it\'s a secret.', async () => {
-        const { page } = await createTestDocs(model, '||::Wombat:: [[Category:Tests]]||')
+        const { page } = await createTestDocs(model, '<secret codename="Wombat">[[Category:Tests]]</secret>')
         expect(page.categories[0].codename).to.be.eql('Wombat')
       })
 
@@ -111,7 +111,7 @@ describe('Page', () => {
 
       it('records that a link is a secret', async () => {
         const { user } = await createTestDocs(model)
-        const page = await Page.create({ title: 'Second Test', body: '||::Wombat:: [[Test Page|Hello!]]||' }, user)
+        const page = await Page.create({ title: 'Second Test', body: '<secret>[[Test Page|Hello!]]</secret>' }, user)
         expect(page.links[0].secret).to.be.true
       })
 
@@ -123,7 +123,7 @@ describe('Page', () => {
 
       it('records the codename of the secret that the link is in', async () => {
         const { user } = await createTestDocs(model)
-        const page = await Page.create({ title: 'Second Test', body: '||::Wombat:: [[Test Page|Hello!]]||' }, user)
+        const page = await Page.create({ title: 'Second Test', body: '<secret codename="Wombat">[[Test Page|Hello!]]</secret>' }, user)
         expect(page.links[0].codename).to.be.equal('Wombat')
       })
     })
@@ -258,7 +258,7 @@ describe('Page', () => {
       })
 
       it('returns false if the page\'s membership in that category is a secret to you', async () => {
-        const { page, other } = await createTestDocs(model, '||[[Category:Test]]||')
+        const { page, other } = await createTestDocs(model, '<secret>[[Category:Test]]</secret>')
         const actual = page.getCategorization('Test', other)
         expect(actual).to.be.false
       })
@@ -319,7 +319,7 @@ describe('Page', () => {
 
       it('doesn\'t return pages that are linked in secrets that you don\'t know', async () => {
         const { page, user, other } = await createTestDocs(model)
-        await Page.create({ title: 'Second Page', body: '||::Wombat:: [[Test Page]]||' }, user)
+        await Page.create({ title: 'Second Page', body: '<secret>[[Test Page]]</secret>' }, user)
         const links = await page.getLinks(other)
         expect(links).to.be.empty
       })
@@ -404,7 +404,7 @@ describe('Page', () => {
 
     describe('findSecret', () => {
       it('returns the secret with that codename', async () => {
-        const { page } = await createTestDocs(model, '||::Wombat:: This is the secret.||')
+        const { page } = await createTestDocs(model, '<secret codename="Wombat">This is the secret.</secret>')
         expect(page.findSecret('Wombat').content).to.be.equal('This is the secret.')
       })
 
