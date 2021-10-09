@@ -740,30 +740,30 @@ describe('Page', () => {
 
       it('reveals all secrets to loremasters in editing mode', async () => {
         const { page, user } = await createTestDocs(model)
-        await page.update({ title: 'Test Page', body: 'This is the updated text. ||::Wombat:: This is a secret.||' }, user)
+        await page.update({ title: 'Test Page', body: 'This is the updated text. <secret codename="Wombat">This is a secret.</secret>' }, user)
         const actual = await page.write({ pov: 'Loremaster', mode: 'editing' })
-        expect(actual).to.be.equal('This is the updated text. ||::Wombat:: This is a secret.||')
+        expect(actual).to.be.equal('This is the updated text. <secret codename="Wombat">This is a secret.</secret>')
       })
 
       it('writes all secrets in full mode, regardless of POV', async () => {
         const { page, user } = await createTestDocs(model)
-        await page.update({ title: 'Test Page', body: 'This is the updated text. ||::Wombat:: This is a secret.||' }, user)
+        await page.update({ title: 'Test Page', body: 'This is the updated text. <secret codename="Wombat">This is a secret.</secret>' }, user)
         const actual = await page.write({ mode: 'full' })
-        expect(actual).to.be.equal('This is the updated text. ||::Wombat:: This is a secret.||')
+        expect(actual).to.be.equal('This is the updated text. <secret codename="Wombat">This is a secret.</secret>')
       })
 
       it('adds back secrets you don\'t know to the end when editing', async () => {
         const { page, user } = await createTestDocs(model)
-        await page.update({ title: 'Test Page', body: 'This is the updated text. ||::Wombat:: This is a secret.||' }, user)
+        await page.update({ title: 'Test Page', body: 'This is the updated text. <secret codename="Wombat">This is a secret.</secret>' }, user)
         const actual = await page.write({ mode: 'editing', str: 'This is some new text.' })
-        expect(actual).to.be.equal('This is some new text.\n\n||::Wombat::||')
+        expect(actual).to.be.equal('This is some new text.\n\n<secret codename="Wombat"></secret>')
       })
 
       it('adds back full secrets you don\'t know to the end when getting full text', async () => {
         const { page, user } = await createTestDocs(model)
-        await page.update({ title: 'Test Page', body: 'This is the updated text. ||::Wombat:: This is a secret.||' }, user)
+        await page.update({ title: 'Test Page', body: 'This is the updated text. <secret codename="Wombat">This is a secret.</secret>' }, user)
         const actual = await page.write({ mode: 'full', str: 'This is some new text.' })
-        expect(actual).to.be.equal('This is some new text.\n\n||::Wombat:: This is a secret.||')
+        expect(actual).to.be.equal('This is some new text.\n\n<secret codename="Wombat">This is a secret.</secret>')
       })
     })
 
@@ -859,48 +859,35 @@ describe('Page', () => {
 
       it('won\'t let you delete secrets that you don\'t know', async () => {
         const { page, user, other } = await createTestDocs(model)
-        await page.update({ title: page.title, body: '||This is a secret.||' }, user)
+        await page.update({ title: page.title, body: '<secret>This is a secret.</secret>' }, user)
         await page.update({ title: page.title, body: 'This is some updated text.' }, other)
         expect(page.secrets.list).to.have.lengthOf(1)
       })
 
       it('won\'t let you delete secrets that you don\'t know from the text', async () => {
         const { page, user, other } = await createTestDocs(model)
-        await page.update({ title: page.title, body: '||::Wombat:: This is a secret.||' }, user)
+        await page.update({ title: page.title, body: '<secret codename="Wombat">This is a secret.</secret>' }, user)
         await page.update({ title: page.title, body: 'This is some updated text.' }, other)
-        expect(page.getCurr().body).to.be.equal('This is some updated text.\n\n||::Wombat:: This is a secret.||')
+        expect(page.getCurr().body).to.be.equal('This is some updated text.\n\n<secret codename="Wombat">This is a secret.</secret>')
       })
 
-      it('makes the page itself a secret when given true', async () => {
+      it('makes the page itself a secret when given a # codename secret', async () => {
         const { page, user } = await createTestDocs(model)
-        const actual = await page.update({ title: page.title, body: 'This is updated text.', secret: true }, user)
+        const actual = await page.update({ title: page.title, body: 'This is updated text. <secret codename="#"></secret>' }, user)
         expect(actual.secrets.existence).to.be.true
       })
 
-      it('makes the page itself a secret when given \'on\'', async () => {
+      it('makes the page no longer a secret when the # codename secret is removed', async () => {
         const { page, user } = await createTestDocs(model)
-        const actual = await page.update({ title: page.title, body: 'This is updated text.', secret: 'on' }, user)
-        expect(actual.secrets.existence).to.be.true
-      })
-
-      it('makes the page no longer a secret when given any other value', async () => {
-        const { page, user } = await createTestDocs(model)
-        await page.update({ title: page.title, body: 'This is updated text.', secret: true }, user)
-        const actual = await page.update({ title: page.title, body: 'This is updated text.', secret: 42 }, user)
+        await page.update({ title: page.title, body: 'This is updated text.  <secret codename="#"></secret>' }, user)
+        const actual = await page.update({ title: page.title, body: 'This is updated text.' }, user)
         expect(actual.secrets.existence).to.be.false
       })
 
       it('adds the editors\' POV to those who know the secret', async () => {
         const { page, user } = await createTestDocs(model)
-        const actual = await page.update({ title: page.title, body: 'This is updated text.', secret: 'on' }, user)
+        const actual = await page.update({ title: page.title, body: 'This is updated text. <secret codename="#"></secret>' }, user)
         expect(actual.secrets.knowers).to.be.eql([user.characters.active._id])
-      })
-
-      it('blanks out who knows if it isn\'t a secret anymore', async () => {
-        const { page, user } = await createTestDocs(model)
-        await page.update({ title: page.title, body: 'This is updated text.', secret: true }, user)
-        const actual = await page.update({ title: page.title, body: 'This is updated text.', secret: 42 }, user)
-        expect(actual.secrets.knowers).to.be.eql([])
       })
     })
 
@@ -1190,26 +1177,6 @@ describe('Page', () => {
         expect(actual).to.be.equal('<a href="https://example.com/test.txt" class="download">\n<span class="name">Test Page</span>\n<small>plain/text; 123.5 kB</small>\n</a>')
       })
     })
-
-    describe('renderSecret', () => {
-      it('returns null if the secret doesn\'t exist', async () => {
-        const { page, user } = await createTestDocs(model)
-        const actual = await page.renderSecret('Wombat', user.getPOV())
-        expect(actual).to.be.null
-      })
-
-      it('returns null if the user doesn\'t know that secret', async () => {
-        const { page, other } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
-        const actual = await page.renderSecret('Wombat', other.getPOV())
-        expect(actual).to.be.null
-      })
-
-      it('renders the secret', async () => {
-        const { page, user } = await createTestDocs(model, '||::Wombat:: [Intelligence (Arcana) DC 20] This is a secret.||')
-        const actual = await page.renderSecret('Wombat', user.getPOV())
-        expect(actual.render).to.be.equal('[Intelligence (Arcana) DC 20] This is a secret.')
-      })
-    })
   })
 
   describe('statics', () => {
@@ -1380,7 +1347,7 @@ describe('Page', () => {
       })
 
       it('won\'t return pages whose membership is a secret that you don\'t know', async () => {
-        const { other } = await createTestDocs(model, '||[[Category:Tests]]||')
+        const { other } = await createTestDocs(model, '<secret>[[Category:Tests]]</secret>')
         const actual = await Page.findMembers('Tests', other)
         expect(actual.pages).to.be.empty
       })
