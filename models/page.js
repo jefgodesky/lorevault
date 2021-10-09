@@ -305,7 +305,7 @@ PageSchema.methods.getFile = function () {
  */
 
 PageSchema.methods.findCodename = function () {
-  const used = this.secrets.list.map(s => s.codename)
+  const used = this.secrets.map(s => s.codename)
   const unused = config.codenames.filter(c => !used.includes(c))
   if (unused.length > 0) return pickRandom(config.codenames.filter(c => !used.includes(c)))
   let num = 1
