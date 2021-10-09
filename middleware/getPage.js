@@ -41,8 +41,8 @@ const getPage = async (req, res, next) => {
   if (!viewOpts.page) viewOpts.page = await Page.findByPath(originalUrl, user)
   if (!viewOpts.page) return next()
 
-  const pov = user.getPOV()
-  if (typeof pov !== 'string') {
+  const pov = user?.getPOV()
+  if (pov && typeof pov !== 'string') {
     const games = await loadGames()
     for (const game of Object.keys(games)) {
       const {onPageView} = games[game]
