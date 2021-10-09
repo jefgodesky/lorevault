@@ -340,21 +340,20 @@ PageSchema.methods.findSecret = function (codename) {
  */
 
 PageSchema.methods.processSecrets = function (secrets, editor) {
-  const { list } = this.secrets
+  const pov = editor.getPOV()
   const updatedCodenames = Object.keys(secrets)
-  const codenames = union(list.map(s => s.codename), updatedCodenames)
+  const codenames = union(this.secrets.map(s => s.codename), updatedCodenames)
   for (const codename of codenames) {
     const existing = this.findSecret(codename)
     const inUpdate = updatedCodenames.includes(codename)
-    const editorKnows = existing && (existing.knowers.includes(editor._id) || existing.knowers.includes(editor.getPOV()._id) )
+    const editorKnows = existing && existing.knows(pov)
     if (existing && inUpdate && editorKnows) {
       existing.content = secrets[codename].content
     } else if (existing && !inUpdate && editorKnows) {
-      list.pull({ _id: existing._id })
+      this.secrets.pull({ _id: existing._id })
     } else if (!existing) {
-      const pov = editor.getPOV()
       const knowers = pov === 'Loremaster' ? [editor._id] : pov._id ? [pov._id] : []
-      list.addToSet({ codename, content: secrets[codename].content, knowers })
+      this.secrets.addToSet({ codename, content: secrets[codename].content, knowers })
     }
   }
 }
