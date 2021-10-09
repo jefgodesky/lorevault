@@ -296,10 +296,17 @@ class Secret {
    * @param {string} str - The string to be parsed.
    * @param {function} codenamer - A function that produces codenames for those
    *   secrets that haven't set one.
-   * @returns {Secret[]} - An array of secrets parsed from the given string.
+   * @param {boolean} [rewrite = false] - If `true`, the method parses the
+   *   secrets and returns the string rewritten with all secrets re-rendered.
+   *   This is useful for assigning codenames to secrets that do not yet have
+   *   them, for example. If `false`, the method returns the array of secrets,
+   *   as usual. (Default: `false`)
+   * @returns {Secret[]|string} - An array of secrets parsed from the given
+   *   string, or that string with all secrets re-rendered, if `rewrite` is
+   *   `true`.
    */
 
-  static parse (str, codenamer) {
+  static parse (str, codenamer, rewrite = false) {
     const tags = str.match(/<secret(.*?)>(.*?)<\/secret>/gmi)
     if (!tags) return []
     const secrets = []
@@ -313,9 +320,11 @@ class Secret {
         if (!pair || pair.length < 2) continue
         attrs[pair[0]] = pair[1].substring(1, pair[1].length - 1)
       }
-      secrets.push(new Secret(Object.assign({}, attrs, { content: elems[2] }), codenamer))
+      const secret = new Secret(Object.assign({}, attrs, { content: elems[2] }), codenamer)
+      secrets.push(secret)
+      if (rewrite) str = str.replace(tag, secret.render())
     }
-    return secrets
+    return rewrite ? str : secrets
   }
 
   /**

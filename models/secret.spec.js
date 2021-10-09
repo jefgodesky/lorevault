@@ -413,16 +413,16 @@ describe('Secret', () => {
         expect(actual[0].codename).to.be.equal('Wombat')
       })
 
-      it('assigns codenames', () => {
-        const str = '<secret>This is a secret</secret>'
-        const actual = Secret.parse(str, codenamer)
-        expect(actual[0].codename).to.be.equal('secret001')
-      })
-
       it('parses conditions', () => {
         const str = '<secret conditions="[Volaarun-speaker]">This is a secret</secret>'
         const actual = Secret.parse(str, codenamer)
         expect(actual[0].conditions).to.be.equal('[Volaarun-speaker]')
+      })
+
+      it('can assign codenames', () => {
+        const str = '<secret>This is a secret</secret>'
+        const actual = Secret.parse(str, codenamer, true)
+        expect(actual).to.be.equal('<secret codename="secret001">This is a secret</secret>')
       })
     })
 
