@@ -49,11 +49,8 @@ const VersionSchema = new Schema(Object.assign({}, ContentSchema, {
 const SecretSchema = new Schema({
   codename: String,
   content: String,
+  conditions: String,
   knowers: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Character'
-  }],
-  checked: [{
     type: Schema.Types.ObjectId,
     ref: 'Character'
   }]
