@@ -584,7 +584,7 @@ PageSchema.methods.update = async function (content, editor) {
   if (tags) { for (const tag of tags) body = body.replace(tag, tag.replace(/[“|”]/g, '"')) }
 
   const str = Secret.parse(body, codenamer, true)
-  this.processSecrets(Secret.parse(body, codenamer), editor)
+  this.processSecrets(Secret.parse(str, codenamer), editor)
 
   const pageIsSecret = findOne(this.secrets.list, s => s.codename === '#')
   if (pageIsSecret) {
