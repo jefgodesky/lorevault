@@ -1,10 +1,10 @@
 import smartquotes from 'smartquotes'
 
-import assignCodenames from '../transformers/assignCodenames.js'
 import renderLinks from '../transformers/renderLinks.js'
 import renderFiles from '../transformers/renderFiles.js'
 import renderMarkup from '../transformers/renderMarkup.js'
 import renderTags from '../transformers/renderTags.js'
+import Secret from './secret.js'
 import Template from './template.js'
 import {
   pickRandom,
