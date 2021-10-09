@@ -326,7 +326,8 @@ PageSchema.methods.findCodename = function () {
  */
 
 PageSchema.methods.findSecret = function (codename) {
-  return findOne(this.secrets, s => s.codename === codename)
+  const record = findOne(this.secrets, s => s.codename === codename)
+  return record ? new Secret(record) : null
 }
 
 /**
