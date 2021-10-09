@@ -328,14 +328,16 @@ PageSchema.methods.findCodename = function () {
 
 /**
  * Find a secret with the given codename.
- * @param {string} codename - The codename of the secret that we want to find.
+ * @param {string} [codename = '#'] - The codename of the secret that we want
+ *   to find. The default value is `#`, a special codename which indicates that
+ *   the page itself is a secret. (Default: `#`)
  * @returns {{ codename: string, content: string,
  *   knowers: [Schema.Types.ObjectId] }|null} - The secret with the given
  *   codename if the page has a secret with that codename, or `null` if it
  *   does not.
  */
 
-PageSchema.methods.findSecret = function (codename) {
+PageSchema.methods.findSecret = function (codename = '#') {
   const record = findOne(this.secrets.list, s => s.codename === codename)
   return record ? new Secret(record) : null
 }

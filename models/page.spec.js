@@ -414,9 +414,9 @@ describe('Page', () => {
       })
 
       it('returns who knows about the page if it\'s a secret and you provide a falsy codename', async () => {
-        const { page } = await createTestDocs(model)
-        page.secrets.existence = true
-        expect(page.findSecret().knowers).to.be.eql([])
+        const { page, user } = await createTestDocs(model, '<secret codename="#"></secret>')
+        const { active } = user.characters
+        expect(page.findSecret().knowers).to.be.eql([active._id])
       })
 
       it('returns null if you provide a falsy codename but the page isn\'t a secret', async () => {
