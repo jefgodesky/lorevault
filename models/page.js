@@ -540,7 +540,7 @@ PageSchema.methods.write = async function (params = {}) {
   const reading = !full && !editing
 
   for (const secret of secrets) {
-    const txt = full || (editing && secret.known)
+    const txt = full || (editing && secret.knows(pov))
       ? secret.render()
       : editing && !secret.knows(pov)
         ? secret.render('placeholder')

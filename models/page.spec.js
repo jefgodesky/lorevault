@@ -733,11 +733,9 @@ describe('Page', () => {
 
       it('reveals secrets to characters who know them in editing mode', async () => {
         const { page, user } = await createTestDocs(model)
-        const pov = user.getPOV()
-        await page.update({ title: 'Test Page', body: 'This is the updated text. ||::Wombat:: This is a secret.||' }, user)
-        await page.reveal(pov, 'Wombat')
+        await page.update({ title: 'Test Page', body: 'This is the updated text. <secret codename="Wombat">This is a secret.</secret>' }, user)
         const actual = await page.write({ pov: user.getPOV(), mode: 'editing' })
-        expect(actual).to.be.equal('This is the updated text. ||::Wombat:: This is a secret.||')
+        expect(actual).to.be.equal('This is the updated text. <secret codename="Wombat">This is a secret.</secret>')
       })
 
       it('reveals all secrets to loremasters in editing mode', async () => {
