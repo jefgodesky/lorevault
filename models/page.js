@@ -315,7 +315,7 @@ PageSchema.methods.getFile = function () {
  */
 
 PageSchema.methods.findCodename = function () {
-  const used = this.secrets.map(s => s.codename)
+  const used = this.secrets.list.map(s => s.codename)
   const unused = config.codenames.filter(c => !used.includes(c))
   if (unused.length > 0) return pickRandom(config.codenames.filter(c => !used.includes(c)))
   let num = 1
@@ -336,7 +336,7 @@ PageSchema.methods.findCodename = function () {
  */
 
 PageSchema.methods.findSecret = function (codename) {
-  const record = findOne(this.secrets, s => s.codename === codename)
+  const record = findOne(this.secrets.list, s => s.codename === codename)
   return record ? new Secret(record) : null
 }
 
@@ -352,7 +352,7 @@ PageSchema.methods.findSecret = function (codename) {
 PageSchema.methods.processSecrets = function (secrets, editor) {
   const pov = editor.getPOV()
   const updatedCodenames = Object.keys(secrets)
-  const codenames = union(this.secrets.map(s => s.codename), updatedCodenames)
+  const codenames = union(this.secrets.list.map(s => s.codename), updatedCodenames)
   for (const codename of codenames) {
     const existing = this.findSecret(codename)
     const inUpdate = updatedCodenames.includes(codename)
@@ -360,10 +360,10 @@ PageSchema.methods.processSecrets = function (secrets, editor) {
     if (existing && inUpdate && editorKnows) {
       existing.content = secrets[codename].content
     } else if (existing && !inUpdate && editorKnows) {
-      this.secrets.pull({ _id: existing._id })
+      this.secrets.list.pull({ _id: existing._id })
     } else if (!existing) {
       const knowers = pov === 'Loremaster' ? [editor._id] : pov._id ? [pov._id] : []
-      this.secrets.addToSet({ codename, content: secrets[codename].content, knowers })
+      this.secrets.list.addToSet({ codename, content: secrets[codename].content, knowers })
     }
   }
 }
@@ -382,7 +382,7 @@ PageSchema.methods.processSecrets = function (secrets, editor) {
  */
 
 PageSchema.methods.getSecrets = function (pov = 'Anonymous') {
-  return this.secrets.map(secret => new Secret(secret))
+  return this.secrets.list.map(secret => new Secret(secret))
 }
 
 /**
