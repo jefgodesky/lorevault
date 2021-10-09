@@ -481,63 +481,39 @@ describe('Page', () => {
 
     describe('getSecrets', () => {
       it('returns an object for each secret', async () => {
-        const { page } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const { page } = await createTestDocs(model, '<secret>This is a secret.</secret>')
         const actual = page.getSecrets()
         expect(actual).to.have.lengthOf(1)
       })
 
       it('provides the codenames for each secret', async () => {
-        const { page } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const { page } = await createTestDocs(model, '<secret codename="Wombat">This is a secret.</secret>')
         const actual = page.getSecrets()
         expect(actual.map(s => s.codename)).to.be.eql(['Wombat'])
       })
 
       it('provides the contents of each secret', async () => {
-        const { page } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const { page } = await createTestDocs(model, '<secret>This is a secret.</secret>')
         const actual = page.getSecrets('Anonymous')
         expect(actual.map(s => s.content)).to.be.eql(['This is a secret.'])
-      })
-
-      it('indicates that anonymous doesn\'t know any secrets', async () => {
-        const { page } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
-        const actual = page.getSecrets('Anonymous')
-        expect(actual[0].known).to.be.false
-      })
-
-      it('shows all secrets to a loremaster', async () => {
-        const { page } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
-        const actual = page.getSecrets('Loremaster')
-        expect(actual[0].known).to.be.true
-      })
-
-      it('says if you don\'t know a secret', async () => {
-        const { page, other } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
-        const actual = page.getSecrets(other.getPOV())
-        expect(actual[0].known).to.be.false
-      })
-
-      it('says if you know a secret', async () => {
-        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
-        const actual = page.getSecrets(user.getPOV())
-        expect(actual[0].known).to.be.true
       })
     })
 
     describe('reveal', () => {
       it('reveals a secret to a character', async () => {
-        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const { page, user } = await createTestDocs(model, '<secret codename="Wombat">This is a secret.</secret>')
         await page.reveal(user.characters.active, 'Wombat')
         expect(page.secrets.list[0].knowers).to.include(user.characters.active._id)
       })
 
       it('returns true when the secret is revealed', async () => {
-        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const { page, user } = await createTestDocs(model, '<secret codename="Wombat">This is a secret.</secret>')
         const res = await page.reveal(user.characters.active, 'Wombat')
         expect(res).to.be.true
       })
 
       it('can reveal the page', async () => {
-        const { page, user } = await createTestDocs(model)
+        const { page, user } = await createTestDocs(model, '<secret codename="#"></secret>')
         page.secrets.existence = true
         await page.reveal(user.characters.active)
         expect(page.secrets.knowers).to.include(user.characters.active._id)
@@ -552,7 +528,7 @@ describe('Page', () => {
 
     describe('revealToCategory', () => {
       it('reveals the secret to every character in a category', async () => {
-        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const { page, user } = await createTestDocs(model, '<secret codename="Wombat">This is a secret.</secret>')
         const c1 = await Page.findById(user.characters.list[0].page)
         const c2 = await Page.findById(user.characters.list[1].page)
         await c1.update({ title: 'Character 1', body: '[[Category:Adventuring Party]]' }, user)
@@ -563,7 +539,7 @@ describe('Page', () => {
       })
 
       it('is recursive', async () => {
-        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const { page, user } = await createTestDocs(model, '<secret codename="Wombat">This is a secret.</secret>')
         await Page.create({ title: 'Category:Adventurers', body: 'These are adventurers.' }, user)
         await Page.create({ title: 'Category:Fighting Men', body: '[[Category:Adventurers]]' }, user)
         await Page.create({ title: 'Category:Magic Users', body: '[[Category:Adventurers]]' }, user)
@@ -582,13 +558,13 @@ describe('Page', () => {
 
     describe('revealToName', () => {
       it('reveals a secret to a character', async () => {
-        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const { page, user } = await createTestDocs(model, '<secret codename="Wombat">This is a secret.</secret>')
         await page.revealToName(user.characters.active.page.title, 'Wombat')
         expect(page.secrets.list[0].knowers).to.include(user.characters.active._id)
       })
 
       it('reveals the secret to every character in a category', async () => {
-        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const { page, user } = await createTestDocs(model, '<secret codename="Wombat">This is a secret.</secret>')
         const c1 = await Page.findById(user.characters.list[0].page)
         const c2 = await Page.findById(user.characters.list[1].page)
         await c1.update({ title: 'Character 1', body: '[[Category:Adventuring Party]]' }, user)
@@ -599,7 +575,7 @@ describe('Page', () => {
       })
 
       it('is recursive', async () => {
-        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const { page, user } = await createTestDocs(model, '<secret codename="Wombat">This is a secret.</secret>')
         await Page.create({ title: 'Category:Adventurers', body: 'These are adventurers.' }, user)
         await Page.create({ title: 'Category:Fighting Men', body: '[[Category:Adventurers]]' }, user)
         await Page.create({ title: 'Category:Magic Users', body: '[[Category:Adventurers]]' }, user)
@@ -618,7 +594,7 @@ describe('Page', () => {
 
     describe('revealToNames', () => {
       it('reveals to several names', async () => {
-        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const { page, user } = await createTestDocs(model, '<secret codename="Wombat">This is a secret.</secret>')
         await Page.create({ title: 'Category:Adventurers', body: 'These are adventurers.' }, user)
         await Page.create({ title: 'Category:Fighting Men', body: '[[Category:Adventurers]]' }, user)
         await Page.create({ title: 'Category:Magic Users', body: '[[Category:Adventurers]]' }, user)
@@ -637,7 +613,7 @@ describe('Page', () => {
       })
 
       it('can also take a semicolon-separated list', async () => {
-        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const { page, user } = await createTestDocs(model, '<secret codename="Wombat">This is a secret.</secret>')
         const { list } = user.characters
         await page.revealToNames(list.map(c => c.name).join(';'), 'Wombat')
         const actual = page.secrets.list[0].knowers.map(id => id.toString())
@@ -648,51 +624,49 @@ describe('Page', () => {
 
     describe('knows', () => {
       it('returns true for a loremaster', async () => {
-        const { page } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const { page } = await createTestDocs(model, '<secret codename="Wombat">This is a secret.</secret>')
         expect(page.knows('Loremaster', 'Wombat')).to.be.true
       })
 
       it('returns false for an anonymous user', async () => {
-        const { page } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const { page } = await createTestDocs(model, '<secret codename="Wombat">This is a secret.</secret>')
         expect(page.knows('Anonymous', 'Wombat')).to.be.false
       })
 
       it('returns false for any other string', async () => {
-        const { page } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const { page } = await createTestDocs(model, '<secret codename="Wombat">This is a secret.</secret>')
         expect(page.knows('Jabberwocky', 'Wombat')).to.be.false
       })
 
       it('returns true if the character knows the secret', async () => {
-        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const { page, user } = await createTestDocs(model, '<secret codename="Wombat">This is a secret.</secret>')
         expect(page.knows(user.getPOV(), 'Wombat')).to.be.true
       })
 
-      it('returns true if there is no such secret secret', async () => {
-        const { page, user } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+      it('returns true if there is no such secret', async () => {
+        const { page, user } = await createTestDocs(model, '<secret codename="Wombat">This is a secret.</secret>')
         expect(page.knows(user.getPOV(), 'Aardvark')).to.be.true
       })
 
       it('returns false if the character doesn\'t know the secret', async () => {
-        const { page, other } = await createTestDocs(model, '||::Wombat:: This is a secret.||')
+        const { page, other } = await createTestDocs(model, '<secret codename="Wombat">This is a secret.</secret>')
+        console.log(other.getPOV())
         expect(page.knows(other.getPOV(), 'Wombat')).to.be.false
       })
 
       it('returns true if the character knows about the page and the page is a secret', async () => {
-        const { page, user } = await createTestDocs(model)
-        page.secrets.existence = true
-        page.secrets.knowers.addToSet(user.getPOV()._id)
+        const { page, user } = await createTestDocs(model, '<secret codename="#"></secret>')
         expect(page.knows(user.getPOV())).to.be.true
       })
 
       it('returns false if the character doesn\'t know about the page and the page is a secret', async () => {
-        const { page, user } = await createTestDocs(model)
-        page.secrets.existence = true
-        expect(page.knows(user.getPOV())).to.be.false
+        const { page, other } = await createTestDocs(model, '<secret codename="#"></secret>')
+        expect(page.knows(other.getPOV())).to.be.false
       })
 
       it('returns true if the page isn\'t a secret', async () => {
-        const { page, user } = await createTestDocs(model)
-        expect(page.knows(user.getPOV())).to.be.true
+        const { page, other } = await createTestDocs(model)
+        expect(page.knows(other.getPOV())).to.be.true
       })
     })
 
