@@ -542,9 +542,9 @@ PageSchema.methods.write = async function (params = {}) {
   for (const secret of secrets) {
     const txt = full || (editing && secret.known)
       ? secret.render()
-      : editing && !secret.known
+      : editing && !secret.knows(pov)
         ? secret.render('placeholder')
-        : reading && secret.known && s
+        : reading && secret.knows(pov)
           ? `<span class="secret" data-codename="${secret.codename}">${secret.render('reading')} <a href="/${this.path}/reveal/${secret.codename}">[Reveal]</a></span>`
           : ''
 
