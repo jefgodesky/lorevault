@@ -585,8 +585,15 @@ PageSchema.methods.update = async function (content, editor) {
   if (tags) { for (const tag of tags) body = body.replace(tag, tag.replace(/[“|”]/g, '"')) }
 
   const str = Secret.parse(body, codenamer, true)
-  const secrets = Secret.parse(body, codenamer)
-  this.processSecrets(secrets, editor)
+  this.processSecrets(Secret.parse(body, codenamer), editor)
+
+  const pageIsSecret = findOne(this.secrets.list, s => s.codename === '#')
+  if (pageIsSecret) {
+    this.secrets.existence = true
+    this.secrets.knowers = pageIsSecret.knowers
+  } else {
+    this.secrets.existence = false
+  }
 
   content.title = smartquotes(content.title)
   content.body = await this.write({ str, pov, mode: 'full' })
