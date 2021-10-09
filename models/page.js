@@ -106,13 +106,13 @@ const PageSchema = new Schema(await transformSchema({
     size: Number
   },
   versions: [VersionSchema]
-}, {
+}, 'Page'), {
   collation: {
     locale: 'en',
     strength: 1,
     numericOrdering: true
   }
-}, 'Page'))
+})
 
 PageSchema.plugin(slugger)
 
