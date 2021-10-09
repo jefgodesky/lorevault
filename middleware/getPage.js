@@ -1,4 +1,5 @@
 import Page from '../models/page.js'
+import { loadGames } from '../utils.js'
 
 /**
  * Fetch categories for rendering the page.
@@ -39,6 +40,15 @@ const getPage = async (req, res, next) => {
   if (!viewOpts.page) viewOpts.page = await Page.findByIdDiscreetly(req.body?.pageID, user)
   if (!viewOpts.page) viewOpts.page = await Page.findByPath(originalUrl, user)
   if (!viewOpts.page) return next()
+
+  const pov = user.getPOV()
+  if (typeof pov !== 'string') {
+    const games = await loadGames()
+    for (const game of Object.keys(games)) {
+      const {onPageView} = games[game]
+      if (onPageView && typeof onPageView === 'function') onPageView(viewOpts.page, pov)
+    }
+  }
 
   const version = params?.version ? viewOpts.page.getVersion(params.version) : null
   viewOpts.title = viewOpts.page.title
