@@ -309,7 +309,7 @@ class Secret {
     for (const tag of tags) {
       const elems = tag.match(/<secret(.*?)>(.*?)<\/secret>/i)
       if (!elems || elems.length < 3) continue
-      const attrMatch = elems[1] !== '' ? elems[1].match(/([A-Za-z]*?)=["“](.*?)["”]/gmi) : []
+      const attrMatch = elems[1] !== '' ? elems[1].match(/([A-Za-z]*?)=["“”](.*?)["“”]/gmi) : []
       const attrs = {}
       for (const attr of attrMatch) {
         const pair = attr.split('=')
