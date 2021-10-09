@@ -531,20 +531,19 @@ PageSchema.methods.write = async function (params = {}) {
   const reading = !full && !editing
 
   for (const secret of secrets) {
-    const s = await this.renderSecret(secret.codename, params.pov)
     const txt = full || (editing && secret.known)
-      ? `||::${secret.codename}:: ${secret.content}||`
+      ? secret.render()
       : editing && !secret.known
-        ? `||::${secret.codename}::||`
+        ? secret.render('placeholder')
         : reading && secret.known && s
-          ? `<span class="secret" data-codename="${secret.codename}">${s.render} <a href="/${this.path}/reveal/${secret.codename}">[Reveal]</a></span>`
+          ? `<span class="secret" data-codename="${secret.codename}">${secret.render('reading')} <a href="/${this.path}/reveal/${secret.codename}">[Reveal]</a></span>`
           : ''
 
-    const regex = new RegExp(`\\|\\|::${secret.codename}::[.\\s\\S]*?\\|\\|`, 'gm')
+    const regex = new RegExp(`<secret[\\s\\S]*?\\scodename="${secret.codename}"[\\s\\S]*?>[\\s\\S]*?<\\/secret>`, 'gmi')
     const replace = str.match(regex)
     if (replace) {
       str = str.replace(replace, txt)
-    } else if ((full || editing) && !secret.known) {
+    } else if ((full || editing) && !secret.knows(pov)) {
       str += `\n\n${txt}`
     }
   }
@@ -745,27 +744,6 @@ PageSchema.methods.renderFile = async function (text) {
     case 'Video': return this.renderVideo()
     default: return this.renderDownload(text)
   }
-}
-
-/**
- * Returns the secret identified by the `codename` (or `null` if the `user`
- * doesn't know it) with an added `render` property which strips out any game
- * tags that may occur in the secret's content.
- * @param {string} codename - The codename of the secret to render.
- * @param {Character|string} [pov = 'Anonymous'] - The point of view from which
- *   the secret should be rendered. If this is the string `Loremaster,` then
- *   all secrets are shown. If this is the string `Anonymous` (which it is by
- *   default), then no secrets are shown. If given a Character, only those
- *   secrets which are known to that character are shown.
- * @returns {Promise<Secret|null>} - The secret requested, with an additional
- *   `render` property, or `null` if the user doesn't know it.
- */
-
-PageSchema.methods.renderSecret = async function (codename, pov = 'Anonymous') {
-  const secret = this.findSecret(codename)
-  if (!secret || !this.knows(pov, codename)) return null
-  secret.render = secret.content
-  return secret
 }
 
 /**
