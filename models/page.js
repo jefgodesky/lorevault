@@ -549,7 +549,7 @@ PageSchema.methods.write = async function (params = {}) {
           : ''
 
     const closing = '</secret>'
-    const regex = new RegExp(`\\scodename="${secret.codename}"[\s>]`, 'gmi')
+    const regex = new RegExp(`\\scodename="${secret.codename}"[\\s>]`, 'gmi')
     const index = str.search(regex)
     if (index && index > -1) {
       const before = str.substr(0, index)
