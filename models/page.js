@@ -548,9 +548,14 @@ PageSchema.methods.write = async function (params = {}) {
           ? `<span class="secret" data-codename="${secret.codename}">${secret.render('reading')} <a href="/${this.path}/reveal/${secret.codename}">[Reveal]</a></span>`
           : ''
 
-    const regex = new RegExp(`<secret[\\s\\S]*?\\scodename="${secret.codename}"[\\s\\S]*?>[\\s\\S]*?<\\/secret>`, 'gmi')
-    const replace = str.match(regex)
-    if (replace) {
+    const closing = '</secret>'
+    const regex = new RegExp(`\\scodename="${secret.codename}"[\s>]`, 'gmi')
+    const index = str.search(regex)
+    if (index && index > -1) {
+      const before = str.substr(0, index)
+      const start = before.toLowerCase().lastIndexOf('<secret')
+      const end = str.toLowerCase().indexOf(closing, index) + closing.length
+      const replace = str.substring(start, end)
       str = str.replace(replace, txt)
     } else if ((full || editing) && !secret.knows(pov)) {
       str += `\n\n${txt}`
@@ -583,8 +588,8 @@ PageSchema.methods.update = async function (content, editor) {
   const tags = body.match(/<.*? (.*?=“.*?”)*?>/gm)
   if (tags) { for (const tag of tags) body = body.replace(tag, tag.replace(/[“|”]/g, '"')) }
 
-  const str = Secret.parse(body, codenamer, true)
-  this.processSecrets(Secret.parse(str, codenamer), editor)
+  body = Secret.parse(body, codenamer, true)
+  this.processSecrets(Secret.parse(body, codenamer), editor)
 
   const pageIsSecret = findOne(this.secrets.list, s => s.codename === '#')
   if (pageIsSecret) {
@@ -595,7 +600,7 @@ PageSchema.methods.update = async function (content, editor) {
   }
 
   content.title = smartquotes(content.title)
-  content.body = await this.write({ str, pov, mode: 'full' })
+  content.body = await this.write({ str: body, pov, mode: 'full' })
   if (content.file) this.file = content.file
   this.title = content.title
   this.versions.push(Object.assign({}, content, { editor: editor._id }))
