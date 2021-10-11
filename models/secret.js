@@ -217,6 +217,7 @@ class Secret {
    */
 
   async evaluate (context, models) {
+    if (!this.conditions || this.conditions.length < 1) return false
     let expr = this.conditions
     const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('')
     const values = {}
