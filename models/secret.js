@@ -350,7 +350,7 @@ class Secret {
     for (const secret of secrets) {
       const { codename } = secret
       const knows = secret.knows(pov)
-      const match = str.match(new RegExp(`<secret.*? codename="${codename}".*?>[\\s\\S]*?<\\/secret>`))
+      const match = str.match(new RegExp(`<secret[\\s\\S]*? codename="${codename}"[\\s\\S]*?>[\\s\\S]*?<\\/secret>`))
       let replacement = ''
       if (mode === 'editing') {
         replacement = knows ? secret.render('full') : secret.render('placeholder')
