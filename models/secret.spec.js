@@ -292,7 +292,7 @@ describe('Secret', () => {
 
       it('returns false if the page has no such secret', () => {
         const secret = new Secret({ codename: 'Wombat', content: 'Hello world!' })
-        const page = { secrets: [] }
+        const page = { secrets: { list: [] } }
         const character = { _id: '12345' }
         expect(secret.evaluateOtherSecret('Dingo', { page, character })).to.be.false
       })
@@ -300,7 +300,7 @@ describe('Secret', () => {
       it('returns false if the page has that secret but the character doesn\'t know it', () => {
         const s1 = new Secret({ codename: 'Wombat', content: 'This is a secret.' })
         const s2 = new Secret({ codename: 'Armadillo', content: 'This is also a secret.' })
-        const page = { secrets: [s1, s2] }
+        const page = { secrets: { list: [s1, s2] } }
         page.knows = () => false
         const character = { _id: '12345' }
         expect(s1.evaluateOtherSecret('Armadillo', { page, character })).to.be.false
@@ -309,7 +309,7 @@ describe('Secret', () => {
       it('returns true if the page has that secret and the character knows it', () => {
         const s1 = new Secret({ codename: 'Wombat', content: 'This is a secret.' })
         const s2 = new Secret({ codename: 'Armadillo', content: 'This is also a secret.' })
-        const page = { secrets: [s1, s2] }
+        const page = { secrets: { list: [s1, s2] } }
         page.knows = () => true
         const character = { _id: '12345' }
         expect(s1.evaluateOtherSecret('Armadillo', { page, character })).to.be.true
@@ -330,7 +330,7 @@ describe('Secret', () => {
       it('can evaluate complex logical conditions', async () => {
         const Page = model('Page')
         const secret = new Secret({ codename: 'Wombat', content: 'Hello world!', conditions: '[Intelligence DC 12]||([Tester]||[Armadillo])&&[/test]' })
-        const page = { dnd5e: [{ character: '12345', int: 10, arcana: 10, history: 10, nature: 10, religion: 10 }], secrets: [] }
+        const page = { dnd5e: [{ character: '12345', int: 10, arcana: 10, history: 10, nature: 10, religion: 10 }], secrets: { list: [] } }
         page.knows = () => true
         const character = { _id: '12345', dnd5e: { int: 0, arcana: 0, history: 0, nature: 0, religion: 0 }, tags: ['Tester'] }
         const actual = await secret.evaluate({ page, character }, { Page })
