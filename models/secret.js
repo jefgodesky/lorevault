@@ -155,7 +155,7 @@ class Secret {
   evaluateOtherSecret (condition, context) {
     const { page, character } = context
     if (!page || !character) return false
-    if (page.secrets.filter(s => s.codename === condition).length <= 0) return false
+    if (page.secrets.list.filter(s => s.codename === condition).length <= 0) return false
     return page.knows(character, condition)
   }
 
