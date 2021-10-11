@@ -363,11 +363,12 @@ PageSchema.methods.processSecrets = function (secrets, editor) {
     const secret = findOne(secrets, secret => secret.codename === codename)
     if (secret && inList && inUpdate && editorKnows) {
       inList.content = secret.content
+      inList.conditions = secret.conditions
     } else if (inList && !inUpdate && editorKnows) {
       this.secrets.list.pull({ _id: inList._id })
     } else if (secret && !existing) {
       const knowers = pov === 'Loremaster' ? [editor._id] : pov._id ? [pov._id] : []
-      this.secrets.list.addToSet({ codename, content: secret.content, knowers })
+      this.secrets.list.addToSet({ codename, content: secret.content, conditions: secret.conditions, knowers })
     }
   }
 }
