@@ -212,10 +212,10 @@ const getReadableFileSize = bytes => {
 const isInSecret = (subj, body) => {
   const start = subj.index
   const end = start + subj.str.length
-  const secrets = match(body, /\|\|::.*?::\s*?.*?\|\|/m)
+  const secrets = match(body, /<secret[\s\S]*? codename="(.*?)"[\s\S]*?>([\s\S]*?)<\/secret>/im)
   for (const secret of secrets) {
     if (secret.index <= start && secret.index + secret.str.length >= end) {
-      const codenameMatch = secret.str.match(/::(.*?)::/)
+      const codenameMatch = secret.str.match(/\scodename="(.*?)"[ >]/)
       return codenameMatch && codenameMatch.length > 1 ? codenameMatch[1] : secret.str
     }
   }
@@ -271,6 +271,48 @@ const getS3 = () => {
   return new aws.S3()
 }
 
+/**
+ * Load information about games specified in the configuration.
+ * @returns {Promise<{}>} - A Promise that resolves with an object that
+ *   provides information about the games specified in the configuration.
+ *   Each game's ID is the property to an object with its information. Core
+ *   information for each game can be found in its `info` property, such as
+ *   its identifier (`id`), name (`name`), edition (`edition`), and character
+ *   sheet (`sheet`).
+ */
+
+const loadGames = async () => {
+  const games = {}
+  for (const game of config.games) {
+    const rules = await import(`./games/${game}/${game}.js`)
+    games[game] = rules
+  }
+  return games
+}
+
+/**
+ * Apply the correct transformation methods to a schema from each game
+ * specified in the configuration.
+ * @param {{}} schema - The schema to be transformed.
+ * @param {string} type - The type of schema being transformed. Valid options
+ *   are `Character` or `Page`.
+ * @returns {Promise<{}>} - A Promise that resolves with the transformed
+ *   schema. If `type` is not a valid option, the Promise resolves with the
+ *   original schema, unchanged.
+ */
+
+const transformSchema = async (schema, type) => {
+  const games = await loadGames()
+  for (const game of Object.keys(games)) {
+    if (type === 'Character') {
+      schema = games[game].transformCharacterSchema(schema)
+    } else if (type === 'Page') {
+      schema = games[game].transformPageSchema(schema)
+    }
+  }
+  return schema
+}
+
 export {
   pickRandomNum,
   pickRandom,
@@ -286,5 +328,7 @@ export {
   isInSecret,
   indexOfRegExp,
   alphabetize,
-  getS3
+  getS3,
+  loadGames,
+  transformSchema
 }

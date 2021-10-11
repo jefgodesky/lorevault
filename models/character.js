@@ -1,32 +1,9 @@
 import mongoose from 'mongoose'
 const { Schema, model } = mongoose
 
-import config from '../config/index.js'
+import { transformSchema, loadGames } from '../utils.js'
 
-/**
- * Adds character sheet statistics from the games specified in the
- * configuration file to the given schema definition.
- * @param {object} def - The starting schema definition.
- * @returns {Promise<object>} - The original schema definition, with properties
- *   added for the games specified in the configuration file and the character
- *   sheet statistics used by each.
- */
-
-const addGames = async def => {
-  for (const game of config.games) {
-    const { info } = await import(`../games/${game}/${game}.js`)
-    def[game] = {}
-    for (const stat of info.sheet) {
-      def[game][stat.id] = {
-        type: stat.type,
-        default: stat.default
-      }
-    }
-  }
-  return def
-}
-
-const CharacterSchema = new Schema(await addGames({
+const CharacterSchema = new Schema(await transformSchema({
   name: String,
   page: {
     type: Schema.Types.ObjectId,
@@ -37,7 +14,7 @@ const CharacterSchema = new Schema(await addGames({
     ref: 'User'
   },
   tags: [String]
-}))
+}, 'Character'))
 
 /**
  * Update the character and save hen to the database.
@@ -60,17 +37,10 @@ CharacterSchema.methods.update = async function (page, player, stats, tags = [])
   this.page = page?._id || page
   this.player = player?._id || player
   this.tags = tags
-
-  for (const game of config.games) {
-    const { info } = await import(`../games/${game}/${game}.js`)
-    for (const stat of info.sheet) {
-      const s = stats ? stats[`${game}-${stat.id}`] : null
-      const isNum = stat.type === Number
-      const isValid = !s ? false : isNum ? !isNaN(parseInt(s)) : true
-      if (isValid) this[game][stat.id] = isNum ? parseInt(s) : s
-    }
+  if (stats) {
+    const games = await loadGames()
+    for (const game of Object.keys(games)) games[game].updateCharacter(this, stats)
   }
-
   await this.save()
   return this
 }

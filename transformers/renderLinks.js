@@ -5,8 +5,6 @@ import { match, isInSecret } from '../utils.js'
 /**
  * Parse links from string.
  * @param {string} str - The string to parse.
- * @param {{}} secrets - The secrets parsed from the string. Generally, this
- *   object should be produced by running `parseSecrets` on `str`.
  * @param {User|string} renderer - The user we're rendering these links for, or
  *   the string `Loremaster` for a loremaster, or the string `Anonymous` for an
  *   anonymous user.
@@ -27,7 +25,7 @@ import { match, isInSecret } from '../utils.js'
  *               the codename of that secret. If not, this is `null`.
  */
 
-const renderLinks = async (str, secrets, renderer) => {
+const renderLinks = async (str, renderer) => {
   const Page = model('Page')
   const matches = match(str, /\[\[(?!Category:|File:|Image:)((\n|\r|.)*?)\]\]/m)
   const links = await Promise.all(matches.map(async m => {

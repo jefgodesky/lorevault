@@ -29,7 +29,7 @@ const createTestDocs = async (model, body = 'This is the original text.') => {
  *   one of its properties.
  */
 
-const codenamer = obj => {
+const codenamer = (obj = {}) => {
   let num = 1
   while (true) {
     let key = `Secret${num.toString().padStart(4, '0')}`

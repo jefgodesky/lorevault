@@ -17,7 +17,9 @@ import {
   isInSecret,
   indexOfRegExp,
   alphabetize,
-  getS3
+  getS3,
+  loadGames,
+  transformSchema
 } from './utils.js'
 
 describe('pickRandomNum', () => {
@@ -220,7 +222,7 @@ describe('isInSecret', () => {
   })
 
   it('returns the codename of the secret that the match is in', () => {
-    const str = '||::Wombat:: This is a test.||'
+    const str = '<secret codename="Wombat">This is a test.</secret>'
     const actual = isInSecret(match(str, /test/)[0], str)
     expect(actual).to.be.equal('Wombat')
   })
@@ -262,5 +264,29 @@ describe('getS3', () => {
   it('returns an S3 object', () => {
     const actual = getS3()
     expect(typeof actual.deleteObject).to.be.equal('function')
+  })
+})
+
+describe('loadGames', () => {
+  it('returns information about each game', async () => {
+    const games = await loadGames()
+    expect(games.dnd5e.info.sheet.length).to.be.equal(5)
+  })
+})
+
+describe('transformSchema', () => {
+  it('transforms a Character schema', async () => {
+    const actual = await transformSchema({}, 'Character')
+    expect(JSON.stringify(actual)).not.to.be.equal(JSON.stringify({}))
+  })
+
+  it('transforms a Page schema', async () => {
+    const actual = await transformSchema({}, 'Page')
+    expect(JSON.stringify(actual)).not.to.be.equal(JSON.stringify({}))
+  })
+
+  it('does nothing to anything else', async () => {
+    const actual = await transformSchema({}, 'Nope')
+    expect(JSON.stringify(actual)).to.be.equal(JSON.stringify({}))
   })
 })

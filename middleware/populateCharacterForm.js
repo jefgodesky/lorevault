@@ -1,5 +1,5 @@
 import Character from '../models/character.js'
-import config from '../config/index.js'
+import { loadGames } from '../utils.js'
 
 /**
  * Express.js middleware that reads through the games listed in the
@@ -15,20 +15,13 @@ import config from '../config/index.js'
 const populateCharacterForm = async (req, res, next) => {
   const character = req.params?.id ? await Character.findById(req.params.id).populate('page') : undefined
   req.viewOpts.character = character
-  for (const game of config.games) {
-    const { info } = await import(`../games/${game}/${game}.js`)
-    req.viewOpts.games = {}
-
+  req.viewOpts.games = {}
+  const games = await loadGames()
+  for (const game of Object.keys(games)) {
+    const { info, characterForm } = games[game]
     req.viewOpts.games[game] = {
       name: info.edition ? `<em>${info.name}</em> (${info.edition})` : `<em>${info.name}</em>`,
-      stats: info.sheet.map(stat => {
-        const { label, detail, type } = stat
-        const id = `${game}-${stat.id}`
-        const isNum = type === Number
-        const defaultVal = isNum ? 0 : ''
-        const val = character ? character[game][stat.id] : req.query ? req.query[stat.id] || defaultVal : defaultVal
-        return { id, label, detail, type: isNum ? 'number' : 'text', val }
-      })
+      stats: characterForm(character)
     }
   }
   next()
