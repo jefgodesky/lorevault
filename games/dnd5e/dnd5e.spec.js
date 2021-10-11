@@ -99,8 +99,9 @@ describe('dnd5e', () => {
     it('rolls dice and records the results', async () => {
       const page = { dnd5e: [] }
       page.dnd5e.addToSet = row => page.dnd5e = [...page.dnd5e, row]
+      page.getSecrets = () => []
       const char = { _id: '12345', dnd5e: { int: 0, arcana: 0, history: 0, nature: 0, religion: 0 } }
-      onPageView(page, char)
+      await onPageView(page, char)
       expect(page.dnd5e).to.have.lengthOf(1)
       expect(page.dnd5e[0].character).to.be.eql(char._id)
     })
@@ -108,10 +109,11 @@ describe('dnd5e', () => {
     it('doesn\'t roll twice', async () => {
       const page = { dnd5e: [] }
       page.dnd5e.addToSet = row => page.dnd5e = [...page.dnd5e, row]
+      page.getSecrets = () => []
       const char = { _id: '12345', dnd5e: { int: 0, arcana: 0, history: 0, nature: 0, religion: 0 } }
-      onPageView(page, char)
+      await onPageView(page, char)
       const { int, arcana, history, nature, religion } = page.dnd5e[0]
-      onPageView(page, char)
+      await onPageView(page, char)
       expect(page.dnd5e).to.have.lengthOf(1)
       expect(page.dnd5e[0].int).to.be.equal(int)
       expect(page.dnd5e[0].arcana).to.be.equal(arcana)

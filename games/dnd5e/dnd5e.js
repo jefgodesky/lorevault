@@ -99,10 +99,12 @@ const characterForm = character => {
  * character has already checked this page. If hen has, we won't roll again.
  * If hen hasn't, we'll make our rolls for this page now.
  * @param {Page} page - The page being viewed.
+ * @param {{}} models - An object that passes the necessary Mongoose models.
+ * @param {Model} models.Page - The Page model.
  * @param {Character} char - The character viewing the page.
  */
 
-const onPageView = (page, char) => {
+const onPageView = async (page, char, models) => {
   const checked = page.dnd5e.filter(row => row.character === char._id)
   if (checked.length > 0) return
   page.dnd5e.addToSet({
@@ -113,6 +115,11 @@ const onPageView = (page, char) => {
     nature: roll({ modifier: char.dnd5e.nature }),
     religion: roll({ modifier: char.dnd5e.religion })
   })
+  const secrets = page.getSecrets()
+  for (const secret of secrets) {
+    const evaluation = await secret.evaluate({ character: char, page }, models)
+    if (evaluation) await page.reveal(char, secret.codename)
+  }
 }
 
 /**
