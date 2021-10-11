@@ -45,7 +45,7 @@ const getPage = async (req, res, next) => {
   if (pov && typeof pov !== 'string') {
     const games = await loadGames()
     for (const game of Object.keys(games)) {
-      const {onPageView} = games[game]
+      const { onPageView } = games[game]
       if (onPageView && typeof onPageView === 'function') onPageView(viewOpts.page, pov)
     }
   }
