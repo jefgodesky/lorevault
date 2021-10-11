@@ -1,10 +1,10 @@
 import smartquotes from 'smartquotes'
 
-import assignCodenames from '../transformers/assignCodenames.js'
 import renderLinks from '../transformers/renderLinks.js'
 import renderFiles from '../transformers/renderFiles.js'
 import renderMarkup from '../transformers/renderMarkup.js'
 import renderTags from '../transformers/renderTags.js'
+import Secret from './secret.js'
 import Template from './template.js'
 import {
   pickRandom,
@@ -17,7 +17,8 @@ import {
   saveBlocks,
   restoreBlocks,
   getReadableFileSize,
-  getS3
+  getS3,
+  transformSchema
 } from '../utils.js'
 
 import config from '../config/index.js'
@@ -48,17 +49,14 @@ const VersionSchema = new Schema(Object.assign({}, ContentSchema, {
 const SecretSchema = new Schema({
   codename: String,
   content: String,
+  conditions: String,
   knowers: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Character'
-  }],
-  checked: [{
     type: Schema.Types.ObjectId,
     ref: 'Character'
   }]
 })
 
-const PageSchema = new Schema({
+const PageSchema = new Schema(await transformSchema({
   title: String,
   path: {
     type: String,
@@ -92,6 +90,7 @@ const PageSchema = new Schema({
     default: Date.now
   },
   secrets: {
+    list: [SecretSchema],
     existence: {
       type: Boolean,
       default: false
@@ -99,8 +98,7 @@ const PageSchema = new Schema({
     knowers: [{
       type: Schema.Types.ObjectId,
       ref: 'Character'
-    }],
-    list: [SecretSchema]
+    }]
   },
   file: {
     url: String,
@@ -108,7 +106,7 @@ const PageSchema = new Schema({
     size: Number
   },
   versions: [VersionSchema]
-}, {
+}, 'Page'), {
   collation: {
     locale: 'en',
     strength: 1,
@@ -330,17 +328,18 @@ PageSchema.methods.findCodename = function () {
 
 /**
  * Find a secret with the given codename.
- * @param {string} codename - The codename of the secret that we want to find.
+ * @param {string} [codename = '#'] - The codename of the secret that we want
+ *   to find. The default value is `#`, a special codename which indicates that
+ *   the page itself is a secret. (Default: `#`)
  * @returns {{ codename: string, content: string,
  *   knowers: [Schema.Types.ObjectId] }|null} - The secret with the given
  *   codename if the page has a secret with that codename, or `null` if it
  *   does not.
  */
 
-PageSchema.methods.findSecret = function (codename) {
-  const { existence, knowers } = this.secrets
-  if (!codename && existence) return { knowers }
-  return findOne(this.secrets.list, s => s.codename === codename)
+PageSchema.methods.findSecret = function (codename = '#') {
+  const record = findOne(this.secrets.list, s => s.codename === codename)
+  return record ? new Secret(record) : null
 }
 
 /**
@@ -353,21 +352,23 @@ PageSchema.methods.findSecret = function (codename) {
  */
 
 PageSchema.methods.processSecrets = function (secrets, editor) {
-  const { list } = this.secrets
-  const updatedCodenames = Object.keys(secrets)
-  const codenames = union(list.map(s => s.codename), updatedCodenames)
+  const pov = editor.getPOV()
+  const updatedCodenames = secrets.map(secret => secret.codename)
+  const codenames = union(this.secrets.list.map(s => s.codename), updatedCodenames)
   for (const codename of codenames) {
     const existing = this.findSecret(codename)
+    const inList = existing ? findOne(this.secrets.list, secret => secret.codename === codename) : null
     const inUpdate = updatedCodenames.includes(codename)
-    const editorKnows = existing && (existing.knowers.includes(editor._id) || existing.knowers.includes(editor.getPOV()._id) )
-    if (existing && inUpdate && editorKnows) {
-      existing.content = secrets[codename].content
-    } else if (existing && !inUpdate && editorKnows) {
-      list.pull({ _id: existing._id })
-    } else if (!existing) {
-      const pov = editor.getPOV()
+    const editorKnows = existing && existing.knows(pov)
+    const secret = findOne(secrets, secret => secret.codename === codename)
+    if (secret && inList && inUpdate && editorKnows) {
+      inList.content = secret.content
+      inList.conditions = secret.conditions
+    } else if (inList && !inUpdate && editorKnows) {
+      this.secrets.list.pull({ _id: inList._id })
+    } else if (secret && !existing) {
       const knowers = pov === 'Loremaster' ? [editor._id] : pov._id ? [pov._id] : []
-      list.addToSet({ codename, content: secrets[codename].content, knowers })
+      this.secrets.list.addToSet({ codename, content: secret.content, conditions: secret.conditions, knowers })
     }
   }
 }
@@ -376,49 +377,11 @@ PageSchema.methods.processSecrets = function (secrets, editor) {
  * Return a mapping of all of the page's secrets. Each object has a `codename`
  * property, but it will only have a `content` property if the point of view
  * (`pov`) provided is one that knows the secret.
- * @param {Character|string} [pov = 'Anonymous'] - The point of view of the
- *   person asking for the secrets. If given the string `Loremaster`, you'll
- *   know all of the secrets. If given the string `Anonymous`, you won't know
- *   any of them. Given a Character object, whether or not you know the secret
- *   will depend on whether or not the given character is on the list of people
- *   who know this secret.
- * @returns {{codename: string, content: string, known: boolean}[]} - An array
- *   of the page's secrets. The `codename` proeprty provides the codename used
- *   to identify the string. The `content` property provides the actual text of
- *   the secret. The `known` property is a boolean, which is `true` if the POV
- *   provided knows this secret, or `false` if hen does not.
+ * @returns {Secret[]} - An array of Secret instances with the page's secrets.
  */
 
-PageSchema.methods.getSecrets = function (pov = 'Anonymous') {
-  return this.secrets.list.map(secret => {
-    const { codename, content, knowers } = secret
-    return { codename, content, known: pov === 'Loremaster' || knowers.includes(pov?._id) }
-  })
-}
-
-/**
- * Use game modules to determine if any secrets should be revealed to this
- * character. Each character only has one chance to check each secret.
- * @param {Character} char - The character being checked.
- * @returns {Promise<void>} - A Promise that resolves once all checks have been
- *   made and recorded, and the document has been saved to the database.
- */
-
-PageSchema.methods.checkSecrets = async function (char) {
-  for (const secret of this.secrets.list) {
-    if (secret.checked.includes(char._id)) continue
-    for (const game of config.games) {
-      const { info, checkSecret } = await import(`../games/${game}/${game}.js`)
-      for (const stat of info.sheet) {
-        const match = secret.content.match(stat.regex)
-        if (match && checkSecret(stat, match, char)) {
-          await this.reveal(char, secret.codename)
-        }
-      }
-    }
-    secret.checked.addToSet(char._id)
-  }
-  await this.save()
+PageSchema.methods.getSecrets = function () {
+  return this.secrets.list.map(secret => new Secret(secret))
 }
 
 /**
@@ -426,20 +389,18 @@ PageSchema.methods.checkSecrets = async function (char) {
  * @param {Character|Schema.Types.ObjectId|string} char - The character that
  *   you would like to reveal the secret to (or hens ID, or the string
  *   representation of hens ID).
- * @param {string} [codename = null] - The codename of the secret that you
- *   would like to reveal to the character `char`. If the page itself is a
- *   secret, and you set this argument to a falsy value (`false`, `null`, etc.)
- *   then the secret to reveal is the existence of the page.
+ * @param {string} [codename = '#'] - The codename of the secret that you would
+ *   like to reveal to the character `char`. Defaults to `#`, which is a
+ *   special codename for the page itself being a secret. (Default: `#`)
  * @returns {Promise<boolean>} - A Promise that resolves with `true` once the
  *   character has been added to the list of those who know the secret
  *   indicated, or `false` if there is no such secret to reveal.
  */
 
-PageSchema.methods.reveal = async function (char, codename = null) {
-  const { existence } = this.secrets
+PageSchema.methods.reveal = async function (char, codename = '#') {
   const id = char?._id || char
   const secret = codename ? this.findSecret(codename) : null
-  const knowers = secret ? secret.knowers : existence && !codename ? this.secrets.knowers : false
+  const knowers = secret ? secret.knowers : null
   if (!knowers) return false
   knowers.addToSet(id)
   await this.save()
@@ -541,12 +502,8 @@ PageSchema.methods.revealToNames = async function (str, codename = null) {
  */
 
 PageSchema.methods.knows = function (char, codename) {
-  if (typeof char === 'string' && char.toLowerCase() === 'loremaster') return true
-  if (typeof char === 'string') return false
   const secret = this.findSecret(codename)
-  if (!secret) return true
-  const id = char?._id || char
-  return secret.knowers.includes(id)
+  return secret ? secret.knows(char) : true
 }
 
 /**
@@ -584,20 +541,24 @@ PageSchema.methods.write = async function (params = {}) {
   const reading = !full && !editing
 
   for (const secret of secrets) {
-    const s = await this.renderSecret(secret.codename, params.pov)
-    const txt = full || (editing && secret.known)
-      ? `||::${secret.codename}:: ${secret.content}||`
-      : editing && !secret.known
-        ? `||::${secret.codename}::||`
-        : reading && secret.known && s
-          ? `<span class="secret" data-codename="${secret.codename}">${s.render} <a href="/${this.path}/reveal/${secret.codename}">[Reveal]</a></span>`
+    const txt = full || (editing && secret.knows(pov))
+      ? secret.render()
+      : editing && !secret.knows(pov)
+        ? secret.render('placeholder')
+        : reading && secret.knows(pov)
+          ? `<span class="secret" data-codename="${secret.codename}">${secret.render('reading')} <a href="/${this.path}/reveal/${secret.codename}">[Reveal]</a></span>`
           : ''
 
-    const regex = new RegExp(`\\|\\|::${secret.codename}::[.\\s\\S]*?\\|\\|`, 'gm')
-    const replace = str.match(regex)
-    if (replace) {
+    const closing = '</secret>'
+    const regex = new RegExp(`\\scodename="${secret.codename}"[\\s>]`, 'gmi')
+    const index = str.search(regex)
+    if (index && index > -1) {
+      const before = str.substr(0, index)
+      const start = before.toLowerCase().lastIndexOf('<secret')
+      const end = str.toLowerCase().indexOf(closing, index) + closing.length
+      const replace = str.substring(start, end)
       str = str.replace(replace, txt)
-    } else if ((full || editing) && !secret.known) {
+    } else if ((full || editing) && !secret.knows(pov)) {
       str += `\n\n${txt}`
     }
   }
@@ -611,8 +572,6 @@ PageSchema.methods.write = async function (params = {}) {
  *   the new version.
  * @param {string} content.title - The title of the new page document version.
  * @param {string} content.body - The body of the new page document version.
- * @param {boolean|string} [content.secret] - (Optional) If set to `true` or
- *   the string `on`, this sets the page itself as a secret.
  * @param {string} [content.msg] - (Optional) If provided, adds a commit
  *   message to the version created for this update.
  * @param {User|Schema.Types.ObjectID|string} editor - Either a User document,
@@ -623,23 +582,26 @@ PageSchema.methods.write = async function (params = {}) {
 
 PageSchema.methods.update = async function (content, editor) {
   const codenamer = this.findCodename.bind(this)
-  let { body, secret } = content
+  let { body } = content
   const pov = editor.getPOV()
 
   body = body && body.length > 0 ? smartquotes(content.body) : ''
   const tags = body.match(/<.*? (.*?=“.*?”)*?>/gm)
   if (tags) { for (const tag of tags) body = body.replace(tag, tag.replace(/[“|”]/g, '"')) }
 
-  const makeSecret = secret === true || secret === 'on'
-  this.secrets.existence = makeSecret
-  if (makeSecret && typeof pov !== 'string') this.secrets.knowers.addToSet(pov._id)
-  if (!makeSecret) this.secrets.knowers = []
+  body = Secret.parse(body, codenamer, true)
+  this.processSecrets(Secret.parse(body, codenamer), editor)
 
-  const { str, secrets } = assignCodenames(body, codenamer)
-  this.processSecrets(secrets, editor)
+  const pageIsSecret = findOne(this.secrets.list, s => s.codename === '#')
+  if (pageIsSecret) {
+    this.secrets.existence = true
+    this.secrets.knowers = pageIsSecret.knowers
+  } else {
+    this.secrets.existence = false
+  }
 
   content.title = smartquotes(content.title)
-  content.body = await this.write({ str, pov, mode: 'full' })
+  content.body = await this.write({ str: body, pov, mode: 'full' })
   if (content.file) this.file = content.file
   this.title = content.title
   this.versions.push(Object.assign({}, content, { editor: editor._id }))
@@ -689,7 +651,7 @@ PageSchema.methods.render = async function (renderer, version = this.getCurr(), 
   str = renderTags(str, '<noinclude>', true)
   str = await Template.render(str, renderer)
   str = str.replace(/\[\[Category:.*?(\|.*?)?\]\]/gm, '')
-  const links = await renderLinks(str, this.getSecrets(pov), renderer)
+  const links = await renderLinks(str, renderer)
   str = await renderFiles(links.str)
   str = restoreBlocks(str, pre.blocks)
   str = await renderMarkup(str)
@@ -797,34 +759,6 @@ PageSchema.methods.renderFile = async function (text) {
     case 'Video': return this.renderVideo()
     default: return this.renderDownload(text)
   }
-}
-
-/**
- * Returns the secret identified by the `codename` (or `null` if the `user`
- * doesn't know it) with an added `render` property which strips out any game
- * tags that may occur in the secret's content.
- * @param {string} codename - The codename of the secret to render.
- * @param {Character|string} [pov = 'Anonymous'] - The point of view from which
- *   the secret should be rendered. If this is the string `Loremaster,` then
- *   all secrets are shown. If this is the string `Anonymous` (which it is by
- *   default), then no secrets are shown. If given a Character, only those
- *   secrets which are known to that character are shown.
- * @returns {Promise<Secret|null>} - The secret requested, with an additional
- *   `render` property, or `null` if the user doesn't know it.
- */
-
-PageSchema.methods.renderSecret = async function (codename, pov = 'Anonymous') {
-  const secret = this.findSecret(codename)
-  if (!secret || !this.knows(pov, codename)) return null
-  secret.render = secret.content
-  for (const game of config.games) {
-    const { info } = await import(`../games/${game}/${game}.js`)
-    for (const stat of info.sheet) {
-      const matches = match(secret.render, stat.regex)
-      for (const m of matches) secret.render = secret.render.replace(m.str, '').trim()
-    }
-  }
-  return secret
 }
 
 /**
@@ -939,7 +873,7 @@ PageSchema.statics.findMembers = async function (category, searcher) {
     arr.push({ page, sort })
   }
   members.subcategories = alphabetize(members.subcategories, el => el.sort)
-  members.page = alphabetize(members.pages, el => el.sort)
+  members.pages = alphabetize(members.pages, el => el.sort)
   return members
 }
 

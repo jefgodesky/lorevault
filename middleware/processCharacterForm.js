@@ -1,6 +1,5 @@
 import Page from '../models/page.js'
 import Character from '../models/character.js'
-import config from '../config/index.js'
 
 /**
  * Express.js middleware for processing the character form, whether to create a
@@ -33,15 +32,7 @@ const processCharacterForm = async (req, res, next) => {
   if (character) {
     await character.update(character.page, character.player, req.body, tags)
   } else {
-    const stats = {}
-    for (const game of config.games) {
-      stats[game] = {}
-      const { info } = await import(`../games/${game}/${game}.js`)
-      for (const stat of info.sheet) {
-        stats[`${game}-${stat.id}`] = req.body[`${game}-${stat.id}`]
-      }
-    }
-    await user.claim(page, stats, tags)
+    await user.claim(page, req.body, tags)
   }
 
   res.redirect('/profile')
